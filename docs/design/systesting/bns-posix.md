@@ -7,7 +7,9 @@ and E2E test plans for one header group.
 | API family | Status | Key feature exercised |
 |---|---|---|
 | [PosixFile](#posixfile--file-io) | ✅ Implemented | System typedefs, variadic skipping, `struct stat` |
-| [PosixSocket](#posixsocket--sockets) | ⬜ Planned | Unions, anonymous nested types, self-referential structs |
+| [Mmap](#mmap) | ✅ Implemented | Hex constant extraction, `void *` return |
+| [Dirent](#dirent) | ✅ Implemented | Anonymous enums, opaque typedefs, PtrConst fix |
+| [PosixSocket](#posixsocket--sockets) | ✅ Implemented | 3 partitions under PosixFile (Socket, Inet, Netdb) |
 
 ---
 
@@ -358,35 +360,136 @@ Test against real filesystem operations using temp files.
 4. ✅ Array parameter decay → pointer in `extract_function()`
 5. ✅ Function deduplication via `HashSet` in `collect_functions()`
 6. ✅ Created `tests/fixtures/bns-posix/bns-posix.toml`
-   (3 partitions: Fcntl, Unistd, Stat — no Types partition needed)
+   (5 partitions: Dirent, Fcntl, Mmap, Stat, Unistd)
 7. ✅ Added 9 roundtrip tests in `roundtrip_posixfile.rs`
 8. ✅ Created `bns-posix/` crate with feature-gated namespace modules
    (package mode via `bns-posix-gen`, no `build.rs`)
 9. ✅ Added `struct_timespec.h` to Stat traverse list
-10. ✅ Created 15 E2E tests (`posixfile_e2e.rs`) — all passing
+10. ✅ Created 25 E2E tests (`posixfile_e2e.rs`) — all passing
 11. ✅ Added `bns-posix` and `bns-posix-gen` to workspace members
 12. ✅ Separated generator into `bns-posix-gen` crate using
    `windows-bindgen --package` mode
 
 ---
 
+## Mmap — ✅ Implemented
+
+`sys/mman.h` — memory mapping APIs. Added as Partition 4.
+
+### Partition Config
+
+```toml
+[[partition]]
+namespace = "PosixFile.Mmap"
+library = "c"
+headers = ["sys/mman.h"]
+traverse = ["sys/mman.h", "bits/mman-linux.h", "bits/mman-map-flags-generic.h"]
+```
+
+### Challenges Solved
+
+**Hex constant extraction**: sonar's `find_definitions` uses
+`u64::from_str()` which only parses decimal. Constants like
+`PROT_READ 0x1`, `MAP_SHARED 0x01` were silently dropped. Fixed
+by adding a supplemental pass in `collect_constants` that iterates
+`MacroDefinition` entities, tokenizes them, and calls
+`parse_hex_or_suffixed_int()` — handles `0x` hex, `0` octal, and
+trailing `U`/`L`/`UL`/`ULL` suffixes.
+
+### API Surface
+
+**Functions (13)**: `mmap`, `munmap`, `mprotect`, `msync`, `madvise`,
+`mlock`, `munlock`, `mlockall`, `munlockall`, `mincore`,
+`posix_madvise`, `shm_open`, `shm_unlink`
+**Constants (~30)**: `PROT_READ`, `PROT_WRITE`, `PROT_EXEC`, `PROT_NONE`,
+`MAP_SHARED`, `MAP_PRIVATE`, `MAP_ANONYMOUS`, `MAP_FIXED`,
+`MS_ASYNC`, `MS_SYNC`, `MS_INVALIDATE`, `MADV_*`, etc.
+
+### E2E Tests (5)
+
+| Test | What it does |
+|---|---|
+| `prot_constants` | `PROT_READ=1`, `PROT_WRITE=2`, `PROT_EXEC=4`, `PROT_NONE=0` |
+| `map_constants` | `MAP_SHARED=1`, `MAP_PRIVATE=2`, `MAP_ANONYMOUS=32`, `MAP_FIXED=16` |
+| `msync_constants` | `MS_ASYNC=1`, `MS_SYNC=4`, `MS_INVALIDATE=2` |
+| `mmap_anonymous_roundtrip` | `mmap(MAP_ANONYMOUS)` → write → read → `munmap` |
+| `mprotect_guard_page` | `mmap` → `mprotect(PROT_READ)` → `mprotect(PROT_READ\|PROT_WRITE)` → `munmap` |
+
+---
+
+## Dirent — ✅ Implemented
+
+`dirent.h` — directory entry APIs. Added as Partition 5.
+
+### Partition Config
+
+```toml
+[[partition]]
+namespace = "PosixFile.Dirent"
+library = "c"
+headers = ["dirent.h"]
+traverse = ["dirent.h", "bits/dirent.h"]
+```
+
+### Challenges Solved
+
+1. **PtrConst mid-chain panic**: `const struct dirent **` produces
+   `PtrMut(PtrConst(Named("dirent"), 1), 1)` which puts
+   `ELEMENT_TYPE_CMOD_REQD` mid-chain in the blob, crashing
+   windows-bindgen's `from_blob_impl`. Fix: always emit `PtrMut`;
+   const-ness tracked via `ConstAttribute` on parameters.
+
+2. **Anonymous enum names**: `enum (unnamed at dirent.h:97:1)` — the
+   unnamed enum containing `DT_UNKNOWN`, `DT_FIFO`, etc. generates
+   invalid Rust type names. Fix: detect anonymous enums in
+   `collect_enums` and emit their variants as standalone `ConstantDef`
+   entries.
+
+3. **Opaque typedef to void**: `typedef struct __dirstream DIR` — the
+   underlying `struct __dirstream` is incomplete, so clang resolves it
+   to `CType::Void`. Emitting `c_void` produces a struct that doesn't
+   implement `Copy`/`Clone`/`Default`. Fix: emit `isize` for
+   void-underlying typedefs.
+
+### API Surface
+
+**Functions (11)**: `opendir`, `closedir`, `readdir`, `readdir_r`,
+`rewinddir`, `seekdir`, `telldir`, `dirfd`, `fdopendir`, `scandir`,
+`alphasort`, `getdirentries`
+**Structs (1)**: `dirent` (280 bytes — `d_ino`, `d_off`, `d_reclen`,
+`d_type`, `d_name[256]`)
+**Types**: `DIR` (opaque handle, emitted as `isize`)
+**Constants (~11)**: `DT_UNKNOWN=0`, `DT_FIFO=1`, `DT_CHR=2`,
+`DT_DIR=4`, `DT_BLK=6`, `DT_REG=8`, `DT_LNK=10`, `DT_SOCK=12`,
+`DT_WHT=14`
+
+### E2E Tests (5)
+
+| Test | What it does |
+|---|---|
+| `dt_type_constants` | `DT_UNKNOWN=0`, `DT_DIR=4`, `DT_REG=8`, etc. |
+| `dirent_struct_size` | `size_of::<dirent>() == 280` |
+| `opendir_readdir_closedir_roundtrip` | Open `/tmp`, read entry, verify `d_ino != 0`, close |
+| `readdir_dot_entries` | Read `/tmp`, find `.` and `..` entries with `d_type == DT_DIR` |
+| `dirfd_returns_valid_fd` | `dirfd(opendir("/tmp"))` returns valid fd ≥ 0 |
+
+---
+
 ## PosixSocket — Sockets
 
 Validate bindscrape against **POSIX socket headers** — `<sys/socket.h>`,
-`<netinet/in.h>`, `<arpa/inet.h>`, and `<netdb.h>`. This is the first
-system header target that requires **union support** (`ExplicitLayout` +
-`FieldLayout`) and **anonymous nested types** — both currently unimplemented
-features that sockets will force.
+`<netinet/in.h>`, `<arpa/inet.h>`, and `<netdb.h>`. This is the next
+system header target. Union support and anonymous nested type naming —
+previously blockers — are now implemented and tested.
 
 ### Why Sockets
 
 - **Unions**: `struct in6_addr` contains an anonymous union with three
-  members (`__u6_addr8`, `__u6_addr16`, `__u6_addr32`). `struct sockaddr`
-  variants (`sockaddr_in` vs `sockaddr_in6` vs `sockaddr_un`) are commonly
-  cast between via pointer, but the `in6_addr` union is the critical
-  structural test.
+  members (`__u6_addr8`, `__u6_addr16`, `__u6_addr32`). (✅ union support
+  and anonymous type naming now implemented)
 - **Anonymous nested types**: `in6_addr.__in6_u` is an anonymous union
-  member — needs synthetic naming (`in6_addr__Anonymous_0` or similar)
+  member — extracted with synthetic name `in6_addr_FieldName`
+  (✅ `try_extract_anonymous_field()` implemented)
 - **New system typedefs**: `socklen_t`, `sa_family_t`, `in_port_t`,
   `in_addr_t` — auto-resolved via clang canonical types (no table needed)
 - **Packed / specific-layout structs**: `sockaddr_in` has a very specific
@@ -472,66 +575,23 @@ traverse = [
 
 ### New Features Required
 
-#### Union Support (Not Implemented)
+#### Union Support (✅ Implemented)
 
-This is the **primary driver** for choosing sockets. Unions require:
+Union support is complete. `StructDef.is_union` flag drives
+`ExplicitLayout` + `FieldLayout(offset=0)` emission. The supplemental
+pass in `collect_structs` detects `EntityKind::UnionDecl`. Tested with
+`Value` union in `simple.h` and `NetAddr_addr` anonymous union.
 
-1. **`ExplicitLayout`** flag on the TypeDef (instead of `SequentialLayout`)
-2. **`FieldLayout`** with offset 0 for every field (all fields overlap)
-3. **`ClassLayout`** with the union's total size
-4. Detection: `EntityKind::UnionDecl` in clang, or check
-   `Type::get_canonical_type()` for record types with `is_union()` (via
-   the underlying clang API — may need `clang-sys` raw FFI if
-   `clang` crate doesn't expose it directly)
+#### Anonymous Nested Types (✅ Implemented)
 
-Implementation sketch:
-```rust
-// In emit.rs — new emit_union function
-fn emit_union(file: &mut File, namespace: &str, union_def: &StructDef) {
-    let value_type = file.TypeRef("System", "ValueType");
-    let td = file.TypeDef(
-        namespace, &union_def.name, value_type,
-        TypeAttributes::PUBLIC | TypeAttributes::EXPLICIT_LAYOUT,
-    );
-    file.ClassLayout(td, union_def.align as u16, union_def.size as u32);
-    for field in &union_def.fields {
-        let ty = ctype_to_wintype(&field.ty, namespace, &registry);
-        let f = file.Field(&field.name, &ty, FieldAttributes::PUBLIC);
-        file.FieldLayout(f, 0);  // All fields at offset 0
-    }
-}
-```
+`try_extract_anonymous_field()` detects anonymous record fields via
+`Entity::is_anonymous()` on the canonical type's declaration. Recursive
+extraction with synthetic names (`ParentName_FieldName`). Tested with
+`NetAddr` struct containing anonymous union field `addr` → extracted as
+`NetAddr_addr`.
 
-Changes needed:
-- **`model.rs`**: Add `is_union: bool` to `StructDef` (or create `UnionDef`)
-- **`extract.rs`**: Detect `EntityKind::UnionDecl` or check
-  `Type::is_union()` — add `collect_unions()` helper, or flag on
-  `StructDef`
-- **`emit.rs`**: `emit_union()` with `ExplicitLayout` + `FieldLayout`
-  at offset 0
-- **`sonar`**: Check if `find_unions()` works or needs the same
-  supplemental-pass treatment as `find_structs()`
-
-#### Anonymous Nested Types (Partial)
-
-`struct in6_addr` on Linux/glibc:
-```c
-struct in6_addr {
-    union {
-        uint8_t  __u6_addr8[16];
-        uint16_t __u6_addr16[8];
-        uint32_t __u6_addr32[4];
-    } __in6_u;
-};
-```
-
-This requires:
-1. Detecting the anonymous union member
-2. Generating a synthetic TypeDef name (e.g., `in6_addr__in6_u`)
-3. Emitting the anonymous union as a separate TypeDef with
-   `ExplicitLayout`
-4. Referencing it as a field type in the parent struct
-5. Optionally emitting `NestedClass` to associate parent and child
+For `struct in6_addr`, the anonymous union member `__in6_u` would be
+extracted as `in6_addr___in6_u` (or similar synthetic name).
 
 #### New System Typedefs
 
@@ -546,16 +606,13 @@ This requires:
 
 ### Challenges
 
-#### 1. Union detection in `clang` crate
+#### 1. Union detection in `clang` crate — ✅ Resolved
 
-The `clang` crate exposes `EntityKind::UnionDecl` for top-level unions,
-but it's unclear whether `sonar::find_unions()` has the same limitations
-as `find_structs()` (missing unions without matching typedef). Likely
-needs the same supplemental pass pattern.
-
-For anonymous unions nested inside structs, the union appears as a child
-entity with `EntityKind::UnionDecl` and `is_anonymous() == true`. Need
-to walk struct children and handle this case.
+The supplemental pass in `collect_structs` detects
+`EntityKind::UnionDecl` directly. `sonar` has no `find_unions()`, so the
+supplemental pass handles all unions. For anonymous unions nested inside
+structs, `try_extract_anonymous_field()` walks struct children and
+detects `is_anonymous() == true`.
 
 #### 2. `sockaddr` family polymorphism
 
@@ -701,14 +758,20 @@ Suggested sequence:
 
 ### Implementation Steps
 
-1. ⬜ Implement union support in model + extract + emit
-2. ⬜ Implement anonymous nested type synthetic naming
+1. ✅ Implement union support in model + extract + emit
+2. ✅ Implement anonymous nested type synthetic naming
 3. ✅ System typedefs (`socklen_t`, `sa_family_t`, `in_port_t`,
    `in_addr_t`) auto-resolved via `CType::Named { resolved }` — no changes needed
-4. ⬜ Create `tests/fixtures/bns-posix/posixsocket.toml`
-5. ⬜ Add roundtrip tests in `roundtrip_posixsocket.rs`
-6. ⬜ Add socket partitions to `bns-posix` crate
-7. ⬜ Handle `htons`/`htonl` (skip if inline, or provide wrapper)
-8. ⬜ Handle conditional compilation flags if needed
-9. ⬜ Iterate on traverse paths for `bits/` sub-headers
-10. ⬜ Add socket E2E tests to `posixfile_e2e.rs` (or new test file)
+4. ✅ Added 3 partitions (Socket, Inet, Netdb) to `bns-posix.toml` under
+   `PosixFile` namespace (not separate `PosixSocket` assembly as originally
+   planned — simpler to keep in one assembly)
+5. ✅ Iteratively discovered traverse paths: `bits/socket.h`,
+   `bits/socket_type.h`, `bits/socket-constants.h`,
+   `bits/types/struct_iovec.h`, `bits/netdb.h`
+6. ✅ Added Socket, Inet, Netdb features to `bns-posix/Cargo.toml`
+7. ✅ `htons`/`htonl` are real weak symbols in glibc — P/Invoke works
+8. ✅ No conditional compilation flags needed — default clang parse picks up
+   all required APIs
+9. ✅ Cross-partition refs work via `#[cfg(feature = "X")]` gating
+   (e.g. `recv` → `super::Unistd::ssize_t`, `addrinfo` → `super::Socket::sockaddr`)
+10. ✅ 37 socket E2E tests added to `posixfile_e2e.rs`

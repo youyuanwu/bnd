@@ -47,43 +47,48 @@ C/C++ Headers
 
 ## Implementation Status
 
-> **Status: v1 implemented and tested.** 47 tests passing (19 roundtrip +
-> 26 E2E + 2 doc-tests), clippy clean.
+> **Status: v2 implemented and tested.** 124 tests passing (30 roundtrip +
+> 90 E2E + 3 doc-tests + 1 freshness), clippy clean.
 
 ### What Is Implemented
 
 | Feature | Notes |
 |---|---|
-| CLI (`clap`) + TOML config parsing | `main.rs` (86 LOC), `config.rs` (122 LOC) |
-| Intermediate model types | `model.rs` (177 LOC) — `StructDef`, `EnumDef`, `FunctionDef`, `TypedefDef`, `ConstantDef`, `CType`, `TypeRegistry` |
-| Clang extraction (`clang` crate + sonar) | `extract.rs` (613 LOC) — `collect_*` helpers for uniform extraction, custom typedef/struct discovery to work around sonar limitations |
+| CLI (`clap`) + TOML config parsing | `main.rs` (86 LOC), `config.rs` (145 LOC) |
+| Intermediate model types | `model.rs` (185 LOC) — `StructDef`, `EnumDef`, `FunctionDef`, `TypedefDef`, `ConstantDef`, `CType`, `TypeRegistry` |
+| Clang extraction (`clang` crate + sonar) | `extract.rs` (840 LOC) — `collect_*` helpers for uniform extraction, custom typedef/struct discovery to work around sonar limitations |
 | Partition filtering by source location | `should_emit_by_location()` checks `Entity::get_location()` against traverse file list |
 | Type mapping (clang `TypeKind` → `CType`) | Void, Bool, char types, int/uint (all widths), float/double, Pointer, ConstantArray, IncompleteArray, Elaborated, Typedef, Record, Enum, FunctionPrototype. Incomplete records → Void. |
 | System typedef resolution | `CType::Named { resolved }` carries clang's canonical type; emit falls back to it for unregistered typedefs. `va_list` → `*mut c_void` at extraction. |
-| WinMD emission | `emit.rs` (429 LOC) — enums, structs, typedefs, delegates, functions (P/Invoke), constants |
+| WinMD emission | `emit.rs` (419 LOC) — enums, structs, unions, typedefs, delegates, functions (P/Invoke), constants |
+| Union support | `StructDef.is_union` flag. `ExplicitLayout` + `FieldLayout(offset=0)` for unions, `SequentialLayout` for structs. Supplemental pass detects `UnionDecl`. |
+| Anonymous nested types | `try_extract_anonymous_field()` detects `Entity::is_anonymous()` on canonical type declarations. Recursive extraction with synthetic names (`ParentName_FieldName`). |
+| Anonymous enum → constants | `collect_enums()` detects unnamed enums (e.g. `enum { DT_UNKNOWN = 0, ... }`) and emits variants as standalone `ConstantDef` entries instead of named enum TypeDefs. |
+| Hex constant extraction | Supplemental `MacroDefinition` pass with `parse_hex_or_suffixed_int()` handles `0x` hex, `0` octal, and `U`/`L`/`UL`/`ULL` suffixes. |
+| Opaque typedef handling | Void-underlying typedefs (e.g. `DIR`) emit `isize` instead of `c_void` for copyable handle-like types. |
 | Function pointer → delegate | Detects `Ptr(FnPtr{...})` and bare `FnPtr{...}`, emits TypeDef extending MulticastDelegate with Invoke method |
-| `#define` integer constants | `sonar::find_definitions()` with `detailed_preprocessing_record` |
+| `#define` integer constants | `sonar::find_definitions()` with `detailed_preprocessing_record` + supplemental hex pass |
 | Cross-partition type references | `TypeRegistry` maps type name → namespace; emits `TypeRef` for named types |
 | Structured logging (`tracing`) | `RUST_LOG=bindscrape=debug` shows per-declaration detail |
 | Variadic function skipping | `collect_functions()` checks `Entity::is_variadic()` and warns/skips |
 | Array parameter decay | `extract_function()` converts `CType::Array` params → `CType::Ptr` (C semantics; avoids `ELEMENT_TYPE_ARRAY` blob incompatibility with windows-bindgen) |
 | Function deduplication | `collect_functions()` uses `HashSet<String>` to skip duplicates from glibc `__REDIRECT` macros |
+| PtrConst workaround | Always emit `PtrMut` — `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs panics windows-bindgen. Const-ness tracked by `ConstAttribute` on parameters. |
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
-| Round-trip integration tests | 28 tests across 4 files |
-| E2E integration tests | 42 tests across 4 crates (including zlib against real `libz.so` and POSIX file I/O) |
+| Round-trip integration tests | 30 tests across 4 files |
+| E2E integration tests | 90 tests across 4 crates (zlib against real `libz.so`, POSIX file I/O, mmap, dirent, sockets, inet, netdb) |
 | Package-mode code generation | `bns-posix-gen` drives bindscrape + `windows-bindgen --package` to generate the `bns-posix` source tree with feature-gated sub-modules |
 
 ### What Is NOT Yet Implemented
 
 | Feature | Complexity |
 |---|---|
-| Union support (`ExplicitLayout` + `FieldLayout`) | Low |
 | Bitfield attribute emission (`NativeBitfieldAttribute`) | Medium — extraction works, emission TODO |
 | Multi-header wrapper generation | Low |
 | Cross-WinMD type imports (`[[type_import]]`) | Medium |
 | COM interface support | Medium — needs `ELEMENT_TYPE_CLASS` fix in `windows-metadata` |
-| Nested types | Low — `NestedClass` API exists |
-| Anonymous type synthetic naming | Partial — typedef-named works; nested anonymous types need synthetic names |
+| Nested types (`NestedClass`) | Low |
+| Inline function skipping | Low — detect `static inline` via storage class |
 
 ---
 
@@ -97,25 +102,49 @@ bindscrape/
 │   ├── config.rs            # TOML config deserialization (122 LOC)
 │   ├── model.rs             # Intermediate types: StructDef, CType, TypeRegistry (177 LOC)
 │   ├── extract.rs           # clang Entity/Type → model (613 LOC)
-│   └── emit.rs              # model → windows-metadata writer calls (429 LOC)
+│   └── emit.rs              # model → windows-metadata writer calls (419 LOC)
 └── tests/
-    ├── roundtrip_simple.rs   # 8 tests — simple.h fixture (201 LOC)
+    ├── roundtrip_simple.rs   # 10 tests — simple.h fixture (297 LOC)
     ├── roundtrip_multi.rs    # 5 tests — multi-partition fixture (141 LOC)
+    ├── roundtrip_posixfile.rs # 9 tests — bns-posix fixture (245 LOC)
     └── roundtrip_zlib.rs     # 6 tests — zlib system header (200 LOC)
 
 tests/
 ├── fixtures/
 │   ├── simple.h / simple.toml
 │   ├── multi/ (graphics.h, audio.h, multi.toml)
-│   ├── bns-posix/ (bns-posix.toml — POSIX file I/O headers)
+│   ├── bns-posix/ (bns-posix.toml — POSIX headers)
 │   └── zlib/ (zlib.toml — references system headers)
 ├── simple-impl/              # Native C lib for e2e-test
-├── e2e-test/                 # 6 E2E tests (single partition)
+├── e2e-test/                 # 8 E2E tests (single partition + unions)
 ├── e2e-multi/                # 8 E2E tests (multi-partition)
 └── e2e-zlib/                 # 12 E2E tests (system header, real libz.so)
+
+bns-posix/
+├── Cargo.toml                # Feature-gated sub-modules
+├── src/
+│   ├── lib.rs                # Hand-written module root
+│   └── PosixFile/            # Auto-generated namespace modules
+│       ├── mod.rs
+│       ├── Dirent/mod.rs
+│       ├── Fcntl/mod.rs
+│       ├── Inet/mod.rs
+│       ├── Mmap/mod.rs
+│       ├── Netdb/mod.rs
+│       ├── Socket/mod.rs
+│       ├── Stat/mod.rs
+│       └── Unistd/mod.rs
+└── tests/
+    ├── posixfile_e2e.rs      # 11 Fcntl/Unistd E2E tests
+    ├── stat_e2e.rs           # 4 Stat E2E tests
+    ├── mmap_e2e.rs           # 5 Mmap E2E tests
+    ├── dirent_e2e.rs         # 5 Dirent E2E tests
+    ├── socket_e2e.rs         # 16 Socket E2E tests
+    ├── inet_e2e.rs           # 11 Inet E2E tests
+    └── netdb_e2e.rs          # 10 Netdb E2E tests
 ```
 
-**Total**: ~1,456 LOC (library) + ~542 LOC (roundtrip tests) + ~850 LOC (E2E crates)
+**Total**: ~1,709 LOC (library) + ~883 LOC (roundtrip tests) + ~834 LOC (E2E crates) + 440 LOC (bns-posix E2E)
 
 ---
 
@@ -184,32 +213,37 @@ serde = { version = "1", features = ["derive"] }
 
 ## Test Coverage
 
-**47 total tests** (all passing, clippy clean):
+**124 total tests** (all passing, clippy clean):
 
-### Roundtrip Tests (19)
+### Roundtrip Tests (30)
 
 Parse headers → emit winmd → read back → assert.
 
-**roundtrip_simple.rs** (8 tests, `simple.h`): typedefs present, enum variants,
-struct fields, functions, function params, constants, delegate, pinvoke.
+**roundtrip_simple.rs** (10 tests, `simple.h`): typedefs present, enum variants,
+struct fields, union fields, anonymous nested types, functions, function params,
+constants, delegate, pinvoke.
 
 **roundtrip_multi.rs** (5 tests, multi-partition): namespace placement,
 functions, cross-partition typeref, constants, enums.
 
+**roundtrip_posixfile.rs** (9 tests, bns-posix): fcntl/stat/unistd functions,
+struct fields, struct sizes, constants, pinvoke.
+
 **roundtrip_zlib.rs** (6 tests, system headers): zlib structs, delegates,
 functions, constants, z_stream fields, pinvoke.
 
-### E2E Tests (26)
+### E2E Tests (90)
 
 Generated FFI bindings linked against real native libraries.
 
 | Crate | Tests | What it exercises |
 |---|---|---|
-| `e2e-test` | 6 | Single partition, simple.h, calls create/destroy widget |
+| `e2e-test` | 8 | Single partition, simple.h, widgets + unions + anonymous nested types |
 | `e2e-multi` | 8 | Multi-partition, cross-namespace type references |
 | `e2e-zlib` | 12 | System header, real libz.so, compress/uncompress roundtrip |
+| `bns-posix` | 62 | Real libc: file I/O, mmap, dirent, stat, sockets, inet, netdb (7 test files) |
 
-### Doc Tests (2)
+### Doc Tests (3) + Freshness Test (1)
 
 ---
 
@@ -278,15 +312,16 @@ All of the above are implemented and verified by the 47 tests.
 
 | Component | LOC | File |
 |---|---|---|
-| Public API + module declarations | 115 | `lib.rs` |
-| TOML config | 122 | `config.rs` |
-| Intermediate model types | 177 | `model.rs` |
-| Extraction (clang → model) | 613 | `extract.rs` |
-| Emission (model → winmd) | 429 | `emit.rs` |
-| Roundtrip tests | 542 | 3 files |
-| E2E test crates | ~850 | 3 crates |
-| **Total (library)** | **1,456** | |
-| **Total (library + tests)** | **~2,848** | |
+| Public API + module declarations | 120 | `lib.rs` |
+| TOML config | 145 | `config.rs` |
+| Intermediate model types | 185 | `model.rs` |
+| Extraction (clang → model) | 840 | `extract.rs` |
+| Emission (model → winmd) | 419 | `emit.rs` |
+| Roundtrip tests | 883 | 4 files |
+| E2E test crates | ~834 | 3 crates |
+| bns-posix E2E tests | 933 | 1 file |
+| **Total (library)** | **1,709** | |
+| **Total (library + tests)** | **~4,359** | |
 
 ---
 
@@ -301,7 +336,12 @@ The writer hardcodes `ELEMENT_TYPE_VALUETYPE` for all named types. Options:
 
 ### Minimum Viable v2 Feature Set
 
-- ⬜ Unions (explicit layout)
+- ✅ Unions (explicit layout)
+- ✅ Anonymous nested types (synthetic naming)
+- ✅ Anonymous enum → constants
+- ✅ Hex/octal constant extraction
+- ✅ Opaque typedef handling
+- ✅ PtrConst workaround
 - ⬜ Bitfield emission (`NativeBitfieldAttribute`)
 - ⬜ Cross-WinMD type imports
 - ⬜ COM interfaces (needs ELEMENT_TYPE_CLASS)

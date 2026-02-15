@@ -39,3 +39,30 @@ namespace = "PosixFile.Dirent"
 library = "c"
 headers = ["dirent.h"]
 traverse = ["dirent.h", "bits/dirent.h"]
+
+# Partition 6: sys/socket — socket/bind/listen/accept + AF_*/SOCK_*/SO_* constants
+[[partition]]
+namespace = "PosixFile.Socket"
+library = "c"
+headers = ["sys/socket.h"]
+traverse = [
+    "sys/socket.h",
+    "bits/socket.h",
+    "bits/socket_type.h",
+    "bits/socket-constants.h",
+    "bits/types/struct_iovec.h",
+]
+
+# Partition 7: netinet/in + arpa/inet — sockaddr_in, in6_addr, inet_pton/ntop
+[[partition]]
+namespace = "PosixFile.Inet"
+library = "c"
+headers = ["netinet/in.h", "arpa/inet.h"]
+traverse = ["netinet/in.h", "arpa/inet.h"]
+
+# Partition 8: netdb — getaddrinfo/freeaddrinfo + struct addrinfo + AI_* constants
+[[partition]]
+namespace = "PosixFile.Netdb"
+library = "c"
+headers = ["netdb.h"]
+traverse = ["netdb.h", "bits/netdb.h"]

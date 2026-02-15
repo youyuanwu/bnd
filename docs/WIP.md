@@ -43,13 +43,16 @@ decay workaround remain relevant for function parameters only.
 
 ## Planned — bns-posix API Families
 
-### 4. PosixSocket partitions
+### ~~4. PosixSocket partitions~~ ✅
 
-Add `sys/socket.h`, `netinet/in.h`, `arpa/inet.h`, `netdb.h` to
-bns-posix. Full design in
-[systesting/bns-posix.md](design/systesting/bns-posix.md#posixsocket--sockets).
-
-**Blocked by**: nothing (unions ✅, anonymous types ✅)
+Added as 3 partitions under the existing `PosixFile` assembly: Socket
+(`sys/socket.h`), Inet (`netinet/in.h` + `arpa/inet.h`), Netdb (`netdb.h`).
+Required iterative traverse path discovery — `struct iovec` in
+`bits/types/struct_iovec.h`, `struct netent` in `bits/netdb.h`, constants
+spread across `bits/socket.h`, `bits/socket_type.h`, and
+`bits/socket-constants.h`. All `htons`/`htonl` are real symbols in glibc.
+37 E2E tests covering constants, struct layouts, socket syscalls, byte order
+functions, address conversion, and name resolution.\n\n**Blocked by**: nothing
 
 ### ~~5. Mmap partition~~ ✅
 
@@ -112,9 +115,9 @@ headers. Need to detect via `Entity::get_storage_class()` or similar.
 
 From [RustGenerator.md](design/RustGenerator.md):
 
-| Feature | Complexity |
-|---|---|
-| Multi-header wrapper generation | Low |
-| Cross-WinMD type imports (`[[type_import]]`) | Medium |
-| COM interface support | Medium |
-| Nested types (`NestedClass`) | Low |
+| Feature | Complexity | Status |
+|---|---|---|
+| Multi-header wrapper generation | Low | ⬜ |
+| Cross-WinMD type imports (`[[type_import]]`) | Medium | ⬜ |
+| COM interface support | Medium | ⬜ |
+| Inline function skipping | Low | ⬜ |

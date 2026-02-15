@@ -12,8 +12,14 @@
 pub mod Dirent;
 #[cfg(feature = "Fcntl")]
 pub mod Fcntl;
+#[cfg(feature = "Inet")]
+pub mod Inet;
 #[cfg(feature = "Mmap")]
 pub mod Mmap;
+#[cfg(feature = "Netdb")]
+pub mod Netdb;
+#[cfg(feature = "Socket")]
+pub mod Socket;
 #[cfg(feature = "Stat")]
 pub mod Stat;
 #[cfg(feature = "Unistd")]
