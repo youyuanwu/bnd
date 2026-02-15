@@ -8,6 +8,11 @@ use std::path::{Path, PathBuf};
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub output: OutputConfig,
+    /// Additional directories to search when resolving header and traverse
+    /// paths.  Each entry is tried in order after `base_dir` (the TOML
+    /// file's parent directory).  Also injected as `-I` flags for clang.
+    #[serde(default)]
+    pub include_paths: Vec<PathBuf>,
     #[serde(default)]
     pub partition: Vec<PartitionConfig>,
     #[serde(default)]
@@ -64,9 +69,9 @@ impl PartitionConfig {
     /// If there are multiple, generates a wrapper `.c` file in `out_dir`
     /// that `#include`s all of them — mimicking the scraper `.c` files
     /// that win32metadata uses.
-    pub fn wrapper_header(&self, base_dir: &Path) -> PathBuf {
+    pub fn wrapper_header(&self, base_dir: &Path, include_paths: &[PathBuf]) -> PathBuf {
         if self.headers.len() == 1 {
-            base_dir.join(&self.headers[0])
+            resolve_header(&self.headers[0], base_dir, include_paths)
         } else {
             // Generate a wrapper .c file that #includes all headers.
             let wrapper_dir = std::env::temp_dir().join("bindscrape_wrappers");
@@ -78,17 +83,35 @@ impl PartitionConfig {
 
             let mut content = String::new();
             for h in &self.headers {
-                let abs = if h.is_absolute() {
-                    h.clone()
-                } else {
-                    base_dir.join(h)
-                };
+                let abs = resolve_header(h, base_dir, include_paths);
                 content.push_str(&format!("#include \"{}\"\n", abs.display()));
             }
             std::fs::write(&wrapper_path, &content).expect("write wrapper file");
             wrapper_path
         }
     }
+}
+
+/// Resolve a header path by searching `base_dir` first, then each
+/// `include_paths` entry.  Absolute paths are returned as-is.  If the
+/// file is not found anywhere, falls back to `base_dir.join(path)` so
+/// that the caller gets a meaningful error from clang.
+pub fn resolve_header(path: &Path, base_dir: &Path, include_paths: &[PathBuf]) -> PathBuf {
+    if path.is_absolute() {
+        return path.to_path_buf();
+    }
+    let candidate = base_dir.join(path);
+    if candidate.exists() {
+        return candidate;
+    }
+    for inc in include_paths {
+        let candidate = inc.join(path);
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+    // Fall back — clang will report the error with context.
+    base_dir.join(path)
 }
 
 /// External winmd type imports (cross-winmd references).

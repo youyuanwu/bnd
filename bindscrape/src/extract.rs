@@ -11,7 +11,7 @@ use clang::{
 };
 use tracing::{debug, trace, warn};
 
-use crate::config::PartitionConfig;
+use crate::config::{self, PartitionConfig};
 use crate::model::*;
 
 /// Extract all declarations from a single partition into model types.
@@ -19,29 +19,38 @@ pub fn extract_partition(
     index: &Index,
     partition: &PartitionConfig,
     base_dir: &Path,
+    include_paths: &[PathBuf],
     namespace_overrides: &std::collections::HashMap<String, String>,
 ) -> Result<Partition> {
     let _ = namespace_overrides; // reserved for future per-API namespace overrides
-    let header_path = partition.wrapper_header(base_dir);
+    let header_path = partition.wrapper_header(base_dir, include_paths);
     debug!(header = %header_path.display(), namespace = %partition.namespace, "parsing partition");
+
+    // Build clang arguments: user-specified args + -I flags from include_paths
+    let mut all_args: Vec<String> = partition.clang_args.clone();
+    for inc in include_paths {
+        let flag = format!("-I{}", inc.display());
+        if !all_args.contains(&flag) {
+            all_args.push(flag);
+        }
+    }
 
     let tu = index
         .parser(header_path.to_str().unwrap())
-        .arguments(
-            &partition
-                .clang_args
-                .iter()
-                .map(|s| s.as_str())
-                .collect::<Vec<_>>(),
-        )
+        .arguments(&all_args.iter().map(|s| s.as_str()).collect::<Vec<_>>())
         .detailed_preprocessing_record(true)
         .parse()
         .map_err(|e| anyhow::anyhow!("failed to parse {}: {:?}", header_path.display(), e))?;
 
-    let traverse_files = partition.traverse_files();
+    // Resolve traverse files through include_paths so relative names work
+    let resolved_traverse: Vec<PathBuf> = partition
+        .traverse_files()
+        .iter()
+        .map(|t| config::resolve_header(t, base_dir, include_paths))
+        .collect();
     let entities = tu.get_entity().get_children();
 
-    let in_scope = |e: &Entity| should_emit(e, traverse_files, base_dir);
+    let in_scope = |e: &Entity| should_emit(e, &resolved_traverse, base_dir);
 
     let structs = collect_structs(&entities, &in_scope);
     let enums = collect_enums(&entities, &in_scope);
@@ -560,7 +569,7 @@ fn should_emit(entity: &Entity, traverse_files: &[PathBuf], base_dir: &Path) -> 
     should_emit_by_location(entity, traverse_files, base_dir)
 }
 
-fn should_emit_by_location(entity: &Entity, traverse_files: &[PathBuf], base_dir: &Path) -> bool {
+fn should_emit_by_location(entity: &Entity, traverse_files: &[PathBuf], _base_dir: &Path) -> bool {
     let location = match entity.get_location() {
         Some(loc) => loc,
         None => return false,
@@ -572,15 +581,11 @@ fn should_emit_by_location(entity: &Entity, traverse_files: &[PathBuf], base_dir
     };
     let file_path = file.get_path();
 
-    traverse_files.iter().any(|tf| {
-        let abs_tf = if tf.is_absolute() {
-            tf.clone()
-        } else {
-            base_dir.join(tf)
-        };
-        // Match by canonical path or suffix
-        file_path == abs_tf || file_path.ends_with(tf)
-    })
+    // traverse_files are already resolved to absolute paths by the caller,
+    // so we just compare directly (or by suffix for robustness).
+    traverse_files
+        .iter()
+        .any(|tf| file_path == *tf || file_path.ends_with(tf))
 }
 
 /// Build a type registry from all partitions' extracted data.

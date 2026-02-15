@@ -1,3 +1,5 @@
+include_paths = ["/usr/include"]
+
 [output]
 name = "Zlib"
 file = "zlib.winmd"
@@ -7,13 +9,13 @@ file = "zlib.winmd"
 [[partition]]
 namespace = "Zlib.Types"
 library = "z"
-headers = ["/usr/include/zconf.h"]
-traverse = ["/usr/include/zconf.h"]
+headers = ["zconf.h"]
+traverse = ["zconf.h"]
 
 # Partition 2: zlib.h structs, functions, constants
 # References Zlib.Types for Bytef, uLong, etc.
 [[partition]]
 namespace = "Zlib"
 library = "z"
-headers = ["/usr/include/zlib.h"]
-traverse = ["/usr/include/zlib.h"]
+headers = ["zlib.h"]
+traverse = ["zlib.h"]

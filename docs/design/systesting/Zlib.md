@@ -162,7 +162,7 @@ to drop `Bytef`, `uIntf`, `uLongf`, and `z_size_t`. These are genuine
 aliases, not struct pass-throughs.
 
 **Solution**: Replaced `sonar::find_typedefs` with custom typedef
-discovery in `extract.rs`. The custom loop iterates `TypedefDecl`
+discovery in `collect_typedefs()`. The helper iterates `TypedefDecl`
 entities directly and only skips trivial struct pass-throughs
 (`typedef struct foo foo;`) via `is_struct_passthrough()`. This correctly
 extracts all 13 zconf.h typedefs (up from 9 with sonar).
@@ -175,31 +175,39 @@ entities (e.g., `typedef struct z_stream_s z_stream` → extracts
 (`typedef struct gzFile_s *gzFile`), so sonar never finds it as a struct.
 The struct IS fully defined (3 fields, 24 bytes) at line 1837 of zlib.h.
 
-**Solution**: Added a supplemental struct discovery pass in
-`extract_partition()` that iterates `StructDecl` entities directly. It
-runs after `sonar::find_structs` and catches any structs with full
-definitions (`entity.is_definition()`) that sonar missed.
+**Solution**: `collect_structs()` runs a supplemental pass after
+`sonar::find_structs` that iterates `StructDecl` entities directly. It
+catches any structs with full definitions (`entity.is_definition()`) that
+sonar missed.
 
-### 3. `off_t` — unregistered system typedef
+### 3. System typedefs (`off_t`, `int32_t`, `size_t`, etc.)
 
-**Problem**: `off_t` is a POSIX typedef from `<sys/types.h>`, not
-extracted by either partition. Functions like `gzseek` use `z_off_t`
-(a macro expanding to `off_t`), producing `CType::Named { name: "off_t" }`
-references that windows-bindgen can't resolve.
+**Problem**: System typedefs like `off_t`, `int32_t`, `size_t` are not
+extracted by any partition but appear in function signatures and struct
+fields. Without handling, they become `CType::Named` references that
+windows-bindgen can't resolve.
 
-**Solution**: Added `off_t`, `__off_t`, `off64_t`, `__off64_t` to the
-well-known typedef list in `map_clang_type`. These resolve to their
-canonical type (platform-dependent integer) instead of producing
-`CType::Named`.
+**Solution**: Extraction preserves all typedef names as `CType::Named`
+without special-casing. At emit time, `ctype_to_wintype()` checks
+`TypeRegistry::contains()` — if the type is registered (user-extracted),
+it emits a TypeRef; if not, it calls `map_system_typedef()` in `emit.rs`
+which maps standard C/POSIX names to winmd primitives:
+- `int8_t`→`I8`, `uint32_t`→`U32`, `size_t`→`USize`, etc.
+- `off_t`/`__off_t`/`off64_t`/`__off64_t` → `I64`
+
+This keeps extraction simple (no hardcoded type tables) and centralises
+system typedef knowledge in the emit layer.
 
 ### 4. `va_list` — compiler built-in type
 
 **Problem**: `gzvprintf` takes a `va_list` parameter. `va_list` is a
 compiler built-in (`__builtin_va_list`), not defined in any header we
-traverse.
+traverse. Unlike `off_t`, it has no portable canonical primitive type.
 
-**Solution**: Added `va_list`, `__builtin_va_list`, `__gnuc_va_list` to
-the well-known typedef list, mapping to `*mut c_void` (opaque pointer).
+**Solution**: `va_list` / `__builtin_va_list` / `__gnuc_va_list` are the
+one special case handled directly in `map_clang_type()` during
+extraction, mapped to `*mut c_void` (opaque pointer). This is the only
+hardcoded typedef in the extraction layer.
 
 ### 5. Opaque / incomplete struct pointers
 
@@ -320,9 +328,12 @@ macro-based FFI.
 
 ## Dependencies
 
-- `zlib1g-dev` package (Ubuntu/Debian) — provides `/usr/include/zlib.h`,
+- `libclang-dev` package — provides `libclang` for `clang-sys` and C
+  header parsing
+- `zlib1g-dev` package — provides `/usr/include/zlib.h`,
   `/usr/include/zconf.h`, and `/usr/lib/x86_64-linux-gnu/libz.so`
-- CI: `apt-get install zlib1g-dev` (usually pre-installed)
+- CI: `apt-get install libclang-dev zlib1g-dev` (in
+  `.github/workflows/CI.yml`)
 
 ---
 
@@ -333,11 +344,12 @@ macro-based FFI.
 3. ✅ Create `tests/e2e-zlib/` crate (Cargo.toml, build.rs, src/, tests/)
 4. ✅ Fix `sonar::find_typedefs` — custom typedef discovery for typedef-to-typedef aliases
 5. ✅ Fix supplemental struct discovery — catch `gzFile_s` missed by sonar
-6. ✅ Fix system typedefs — `off_t`, `va_list` mapped to well-known types
+6. ✅ Fix system typedefs — `map_system_typedef()` in emit layer
 7. ✅ Fix incomplete record types — `internal_state` mapped to Void
 8. ✅ Fix `emit_function` namespace — pass partition namespace, not empty string
 9. ✅ Add `e2e-zlib` to workspace members
-10. ✅ All 47 workspace tests passing, clippy clean
+10. ✅ Refactor `extract_partition` — `collect_*` helpers, merge duplicate `extract_struct`
+11. ✅ All 47 workspace tests passing, clippy clean
 
 ---
 
@@ -357,7 +369,10 @@ macro-based FFI.
    is relative to the TOML file, which is nested in the test fixtures
    directory. System headers need absolute paths.
 
-4. **Well-known typedefs grow with each system header.** `off_t` and
-   `va_list` are not from our traverse files but appear in function
-   signatures. The well-known list will need extension for each new
-   system header target (e.g., `FILE *`, `pid_t`, `socklen_t`).
+4. **System typedef resolution belongs in emit, not extraction.**
+   Extraction should preserve all typedef names as-is. The emit layer
+   checks the TypeRegistry and falls back to `map_system_typedef()` for
+   unregistered names (`int32_t`, `off_t`, `size_t`, etc.). Only
+   `va_list` (compiler built-in with no canonical primitive) is handled
+   during extraction. The `map_system_typedef()` table will grow with
+   each new system header target (e.g., `pid_t`, `socklen_t`, `time_t`).

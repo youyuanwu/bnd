@@ -98,8 +98,13 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
     // Extract all partitions
     let mut partitions = Vec::new();
     for partition_cfg in &cfg.partition {
-        let partition =
-            extract::extract_partition(&index, partition_cfg, base_dir, &cfg.namespace_overrides)?;
+        let partition = extract::extract_partition(
+            &index,
+            partition_cfg,
+            base_dir,
+            &cfg.include_paths,
+            &cfg.namespace_overrides,
+        )?;
         partitions.push(partition);
     }
 
