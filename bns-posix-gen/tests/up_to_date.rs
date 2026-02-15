@@ -25,11 +25,11 @@ fn collect_files_recursive(base: &Path, dir: &Path, out: &mut Vec<PathBuf>) {
 #[test]
 fn generated_sources_are_up_to_date() {
     let workspace_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
-    let checked_in = workspace_dir.join("bns-posix/src/PosixFile");
+    let checked_in = workspace_dir.join("bns-posix/src/posix");
 
     // Generate into a temp directory structured like bns-posix
     let tmp = tempfile::tempdir().unwrap();
-    let tmp_src = tmp.path().join("src/PosixFile");
+    let tmp_src = tmp.path().join("src/posix");
     std::fs::create_dir_all(&tmp_src).unwrap();
 
     // Need a Cargo.toml stub for --package (it reads up to "# generated features")
@@ -38,7 +38,7 @@ fn generated_sources_are_up_to_date() {
 
     bns_posix_gen::generate(tmp.path());
 
-    let generated_dir = tmp.path().join("src/PosixFile");
+    let generated_dir = tmp.path().join("src/posix");
 
     // Collect files from both directories
     let checked_in_files = collect_files(&checked_in);

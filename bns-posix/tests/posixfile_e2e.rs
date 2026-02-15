@@ -1,8 +1,8 @@
 //! End-to-end tests for Fcntl + Unistd file I/O bindings against real libc.
 
-use bns_posix::PosixFile::Fcntl;
-use bns_posix::PosixFile::Stat;
-use bns_posix::PosixFile::Unistd;
+use bns_posix::posix::fcntl;
+use bns_posix::posix::stat;
+use bns_posix::posix::unistd;
 
 use std::ffi::CString;
 
@@ -17,22 +17,22 @@ fn tmp_path(name: &str) -> CString {
 
 #[test]
 fn o_rdonly_is_zero() {
-    assert_eq!(Fcntl::O_RDONLY, 0);
+    assert_eq!(fcntl::O_RDONLY, 0);
 }
 
 #[test]
 fn seek_constants() {
-    assert_eq!(Unistd::SEEK_SET, 0);
-    assert_eq!(Unistd::SEEK_CUR, 1);
-    assert_eq!(Unistd::SEEK_END, 2);
+    assert_eq!(unistd::SEEK_SET, 0);
+    assert_eq!(unistd::SEEK_CUR, 1);
+    assert_eq!(unistd::SEEK_END, 2);
 }
 
 #[test]
 fn access_mode_constants() {
-    assert_eq!(Unistd::R_OK, 4);
-    assert_eq!(Unistd::W_OK, 2);
-    assert_eq!(Unistd::X_OK, 1);
-    assert_eq!(Unistd::F_OK, 0);
+    assert_eq!(unistd::R_OK, 4);
+    assert_eq!(unistd::W_OK, 2);
+    assert_eq!(unistd::X_OK, 1);
+    assert_eq!(unistd::F_OK, 0);
 }
 
 // ---------------------------------------------------------------------------
@@ -41,13 +41,13 @@ fn access_mode_constants() {
 
 #[test]
 fn getpid_returns_positive() {
-    let pid = unsafe { Unistd::getpid() };
+    let pid = unsafe { unistd::getpid() };
     assert!(pid > 0, "getpid should return a positive value, got {pid}");
 }
 
 #[test]
 fn getuid_returns_value() {
-    let uid = unsafe { Unistd::getuid() };
+    let uid = unsafe { unistd::getuid() };
     let _ = uid;
 }
 
@@ -58,48 +58,48 @@ fn getuid_returns_value() {
 #[test]
 fn creat_and_close() {
     let path = tmp_path("creat_close");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0, "creat failed with fd={fd}");
-    let rc = unsafe { Unistd::close(fd) };
+    let rc = unsafe { unistd::close(fd) };
     assert_eq!(rc, 0, "close failed");
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 #[test]
 fn write_then_read() {
     let path = tmp_path("write_read");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0, "creat failed");
     let data = b"hello bindscrape";
     let written = unsafe {
-        Unistd::write(
+        unistd::write(
             fd,
             data.as_ptr() as *const core::ffi::c_void,
             data.len() as u64,
         )
     };
     assert_eq!(written, data.len() as i64, "write returned wrong count");
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
-    unsafe { Unistd::close(fd) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
+    unsafe { unistd::close(fd) };
 
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     unsafe {
-        Unistd::write(
+        unistd::write(
             fd,
             data.as_ptr() as *const core::ffi::c_void,
             data.len() as u64,
         )
     };
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let mut st = Stat::stat::default();
-    let rc = unsafe { Stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
+    let mut st = stat::stat::default();
+    let rc = unsafe { stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
     assert_eq!(rc, 0, "stat failed");
     assert_eq!(st.st_size, data.len() as i64, "file size mismatch");
 
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 // ---------------------------------------------------------------------------
@@ -109,28 +109,28 @@ fn write_then_read() {
 #[test]
 fn lseek_returns_offset() {
     let path = tmp_path("lseek");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
     let data = b"abcdefghij"; // 10 bytes
     unsafe {
-        Unistd::write(
+        unistd::write(
             fd,
             data.as_ptr() as *const core::ffi::c_void,
             data.len() as u64,
         )
     };
 
-    let pos = unsafe { Unistd::lseek(fd, 0, Unistd::SEEK_CUR) };
+    let pos = unsafe { unistd::lseek(fd, 0, unistd::SEEK_CUR) };
     assert_eq!(pos, 10, "after writing 10 bytes, pos should be 10");
 
-    let pos = unsafe { Unistd::lseek(fd, 0, Unistd::SEEK_SET) };
+    let pos = unsafe { unistd::lseek(fd, 0, unistd::SEEK_SET) };
     assert_eq!(pos, 0, "SEEK_SET to 0");
 
-    let pos = unsafe { Unistd::lseek(fd, -3, Unistd::SEEK_END) };
+    let pos = unsafe { unistd::lseek(fd, -3, unistd::SEEK_END) };
     assert_eq!(pos, 7, "SEEK_END - 3 on 10-byte file");
 
-    unsafe { Unistd::close(fd) };
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::close(fd) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 // ---------------------------------------------------------------------------
@@ -140,20 +140,20 @@ fn lseek_returns_offset() {
 #[test]
 fn access_existing_file() {
     let path = tmp_path("access_exist");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let rc = unsafe { Unistd::access(path.as_ptr(), Unistd::F_OK) };
+    let rc = unsafe { unistd::access(path.as_ptr(), unistd::F_OK) };
     assert_eq!(rc, 0, "access F_OK should succeed for existing file");
 
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 #[test]
 fn access_nonexistent_file() {
     let path = CString::new("/tmp/bindscrape_e2e_no_such_file_ever").unwrap();
-    let rc = unsafe { Unistd::access(path.as_ptr(), Unistd::F_OK) };
+    let rc = unsafe { unistd::access(path.as_ptr(), unistd::F_OK) };
     assert_eq!(rc, -1, "access should fail for nonexistent file");
 }
 
@@ -164,13 +164,13 @@ fn access_nonexistent_file() {
 #[test]
 fn unlink_file() {
     let path = tmp_path("unlink");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let rc = unsafe { Unistd::unlink(path.as_ptr()) };
+    let rc = unsafe { unistd::unlink(path.as_ptr()) };
     assert_eq!(rc, 0, "unlink should succeed");
 
-    let rc = unsafe { Unistd::access(path.as_ptr(), Unistd::F_OK) };
+    let rc = unsafe { unistd::access(path.as_ptr(), unistd::F_OK) };
     assert_eq!(rc, -1, "file should be gone after unlink");
 }

@@ -23,7 +23,7 @@ fn open_index() -> windows_metadata::reader::Index {
 fn fcntl_functions_present() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Fcntl", "Apis");
+    let apis = index.expect("posix.fcntl", "Apis");
     let methods: Vec<String> = apis.methods().map(|m| m.name().to_string()).collect();
 
     // creat is non-variadic and should be present
@@ -49,7 +49,7 @@ fn fcntl_functions_present() {
 fn fcntl_o_rdonly_constant() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Fcntl", "Apis");
+    let apis = index.expect("posix.fcntl", "Apis");
     let fields: Vec<String> = apis.fields().map(|f| f.name().to_string()).collect();
 
     assert!(
@@ -88,7 +88,7 @@ fn fcntl_o_rdonly_constant() {
 fn fcntl_pinvoke() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Fcntl", "Apis");
+    let apis = index.expect("posix.fcntl", "Apis");
     let creat = apis
         .methods()
         .find(|m| m.name() == "creat")
@@ -110,7 +110,7 @@ fn fcntl_pinvoke() {
 fn unistd_functions_present() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Unistd", "Apis");
+    let apis = index.expect("posix.unistd", "Apis");
     let methods: Vec<String> = apis.methods().map(|m| m.name().to_string()).collect();
 
     let check = |name: &str| {
@@ -137,7 +137,7 @@ fn unistd_functions_present() {
 fn unistd_constants_present() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Unistd", "Apis");
+    let apis = index.expect("posix.unistd", "Apis");
     let fields: Vec<String> = apis.fields().map(|f| f.name().to_string()).collect();
 
     assert!(
@@ -178,7 +178,7 @@ fn stat_struct_present() {
     assert!(
         types
             .iter()
-            .any(|(ns, n)| ns == "PosixFile.Stat" && n == "stat"),
+            .any(|(ns, n)| ns == "posix.stat" && n == "stat"),
         "struct stat missing. Found: {types:?}"
     );
 }
@@ -187,7 +187,7 @@ fn stat_struct_present() {
 fn stat_struct_fields() {
     let index = open_index();
 
-    let stat = index.expect("PosixFile.Stat", "stat");
+    let stat = index.expect("posix.stat", "stat");
     let fields: Vec<String> = stat.fields().map(|f| f.name().to_string()).collect();
 
     let check = |name: &str| {
@@ -212,7 +212,7 @@ fn stat_struct_fields() {
 fn stat_struct_size() {
     let index = open_index();
 
-    let stat = index.expect("PosixFile.Stat", "stat");
+    let stat = index.expect("posix.stat", "stat");
     let field_count = stat.fields().count();
 
     // struct stat on Linux x86-64 has 15 fields
@@ -226,7 +226,7 @@ fn stat_struct_size() {
 fn stat_functions_present() {
     let index = open_index();
 
-    let apis = index.expect("PosixFile.Stat", "Apis");
+    let apis = index.expect("posix.stat", "Apis");
     let methods: Vec<String> = apis.methods().map(|m| m.name().to_string()).collect();
 
     let check = |name: &str| {

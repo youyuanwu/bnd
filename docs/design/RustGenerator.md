@@ -124,16 +124,16 @@ bns-posix/
 ├── Cargo.toml                # Feature-gated sub-modules
 ├── src/
 │   ├── lib.rs                # Hand-written module root
-│   └── PosixFile/            # Auto-generated namespace modules
+│   └── posix/                # Auto-generated namespace modules
 │       ├── mod.rs
-│       ├── Dirent/mod.rs
-│       ├── Fcntl/mod.rs
-│       ├── Inet/mod.rs
-│       ├── Mmap/mod.rs
-│       ├── Netdb/mod.rs
-│       ├── Socket/mod.rs
-│       ├── Stat/mod.rs
-│       └── Unistd/mod.rs
+│       ├── dirent/mod.rs
+│       ├── fcntl/mod.rs
+│       ├── inet/mod.rs
+│       ├── mmap/mod.rs
+│       ├── netdb/mod.rs
+│       ├── socket/mod.rs
+│       ├── stat/mod.rs
+│       └── unistd/mod.rs
 └── tests/
     ├── posixfile_e2e.rs      # 11 Fcntl/Unistd E2E tests
     ├── stat_e2e.rs           # 4 Stat E2E tests

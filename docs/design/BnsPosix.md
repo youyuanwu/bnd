@@ -11,36 +11,36 @@ C-header-to-WinMD approach scales beyond test fixtures to real system APIs.
 
 | Module | Header(s) | Functions | Constants | Structs |
 |---|---|---|---|---|
-| `PosixFile::Dirent` | `dirent.h`, `bits/dirent.h` | 12 | ~11 | `dirent` |
-| `PosixFile::Fcntl`  | `fcntl.h` | 4 | ~60 | — |
-| `PosixFile::Inet`   | `netinet/in.h`, `arpa/inet.h` | 20 | ~75 | `sockaddr_in`, `sockaddr_in6`, `in_addr`, `in6_addr` (+unions) |
-| `PosixFile::Mmap`   | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` | 13 | ~62 | — |
-| `PosixFile::Netdb`  | `netdb.h`, `bits/netdb.h` | 56 | ~32 | `addrinfo`, `hostent`, `servent`, `protoent`, `netent` |
-| `PosixFile::Socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h` | 20 | ~102 | `sockaddr`, `sockaddr_storage`, `msghdr`, `iovec`, `cmsghdr`, `linger` |
-| `PosixFile::Stat`   | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` | 17 | 4 | `stat`, `timespec` |
-| `PosixFile::Unistd` | `unistd.h` | 103 | ~23 | — |
+| `posix::dirent` | `dirent.h`, `bits/dirent.h` | 12 | ~11 | `dirent` |
+| `posix::fcntl`  | `fcntl.h` | 4 | ~60 | — |
+| `posix::inet`   | `netinet/in.h`, `arpa/inet.h` | 20 | ~75 | `sockaddr_in`, `sockaddr_in6`, `in_addr`, `in6_addr` (+unions) |
+| `posix::mmap`   | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` | 13 | ~62 | — |
+| `posix::netdb`  | `netdb.h`, `bits/netdb.h` | 56 | ~32 | `addrinfo`, `hostent`, `servent`, `protoent`, `netent` |
+| `posix::socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h` | 20 | ~102 | `sockaddr`, `sockaddr_storage`, `msghdr`, `iovec`, `cmsghdr`, `linger` |
+| `posix::stat`   | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` | 17 | 4 | `stat`, `timespec` |
+| `posix::unistd` | `unistd.h` | 103 | ~23 | — |
 
 ### Usage
 
 ```rust
-use bns_posix::PosixFile::{Fcntl, Stat, Unistd};
+use bns_posix::posix::{fcntl, stat, unistd};
 
 // Create a file
 let path = c"/tmp/example.txt";
-let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
 assert!(fd >= 0);
 
 // Write
 let data = b"hello";
-unsafe { Unistd::write(fd, data.as_ptr().cast(), data.len() as u64) };
+unsafe { unistd::write(fd, data.as_ptr().cast(), data.len() as u64) };
 
 // Stat
-let mut st = Stat::stat::default();
-unsafe { Stat::fstat(fd, &mut st as *mut _ as *const _) };
+let mut st = stat::stat::default();
+unsafe { stat::fstat(fd, &mut st as *mut _ as *const _) };
 assert_eq!(st.st_size, 5);
 
 // Close
-unsafe { Unistd::close(fd) };
+unsafe { unistd::close(fd) };
 ```
 
 ## Architecture
@@ -58,11 +58,11 @@ and checked into the `bns-posix` source tree — there is no `build.rs`.
   │                                      │                  │
   │                                      ▼                  │
   │                              bns-posix/src/              │
-  │                              ├── PosixFile/              │
+  │                              ├── posix/                  │
   │                              │   ├── mod.rs              │
-  │                              │   ├── Fcntl/mod.rs        │
-  │                              │   ├── Stat/mod.rs         │
-  │                              │   └── Unistd/mod.rs       │
+  │                              │   ├── fcntl/mod.rs        │
+  │                              │   ├── stat/mod.rs         │
+  │                              │   └── unistd/mod.rs       │
   │                              └── lib.rs (hand-written)   │
   └─────────────────────────────────────────────────────────┘
 ```
@@ -76,7 +76,7 @@ cargo run -p bns-posix-gen
 1. **bindscrape** parses `bns-posix.toml`, invokes clang on system headers,
    extracts types/functions/constants, and writes a temporary `.winmd` file.
 2. **windows-bindgen `--package`** reads the `.winmd` and generates one
-   `mod.rs` per namespace under `src/PosixFile/`, with `#[cfg(feature)]`
+   `mod.rs` per namespace under `src/posix/`, with `#[cfg(feature)]`
    gating on each sub-module. It also appends feature definitions to
    `Cargo.toml` after the `# generated features` marker.
 3. The intermediate `.winmd` is deleted — `bns-posix` is a pure Rust crate
@@ -87,7 +87,7 @@ cargo run -p bns-posix-gen
 Multiple partitions extract overlapping system types (`off_t`, `mode_t`,
 `SEEK_SET`, etc.). Without `--flat`, windows-bindgen generates nested
 `pub mod` modules per namespace, so each partition's types live in their
-own module. Cross-partition references use `super::Stat::mode_t` etc.
+own module. Cross-partition references use `super::stat::mode_t` etc.
 
 ## Partition Config
 
@@ -96,14 +96,14 @@ and defines eight partitions:
 
 | Partition | Namespace | Headers traversed |
 |---|---|---|
-| Dirent | `PosixFile.Dirent` | `dirent.h`, `bits/dirent.h` |
-| Fcntl | `PosixFile.Fcntl` | `fcntl.h` |
-| Inet | `PosixFile.Inet` | `netinet/in.h`, `arpa/inet.h` |
-| Mmap | `PosixFile.Mmap` | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` |
-| Netdb | `PosixFile.Netdb` | `netdb.h`, `bits/netdb.h` |
-| Socket | `PosixFile.Socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h`, `bits/types/struct_iovec.h` |
-| Stat | `PosixFile.Stat` | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` |
-| Unistd | `PosixFile.Unistd` | `unistd.h` |
+| Dirent | `posix.dirent` | `dirent.h`, `bits/dirent.h` |
+| Fcntl | `posix.fcntl` | `fcntl.h` |
+| Inet | `posix.inet` | `netinet/in.h`, `arpa/inet.h` |
+| Mmap | `posix.mmap` | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` |
+| Netdb | `posix.netdb` | `netdb.h`, `bits/netdb.h` |
+| Socket | `posix.socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h`, `bits/types/struct_iovec.h` |
+| Stat | `posix.stat` | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` |
+| Unistd | `posix.unistd` | `unistd.h` |
 
 ## Challenges Solved
 
@@ -140,7 +140,7 @@ in bindscrape core (see [bns-posix.md](systesting/bns-posix.md) for details):
     Traverse lists must include these sub-headers or types are missing
     and windows-bindgen panics with `type not found`.
 12. **Cross-partition type references** — `recv`/`send` use
-    `super::Unistd::ssize_t`; `addrinfo` uses `super::Socket::sockaddr`.
+    `super::unistd::ssize_t`; `addrinfo` uses `super::socket::sockaddr`.
     windows-bindgen gates these with `#[cfg(feature = "X")]` automatically.
 13. **`htons`/`htonl` as real symbols** — on glibc x86-64, `htons`/`htonl`
     have real symbols in `libc.so` (weak symbols), so P/Invoke works.
@@ -151,10 +151,10 @@ To add more POSIX APIs (e.g., `sys/socket.h`, `pthread.h`):
 
 1. Add a new `[[partition]]` to `bns-posix.toml` with the desired headers.
 2. Run `cargo run -p bns-posix-gen` — bindscrape extracts the new partition,
-   windows-bindgen adds a new `src/PosixFile/<Name>/mod.rs` and appends
+   windows-bindgen adds a new `src/posix/<name>/mod.rs` and appends
    the feature to `Cargo.toml`.
 3. Add the new feature to the `default` list in `Cargo.toml`.
-4. `lib.rs` already does `pub mod PosixFile;` which picks up new sub-modules
+4. `lib.rs` already does `pub mod posix;` which picks up new sub-modules
    automatically.
 
 ## Tests

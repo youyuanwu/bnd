@@ -1,8 +1,8 @@
 //! End-to-end tests for Stat bindings against real libc.
 
-use bns_posix::PosixFile::Fcntl;
-use bns_posix::PosixFile::Stat;
-use bns_posix::PosixFile::Unistd;
+use bns_posix::posix::fcntl;
+use bns_posix::posix::stat;
+use bns_posix::posix::unistd;
 
 use std::ffi::CString;
 
@@ -13,35 +13,35 @@ fn tmp_path(name: &str) -> CString {
 #[test]
 fn stat_file_size() {
     let path = tmp_path("stat_size");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
     let data = b"0123456789";
     unsafe {
-        Unistd::write(
+        unistd::write(
             fd,
             data.as_ptr() as *const core::ffi::c_void,
             data.len() as u64,
         )
     };
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let mut st = Stat::stat::default();
-    let rc = unsafe { Stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
+    let mut st = stat::stat::default();
+    let rc = unsafe { stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
     assert_eq!(rc, 0, "stat failed");
     assert_eq!(st.st_size, 10);
 
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 #[test]
 fn stat_is_regular_file() {
     let path = tmp_path("stat_reg");
-    let fd = unsafe { Fcntl::creat(path.as_ptr(), 0o644) };
+    let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
-    unsafe { Unistd::close(fd) };
+    unsafe { unistd::close(fd) };
 
-    let mut st = Stat::stat::default();
-    let rc = unsafe { Stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
+    let mut st = stat::stat::default();
+    let rc = unsafe { stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
     assert_eq!(rc, 0);
     assert_eq!(
         st.st_mode & 0o170000,
@@ -50,13 +50,13 @@ fn stat_is_regular_file() {
         st.st_mode
     );
 
-    unsafe { Unistd::unlink(path.as_ptr()) };
+    unsafe { unistd::unlink(path.as_ptr()) };
 }
 
 #[test]
 fn stat_struct_size() {
     assert_eq!(
-        std::mem::size_of::<Stat::stat>(),
+        std::mem::size_of::<stat::stat>(),
         144,
         "struct stat should be 144 bytes on x86_64 Linux"
     );
@@ -65,7 +65,7 @@ fn stat_struct_size() {
 #[test]
 fn timespec_struct_size() {
     assert_eq!(
-        std::mem::size_of::<Stat::timespec>(),
+        std::mem::size_of::<stat::timespec>(),
         16,
         "struct timespec should be 16 bytes"
     );

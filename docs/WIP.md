@@ -43,9 +43,9 @@ decay workaround remain relevant for function parameters only.
 
 ## Planned — bns-posix API Families
 
-### ~~4. PosixSocket partitions~~ ✅
+### ~~4. Socket partitions~~ ✅
 
-Added as 3 partitions under the existing `PosixFile` assembly: Socket
+Added as 3 partitions under the existing `posix` assembly: Socket
 (`sys/socket.h`), Inet (`netinet/in.h` + `arpa/inet.h`), Netdb (`netdb.h`).
 Required iterative traverse path discovery — `struct iovec` in
 `bits/types/struct_iovec.h`, `struct netent` in `bits/netdb.h`, constants

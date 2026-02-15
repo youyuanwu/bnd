@@ -6,14 +6,14 @@ and E2E test plans for one header group.
 
 | API family | Status | Key feature exercised |
 |---|---|---|
-| [PosixFile](#posixfile--file-io) | ✅ Implemented | System typedefs, variadic skipping, `struct stat` |
+| [posix](#posix--file-io) | ✅ Implemented | System typedefs, variadic skipping, `struct stat` |
 | [Mmap](#mmap) | ✅ Implemented | Hex constant extraction, `void *` return |
 | [Dirent](#dirent) | ✅ Implemented | Anonymous enums, opaque typedefs, PtrConst fix |
-| [PosixSocket](#posixsocket--sockets) | ✅ Implemented | 3 partitions under PosixFile (Socket, Inet, Netdb) |
+| [Sockets](#sockets) | ✅ Implemented | 3 partitions under posix (socket, inet, netdb) |
 
 ---
 
-## PosixFile — File I/O
+## posix — File I/O
 
 Validate bindscrape against **POSIX file I/O headers** — `<fcntl.h>`,
 `<unistd.h>`, and `<sys/stat.h>`. This exercises many system typedefs
@@ -107,27 +107,27 @@ include_paths = [
 ]
 
 [output]
-name = "PosixFile"
+name = "posix"
 file = "bns-posix.winmd"
 
 # Partition 1: fcntl — creat + O_* flags
 # open/openat/fcntl are variadic and will be auto-skipped
 [[partition]]
-namespace = "PosixFile.Fcntl"
+namespace = "posix.fcntl"
 library = "c"
 headers = ["fcntl.h"]
 traverse = ["fcntl.h", "bits/fcntl-linux.h"]
 
 # Partition 2: unistd — read/write/close/lseek
 [[partition]]
-namespace = "PosixFile.Unistd"
+namespace = "posix.unistd"
 library = "c"
 headers = ["unistd.h"]
 traverse = ["unistd.h"]
 
 # Partition 3: sys/stat — struct stat + stat/fstat/chmod + S_* constants
 [[partition]]
-namespace = "PosixFile.Stat"
+namespace = "posix.stat"
 library = "c"
 headers = ["sys/stat.h"]
 traverse = [
@@ -138,7 +138,7 @@ traverse = [
 ```
 
 Key points:
-- **No `PosixFile.Types` partition** — system typedefs are auto-resolved
+- **No `posix.types` partition** — system typedefs are auto-resolved
   by clang canonical types stored in `CType::Named { resolved }`. A
   separate `sys/types.h` partition is unnecessary and extracts ~33 noisy
   typedefs including `__fsid_t` (anonymous struct) that windows-bindgen
@@ -278,14 +278,14 @@ with a `HashSet<String>` on the function name.
 
 Typedefs like `off_t`, `mode_t`, constants like `SEEK_SET`, `R_OK`
 appear in multiple partitions. Using namespace modules (no `--flat`)
-separates them into distinct Rust modules (`PosixFile::Fcntl::off_t`
-vs `PosixFile::Unistd::off_t`), avoiding compilation errors.
+separates them into distinct Rust modules (`posix::fcntl::off_t`
+vs `posix::unistd::off_t`), avoiding compilation errors.
 
 ---
 
 ### API Surface
 
-#### PosixFile.Fcntl (fcntl.h + bits/fcntl-linux.h)
+#### posix.fcntl (fcntl.h + bits/fcntl-linux.h)
 
 **Functions (4)**: `creat`, `lockf`, `posix_fadvise`, `posix_fallocate`
 (skipping variadic `open`, `fcntl`, `openat`)
@@ -294,7 +294,7 @@ vs `PosixFile::Unistd::off_t`), avoiding compilation errors.
 `SEEK_END`, `R_OK`, `W_OK`, `X_OK`, `F_OK`, ...
 **Typedefs (3)**: `mode_t`, `off_t`, `pid_t`
 
-#### PosixFile.Unistd (unistd.h)
+#### posix.unistd (unistd.h)
 
 **Functions (103)**: `read`, `write`, `close`, `lseek`, `ftruncate`, `unlink`,
 `access`, `getpid`, `dup`, `dup2`, `pipe`, `fsync`, `fork`, `execv`, ...
@@ -304,7 +304,7 @@ vs `PosixFile::Unistd::off_t`), avoiding compilation errors.
 **Typedefs (8)**: `gid_t`, `intptr_t`, `off_t`, `pid_t`, `socklen_t`,
 `ssize_t`, `uid_t`, `useconds_t`
 
-#### PosixFile.Stat (sys/stat.h + bits/struct_stat.h + bits/types/struct_timespec.h)
+#### posix.stat (sys/stat.h + bits/struct_stat.h + bits/types/struct_timespec.h)
 
 **Structs (2)**: `stat` (15 fields, 144 bytes on x86-64), `timespec` (2 fields, 16 bytes)
 **Functions (17)**: `stat`, `fstat`, `lstat`, `fstatat`, `chmod`, `lchmod`,
@@ -380,7 +380,7 @@ Test against real filesystem operations using temp files.
 
 ```toml
 [[partition]]
-namespace = "PosixFile.Mmap"
+namespace = "posix.mmap"
 library = "c"
 headers = ["sys/mman.h"]
 traverse = ["sys/mman.h", "bits/mman-linux.h", "bits/mman-map-flags-generic.h"]
@@ -425,7 +425,7 @@ trailing `U`/`L`/`UL`/`ULL` suffixes.
 
 ```toml
 [[partition]]
-namespace = "PosixFile.Dirent"
+namespace = "posix.dirent"
 library = "c"
 headers = ["dirent.h"]
 traverse = ["dirent.h", "bits/dirent.h"]
@@ -475,7 +475,7 @@ traverse = ["dirent.h", "bits/dirent.h"]
 
 ---
 
-## PosixSocket — Sockets
+## Sockets
 
 Validate bindscrape against **POSIX socket headers** — `<sys/socket.h>`,
 `<netinet/in.h>`, `<arpa/inet.h>`, and `<netdb.h>`. This is the next
@@ -515,33 +515,33 @@ previously blockers — are now implemented and tested.
 
 ```toml
 [output]
-name = "PosixSocket"
+name = "posix"
 file = "posixsocket.winmd"
 
 # Partition 1: socket types and core API
 [[partition]]
-namespace = "PosixSocket"
+namespace = "posix.socket"
 library = "c"
 headers = ["/usr/include/sys/socket.h"]
 traverse = ["/usr/include/sys/socket.h"]
 
 # Partition 2: IPv4/IPv6 structs and constants
 [[partition]]
-namespace = "PosixSocket.Inet"
+namespace = "posix.inet"
 library = "c"
 headers = ["/usr/include/netinet/in.h"]
 traverse = ["/usr/include/netinet/in.h"]
 
 # Partition 3: address conversion functions
 [[partition]]
-namespace = "PosixSocket.Arpa"
+namespace = "posix.arpa"
 library = "c"
 headers = ["/usr/include/arpa/inet.h"]
 traverse = ["/usr/include/arpa/inet.h"]
 
 # Partition 4: name resolution
 [[partition]]
-namespace = "PosixSocket.Netdb"
+namespace = "posix.netdb"
 library = "c"
 headers = ["/usr/include/netdb.h"]
 traverse = ["/usr/include/netdb.h"]
@@ -552,14 +552,14 @@ traverse = ["/usr/include/netdb.h"]
 ```toml
 # Partition 1: sys/socket.h types + functions
 [[partition]]
-namespace = "PosixSocket"
+namespace = "posix.socket"
 library = "c"
 headers = ["/usr/include/sys/socket.h"]
 traverse = ["/usr/include/sys/socket.h"]
 
 # Partition 2: inet + arpa + netdb
 [[partition]]
-namespace = "PosixSocket.Inet"
+namespace = "posix.inet"
 library = "c"
 headers = [
     "/usr/include/netinet/in.h",
@@ -682,7 +682,7 @@ sub-headers, or the constants won't be extracted.
 
 ### API Surface
 
-#### PosixSocket (sys/socket.h)
+#### posix.socket (sys/socket.h)
 
 **Structs**: `sockaddr` (16 bytes — `sa_family` + `sa_data[14]`)
 **Functions**: `socket`, `bind`, `listen`, `accept`, `connect`, `send`,
@@ -692,7 +692,7 @@ sub-headers, or the constants won't be extracted.
 `SOCK_STREAM`, `SOCK_DGRAM`, `SOCK_RAW`, `SOL_SOCKET`, `SO_REUSEADDR`,
 `SO_REUSEPORT`, `SO_KEEPALIVE`, `SHUT_RD`, `SHUT_WR`, `SHUT_RDWR`
 
-#### PosixSocket.Inet (netinet/in.h)
+#### posix.inet (netinet/in.h)
 
 **Structs**: `in_addr` (4 bytes), `in6_addr` (16 bytes, contains union),
 `sockaddr_in` (16 bytes), `sockaddr_in6` (28 bytes)
@@ -700,11 +700,11 @@ sub-headers, or the constants won't be extracted.
 `INADDR_ANY`, `INADDR_LOOPBACK`, `INADDR_BROADCAST`,
 `INET_ADDRSTRLEN`, `INET6_ADDRSTRLEN`
 
-#### PosixSocket.Arpa (arpa/inet.h)
+#### posix.arpa (arpa/inet.h)
 
 **Functions**: `inet_pton`, `inet_ntop`, `inet_addr`, `inet_ntoa`
 
-#### PosixSocket.Netdb (netdb.h)
+#### posix.netdb (netdb.h)
 
 **Structs**: `addrinfo` (self-referential linked list)
 **Functions**: `getaddrinfo`, `freeaddrinfo`, `gai_strerror`
@@ -763,7 +763,7 @@ Suggested sequence:
 3. ✅ System typedefs (`socklen_t`, `sa_family_t`, `in_port_t`,
    `in_addr_t`) auto-resolved via `CType::Named { resolved }` — no changes needed
 4. ✅ Added 3 partitions (Socket, Inet, Netdb) to `bns-posix.toml` under
-   `PosixFile` namespace (not separate `PosixSocket` assembly as originally
+   `posix` namespace (not separate assembly as originally
    planned — simpler to keep in one assembly)
 5. ✅ Iteratively discovered traverse paths: `bits/socket.h`,
    `bits/socket_type.h`, `bits/socket-constants.h`,
@@ -773,5 +773,5 @@ Suggested sequence:
 8. ✅ No conditional compilation flags needed — default clang parse picks up
    all required APIs
 9. ✅ Cross-partition refs work via `#[cfg(feature = "X")]` gating
-   (e.g. `recv` → `super::Unistd::ssize_t`, `addrinfo` → `super::Socket::sockaddr`)
+   (e.g. `recv` → `super::unistd::ssize_t`, `addrinfo` → `super::socket::sockaddr`)
 10. ✅ 37 socket E2E tests added to `posixfile_e2e.rs`

@@ -17,18 +17,18 @@ windows_link::link!("c" "C" fn getsockname(__fd : i32, __addr : *const sockaddr,
 windows_link::link!("c" "C" fn getsockopt(__fd : i32, __level : i32, __optname : i32, __optval : *const core::ffi::c_void, __optlen : *const socklen_t) -> i32);
 windows_link::link!("c" "C" fn isfdtype(__fd : i32, __fdtype : i32) -> i32);
 windows_link::link!("c" "C" fn listen(__fd : i32, __n : i32) -> i32);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn recv(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::Unistd:: ssize_t);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn recvfrom(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32, __addr : *const sockaddr, __addr_len : *const socklen_t) -> super::Unistd:: ssize_t);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn recvmsg(__fd : i32, __message : *const msghdr, __flags : i32) -> super::Unistd:: ssize_t);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn send(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::Unistd:: ssize_t);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn sendmsg(__fd : i32, __message : *const msghdr, __flags : i32) -> super::Unistd:: ssize_t);
-#[cfg(feature = "Unistd")]
-windows_link::link!("c" "C" fn sendto(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32, __addr : *const sockaddr, __addr_len : socklen_t) -> super::Unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn recv(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn recvfrom(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32, __addr : *const sockaddr, __addr_len : *const socklen_t) -> super::unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn recvmsg(__fd : i32, __message : *const msghdr, __flags : i32) -> super::unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn send(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn sendmsg(__fd : i32, __message : *const msghdr, __flags : i32) -> super::unistd:: ssize_t);
+#[cfg(feature = "unistd")]
+windows_link::link!("c" "C" fn sendto(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32, __addr : *const sockaddr, __addr_len : socklen_t) -> super::unistd:: ssize_t);
 windows_link::link!("c" "C" fn setsockopt(__fd : i32, __level : i32, __optname : i32, __optval : *const core::ffi::c_void, __optlen : socklen_t) -> i32);
 windows_link::link!("c" "C" fn shutdown(__fd : i32, __how : i32) -> i32);
 windows_link::link!("c" "C" fn sockatmark(__fd : i32) -> i32);

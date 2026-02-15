@@ -5,7 +5,7 @@ use std::path::Path;
 /// Generate the bns-posix source tree at `output_dir`.
 ///
 /// 1. Runs bindscrape on `bns-posix.toml` to produce a `.winmd`.
-/// 2. Runs `windows-bindgen --package` to emit `src/PosixFile/*/mod.rs`.
+/// 2. Runs `windows-bindgen --package` to emit `src/posix/*/mod.rs`.
 /// 3. Deletes the intermediate `.winmd`.
 pub fn generate(output_dir: &Path) {
     let workspace_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("..");
@@ -23,7 +23,7 @@ pub fn generate(output_dir: &Path) {
         "--out",
         output_dir.to_str().unwrap(),
         "--filter",
-        "PosixFile",
+        "posix",
         "--sys",
         "--package",
         "--no-toml",

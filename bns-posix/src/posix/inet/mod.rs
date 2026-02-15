@@ -24,8 +24,8 @@ windows_link::link!("c" "C" fn inet_network(__cp : *const i8) -> in_addr_t);
 windows_link::link!("c" "C" fn inet_nsap_addr(__cp : *const i8, __buf : *const u8, __len : i32) -> u32);
 windows_link::link!("c" "C" fn inet_nsap_ntoa(__len : i32, __cp : *const u8, __buf : *const i8) -> *mut i8);
 windows_link::link!("c" "C" fn inet_ntoa(__in : in_addr) -> *mut i8);
-#[cfg(feature = "Socket")]
-windows_link::link!("c" "C" fn inet_ntop(__af : i32, __cp : *const core::ffi::c_void, __buf : *const i8, __len : super::Socket:: socklen_t) -> *mut i8);
+#[cfg(feature = "socket")]
+windows_link::link!("c" "C" fn inet_ntop(__af : i32, __cp : *const core::ffi::c_void, __buf : *const i8, __len : super::socket:: socklen_t) -> *mut i8);
 windows_link::link!("c" "C" fn inet_pton(__af : i32, __cp : *const i8, __buf : *const core::ffi::c_void) -> i32);
 windows_link::link!("c" "C" fn ntohl(__netlong : u32) -> u32);
 windows_link::link!("c" "C" fn ntohs(__netshort : u16) -> u16);
@@ -105,35 +105,35 @@ pub const IPPROTO_UDPLITE: u32 = 136u32;
 pub const _ARPA_INET_H: i32 = 1i32;
 pub const _NETINET_IN_H: i32 = 1i32;
 #[repr(C, packed(8))]
-#[cfg(feature = "Socket")]
+#[cfg(feature = "socket")]
 #[derive(Clone, Copy)]
 pub struct group_filter {
     pub gf_interface: u32,
-    pub gf_group: super::Socket::sockaddr_storage,
+    pub gf_group: super::socket::sockaddr_storage,
     pub gf_fmode: u32,
     pub gf_numsrc: u32,
-    pub gf_slist: [super::Socket::sockaddr_storage; 1],
+    pub gf_slist: [super::socket::sockaddr_storage; 1],
 }
-#[cfg(feature = "Socket")]
+#[cfg(feature = "socket")]
 impl Default for group_filter {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
     }
 }
 #[repr(C, packed(8))]
-#[cfg(feature = "Socket")]
+#[cfg(feature = "socket")]
 #[derive(Clone, Copy, Default)]
 pub struct group_req {
     pub gr_interface: u32,
-    pub gr_group: super::Socket::sockaddr_storage,
+    pub gr_group: super::socket::sockaddr_storage,
 }
 #[repr(C, packed(8))]
-#[cfg(feature = "Socket")]
+#[cfg(feature = "socket")]
 #[derive(Clone, Copy, Default)]
 pub struct group_source_req {
     pub gsr_interface: u32,
-    pub gsr_group: super::Socket::sockaddr_storage,
-    pub gsr_source: super::Socket::sockaddr_storage,
+    pub gsr_group: super::socket::sockaddr_storage,
+    pub gsr_source: super::socket::sockaddr_storage,
 }
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]
