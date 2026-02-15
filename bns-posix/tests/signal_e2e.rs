@@ -1,6 +1,6 @@
 //! End-to-end tests for Signal bindings against real libc.
 
-use bns_posix::posix::signal;
+use bns_posix::posix::{pthread, signal};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -112,7 +112,7 @@ fn sighandler_type_is_option_fn_pointer() {
 
 #[test]
 fn sigemptyset_and_sigaddset() {
-    let mut set = signal::__sigset_t::default();
+    let mut set = pthread::__sigset_t::default();
     let rc = unsafe { signal::sigemptyset(&mut set as *mut _ as *const _) };
     assert_eq!(rc, 0, "sigemptyset should succeed");
 
@@ -128,7 +128,7 @@ fn sigemptyset_and_sigaddset() {
 
 #[test]
 fn sigfillset_and_sigdelset() {
-    let mut set = signal::__sigset_t::default();
+    let mut set = pthread::__sigset_t::default();
     let rc = unsafe { signal::sigfillset(&mut set as *mut _ as *const _) };
     assert_eq!(rc, 0, "sigfillset should succeed");
 
@@ -227,12 +227,12 @@ fn sigaction_install_handler() {
 
 #[test]
 fn sigprocmask_block_and_pending() {
-    let mut block_set = signal::__sigset_t::default();
+    let mut block_set = pthread::__sigset_t::default();
     unsafe { signal::sigemptyset(&mut block_set as *mut _ as *const _) };
     unsafe { signal::sigaddset(&mut block_set as *mut _ as *const _, signal::SIGUSR1) };
 
     // Save old mask and block SIGUSR1
-    let mut old_set = signal::__sigset_t::default();
+    let mut old_set = pthread::__sigset_t::default();
     let rc = unsafe {
         signal::sigprocmask(
             signal::SIG_BLOCK,
@@ -243,7 +243,7 @@ fn sigprocmask_block_and_pending() {
     assert_eq!(rc, 0, "sigprocmask SIG_BLOCK should succeed");
 
     // Check pending set — SIGUSR1 should NOT be pending yet (not raised)
-    let mut pending = signal::__sigset_t::default();
+    let mut pending = pthread::__sigset_t::default();
     let rc = unsafe { signal::sigpending(&mut pending as *mut _ as *const _) };
     assert_eq!(rc, 0, "sigpending should succeed");
 

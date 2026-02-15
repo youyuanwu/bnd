@@ -12,6 +12,11 @@ and E2E test plans for one header group.
 | [Sockets](#sockets) | ✅ Implemented | 3 partitions under posix (socket, inet, netdb) |
 | [Signal](#signal) | ✅ Implemented | Union-in-struct, function-pointer delegate, deep include graph |
 | [Types](#types) | ✅ Implemented | Shared POSIX typedefs, first-writer-wins dedup |
+| [Dlfcn](#dlfcn) | ✅ Implemented | `void*` returns, `RTLD_*` constants, non-libc linkage (glibc 2.34+ uses libc) |
+| [Errno](#errno) | ✅ Implemented | `*mut i32` return type, ~130 kernel `E*` constants, deep kernel header traverse |
+| [Sched](#sched) | ✅ Implemented | Scheduling API, `cpu_set_t` struct, `SCHED_*` constants |
+| [Time](#time) | ✅ Implemented | `struct tm`, `clock_gettime`, `CLOCK_*` constants, POSIX timers |
+| [Pthread](#pthread) | ✅ Implemented | Opaque union types, function-pointer params, ~90 functions, cross-partition `__sigset_t` |
 
 ---
 
@@ -961,3 +966,200 @@ existing E2E tests in other partitions that consume these types.
 6. ✅ Compilation clean — all cross-partition `#[cfg]` gates resolve
 7. ✅ Added `types` feature to `bns-posix/Cargo.toml` default list
 8. ✅ All existing tests pass (no E2E changes needed)
+
+---
+
+## Sched
+
+`sched.h` — scheduling API. Separated from `pthread.h` include chain as an
+independent POSIX API with its own functions, constants, and types.
+
+### Partition Config
+
+```toml
+[[partition]]
+namespace = "posix.sched"
+library = "c"
+headers = ["sched.h"]
+traverse = [
+    "sched.h",
+    "bits/sched.h",
+    "bits/types/struct_sched_param.h",
+    "bits/cpu-set.h",
+]
+```
+
+### API Surface
+
+**Functions (10)**: `sched_yield`, `sched_setparam`, `sched_getparam`,
+`sched_setscheduler`, `sched_getscheduler`, `sched_get_priority_max`,
+`sched_get_priority_min`, `sched_rr_get_interval`, `__sched_cpualloc`,
+`__sched_cpucount`, `__sched_cpufree`
+
+**Constants (3)**: `SCHED_OTHER=0`, `SCHED_FIFO=1`, `SCHED_RR=2`
+
+**Structs (2)**: `cpu_set_t` (128 bytes), `sched_param` (4 bytes)
+
+Note: `clone()` is variadic and auto-skipped. `CLONE_*` constants are
+`#ifdef __USE_GNU` guarded and extracted.
+
+### E2E Tests (`sched_e2e.rs`)
+
+| Test | What it validates |
+|---|---|
+| `sched_constants` | SCHED_OTHER/FIFO/RR values |
+| `sched_yield_succeeds` | sched_yield returns 0 |
+| `sched_get_priority_range` | FIFO priority min < max |
+| `sched_getscheduler_self` | Current process is SCHED_OTHER |
+| `cpu_set_t_size` | cpu_set_t is 128 bytes |
+| `sched_param_size` | sched_param is 4 bytes |
+
+---
+
+## Time
+
+`time.h` — time manipulation, formatting, and POSIX timer APIs. Separated
+from `pthread.h` include chain as a substantial independent API (~25
+functions, 12 clock constants, and key struct types).
+
+### Partition Config
+
+```toml
+[[partition]]
+namespace = "posix.time"
+library = "c"
+headers = ["time.h"]
+traverse = [
+    "time.h",
+    "bits/time.h",
+    "bits/types/clock_t.h",
+    "bits/types/struct_tm.h",
+    "bits/types/clockid_t.h",
+    "bits/types/timer_t.h",
+    "bits/types/struct_itimerspec.h",
+    "bits/types/locale_t.h",
+    "bits/types/__locale_t.h",
+]
+```
+
+### API Surface
+
+**Functions (~25)**: `time`, `clock`, `clock_gettime`, `clock_getres`,
+`clock_settime`, `clock_nanosleep`, `nanosleep`, `gmtime`, `gmtime_r`,
+`localtime`, `localtime_r`, `mktime`, `timegm`, `difftime`, `strftime`,
+`asctime`, `ctime`, `tzset`, `timer_create`, `timer_delete`,
+`timer_settime`, `timer_gettime`, `timer_getoverrun`, `timespec_get`
+
+**Constants (12)**: `CLOCK_REALTIME=0`, `CLOCK_MONOTONIC=1`,
+`CLOCK_PROCESS_CPUTIME_ID=2`, `CLOCK_THREAD_CPUTIME_ID=3`,
+`CLOCK_MONOTONIC_RAW=4`, `CLOCK_REALTIME_COARSE=5`,
+`CLOCK_MONOTONIC_COARSE=6`, `CLOCK_BOOTTIME=7`,
+`CLOCK_REALTIME_ALARM=8`, `CLOCK_BOOTTIME_ALARM=9`,
+`CLOCK_TAI=11`, `TIMER_ABSTIME=1`
+
+**Types**: `tm` (struct, ~56 bytes), `itimerspec` (struct),
+`clock_t` (typedef), `clockid_t` (typedef), `timer_t` (typedef),
+`locale_t` (typedef), `__locale_struct` (struct)
+
+### E2E Tests (`time_e2e.rs`)
+
+| Test | What it validates |
+|---|---|
+| `clock_constants` | All CLOCK_* and TIMER_ABSTIME values |
+| `time_returns_epoch` | time() returns recent epoch timestamp |
+| `clock_gettime_monotonic` | clock_gettime(CLOCK_MONOTONIC) succeeds with elapsed seconds |
+| `gmtime_epoch_zero` | gmtime(0) returns 1970-01-01 00:00:00 UTC |
+| `mktime_roundtrip` | timegm(gmtime_r(t)) == t |
+| `difftime_works` | difftime(100, 50) == 50.0 |
+| `struct_tm_layout` | struct tm has reasonable size and zeroed defaults |
+| `tzset_runs` | tzset() does not crash |
+
+---
+
+## Pthread
+
+`pthread.h` — POSIX threads API. The largest partition with ~90 functions,
+~30 constants, and complex union-based synchronisation types. This was the
+primary motivation for exploring this header family — `pthread_create` takes
+a function-pointer parameter (testing the delegate-as-param codegen path).
+
+### Partition Config
+
+```toml
+[[partition]]
+namespace = "posix.pthread"
+library = "c"
+headers = ["pthread.h"]
+traverse = [
+    "pthread.h",
+    "bits/pthreadtypes.h",
+    "bits/thread-shared-types.h",
+    "bits/pthreadtypes-arch.h",
+    "bits/atomic_wide_counter.h",
+    "bits/struct_mutex.h",
+    "bits/struct_rwlock.h",
+    "bits/types/__sigset_t.h",
+    "bits/types/struct___jmp_buf_tag.h",
+    "bits/pthread_stack_min-dynamic.h",
+    "bits/pthread_stack_min.h",
+]
+```
+
+### Design Decisions
+
+- **sched.h and time.h separated**: Both are substantial independent APIs
+  included by pthread.h. Given their own partitions (13 and 14) rather than
+  bundled into the pthread partition.
+- **`bits/pthreadtypes.h` in traverse**: Defines all union types
+  (`pthread_mutex_t`, `pthread_cond_t`, etc.). Missing this caused
+  "type not found: posix.pthread.pthread_mutex_t" panic on first attempt.
+- **Function pointers as `*const isize`**: `pthread_create`'s
+  `__start_routine`, `pthread_atfork`'s callbacks, `pthread_once`'s
+  `__init_routine`, and `pthread_key_create`'s destructor are all emitted
+  as `*const isize` (opaque function pointer in WinMD convention).
+- **Cross-partition `__sigset_t`**: Both signal and pthread traverse
+  `bits/types/__sigset_t.h`. The type ends up defined in both modules;
+  signal functions reference `pthread::__sigset_t`. Signal tests updated
+  to use `pthread::__sigset_t` for variables passed to signal functions.
+
+### API Surface
+
+**Functions (~90)**: `pthread_create`, `pthread_join`, `pthread_detach`,
+`pthread_self`, `pthread_equal`, `pthread_exit`, `pthread_cancel`,
+`pthread_mutex_init`/`lock`/`unlock`/`trylock`/`destroy`,
+`pthread_cond_init`/`signal`/`broadcast`/`wait`/`timedwait`/`destroy`,
+`pthread_rwlock_init`/`rdlock`/`wrlock`/`unlock`/`destroy`,
+`pthread_spin_init`/`lock`/`trylock`/`unlock`/`destroy`,
+`pthread_barrier_init`/`wait`/`destroy`,
+`pthread_key_create`/`delete`/`getspecific`/`setspecific`,
+`pthread_attr_*` (init, destroy, get/set detachstate, stacksize, etc.),
+`pthread_once`, `pthread_atfork`, …
+
+**Constants (~30)**: `PTHREAD_CREATE_JOINABLE=0`, `PTHREAD_CREATE_DETACHED=1`,
+`PTHREAD_MUTEX_NORMAL=0`, `PTHREAD_MUTEX_RECURSIVE=1`,
+`PTHREAD_MUTEX_ERRORCHECK=2`, `PTHREAD_CANCEL_ENABLE=0`,
+`PTHREAD_CANCEL_DISABLE=1`, `PTHREAD_ONCE_INIT=0`,
+`PTHREAD_BARRIER_SERIAL_THREAD=-1`, `PTHREAD_SCOPE_SYSTEM=0`, …
+
+**Types**: `pthread_t` (u64), `pthread_key_t` (u32), `pthread_once_t` (i32),
+`pthread_spinlock_t` (i32), `pthread_mutex_t` (union, 40 bytes),
+`pthread_cond_t` (union, 48 bytes), `pthread_rwlock_t` (union, 56 bytes),
+`pthread_attr_t` (union, 56 bytes), `pthread_barrier_t` (union, 32 bytes),
+`pthread_mutexattr_t`, `pthread_condattr_t`, `pthread_rwlockattr_t`,
+`pthread_barrierattr_t`
+
+### E2E Tests (`pthread_e2e.rs`)
+
+| Test | What it validates |
+|---|---|
+| `pthread_constants` | PTHREAD_CREATE_*, MUTEX_*, CANCEL_*, SCOPE_*, ONCE_INIT, BARRIER_SERIAL_THREAD |
+| `pthread_self_returns_nonzero` | pthread_self() != 0 |
+| `pthread_equal_self` | Thread is equal to itself |
+| `mutex_init_lock_unlock_destroy` | Full mutex lifecycle |
+| `mutex_trylock` | trylock succeeds on unlocked, returns EBUSY on locked |
+| `rwlock_read_write` | rdlock + wrlock roundtrip |
+| `pthread_key_create_delete` | TLS key create/set/get/delete with value 42 |
+| `pthread_create_join` | Create thread with function pointer, join, verify return value |
+| `pthread_attr_init_destroy` | Attr init, default detach state is JOINABLE |
+| `spinlock_lock_unlock` | Spinlock init/lock/unlock/destroy |
+| `struct_sizes` | mutex_t=40, cond_t=48, rwlock_t=56, attr_t=56, barrier_t=32 |

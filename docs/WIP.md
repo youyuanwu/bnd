@@ -136,20 +136,92 @@ No E2E tests — typedef-only partition with no callable functions.
 
 **Blocked by**: nothing
 
+### ~~9. Dlfcn partition~~ ✅
+
+`dlfcn.h` — `dlopen`/`dlclose`/`dlsym`/`dlerror` and `RTLD_*` constants.
+On glibc 2.34+, `libdl.so.2` is a stub — all symbols live in `libc.so.6`,
+so uses `library = "c"`. `void*` returns emitted as `*mut c_void`.
+E2E tests cover constant values, dlopen/dlclose roundtrip, dlsym lookup
+(found + missing), dlerror, and casting dlsym result to callable fn pointer.
+
+**Blocked by**: nothing
+
+### ~~10. Errno partition~~ ✅
+
+`errno.h` — `__errno_location()` returns `*mut i32` (pointer-to-primitive
+return type), plus ~130 `E*` error constants from kernel headers.
+Traverse chain: `errno.h` → `bits/errno.h` → `linux/errno.h` →
+`asm/errno.h` → `asm-generic/errno.h` → `asm-generic/errno-base.h`.
+E2E tests cover constant values, pointer validity, set/read roundtrip,
+and errno-after-failed-syscall.
+
+**Blocked by**: nothing
+
+### ~~11. Sched partition~~ ✅
+
+`sched.h` — `sched_yield`/`sched_setscheduler`/`sched_getparam` and friends,
+`SCHED_*` constants, `struct sched_param`, `cpu_set_t`. `clone()` is variadic
+and auto-skipped. Separated from pthread.h as an independent POSIX API.
+On glibc 2.34+, sched_* symbols live in libc.
+E2E tests cover constant values, sched_yield, priority range queries,
+getscheduler, and struct sizes.
+
+**Blocked by**: nothing
+
+### ~~12. Time partition~~ ✅
+
+`time.h` — `clock_gettime`/`nanosleep`/`gmtime`/`mktime`/`timer_create` and
+friends, `CLOCK_*`/`TIMER_ABSTIME` constants, `struct tm`, `struct itimerspec`,
+`clockid_t`/`timer_t` types. Separated from pthread.h as an independent
+POSIX API. Rich function set (~25 functions across time manipulation,
+formatting, and POSIX timers).
+E2E tests cover constant values, time(), clock_gettime(MONOTONIC),
+gmtime epoch zero, mktime roundtrip, difftime, struct tm layout, tzset.
+
+**Blocked by**: nothing
+
+### ~~13. Pthread partition~~ ✅
+
+`pthread.h` — `pthread_create`/`pthread_join`/`pthread_mutex_*`/`pthread_cond_*`/
+`pthread_rwlock_*`/`pthread_spin_*`/`pthread_barrier_*`/`pthread_key_*` and
+~90 functions total. `PTHREAD_*` constants (~30). Union-based opaque types
+(`pthread_mutex_t`, `pthread_cond_t`, `pthread_rwlock_t`, `pthread_barrier_t`,
+`pthread_attr_t`). Function pointer parameters (`pthread_create`'s
+`__start_routine`, `pthread_atfork`, `pthread_once`, `pthread_key_create`'s
+destructor) emitted as `*const isize` (opaque function pointer in WinMD).
+On glibc 2.34+, pthread_* symbols live in libc.
+
+Included headers `sched.h` and `time.h` were separated into their own
+partitions (11 and 12) since they are substantial independent POSIX APIs.
+`bits/pthreadtypes.h` needed explicit inclusion in the traverse list —
+defines all pthread union types (`pthread_mutex_t`, etc.).
+
+E2E tests cover constant values, pthread_self, pthread_equal, mutex
+init/lock/unlock/destroy, trylock (EBUSY), rwlock read/write, spinlock,
+TLS key create/set/get/delete, pthread_create/join with function pointer
+callback, attr init/getdetachstate/destroy, and struct sizes for all
+major synchronisation types.
+
+**Blocked by**: nothing
+
 ### Candidate API families
 
 | Header | Partition | Why it's interesting |
 |---|---|---|
 | `poll.h` | `posix.poll` | Tiny clean API — `struct pollfd` with bitfield-like `short` fields, `POLLIN`/`POLLOUT` constants |
 | `sys/resource.h` | `posix.resource` | `struct rlimit` with `rlim_t` typedef, `RLIMIT_*` constants |
-| `dlfcn.h` | `posix.dl` | `void*` returns (`dlopen`, `dlsym`), `RTLD_*` constants, linked to `libdl` not `libc` (tests non-`c` library field) |
+| `dlfcn.h` | `posix.dl` | ✅ Implemented — `void*` returns, `RTLD_*` constants |
+| `errno.h` | `posix.errno` | ✅ Implemented — `*mut i32` return, ~130 `E*` constants |
+| `sched.h` | `posix.sched` | ✅ Implemented — scheduling API, `SCHED_*` constants, `cpu_set_t` |
+| `time.h` | `posix.time` | ✅ Implemented — `struct tm`, `clock_gettime`, `CLOCK_*` constants |
+| `pthread.h` | `posix.pthread` | ✅ Implemented — opaque union types, function-pointer params, ~90 functions |
 | `sys/utsname.h` | `posix.utsname` | `struct utsname` with fixed-size `char[]` array fields — stress-tests array-in-struct emission |
 | `termios.h` | `posix.termios` | Large struct with array fields (`c_cc[NCCS]`), many `B*`/`TC*` constants |
-| `pthread.h` | `posix.pthread` | Opaque types (`pthread_t`, `pthread_mutex_t`), function-pointer params (`pthread_create`'s start routine) |
-| `time.h` | `posix.time` | `struct tm` (many fields), `clock_gettime` with `clockid_t`, `CLOCK_*` constants |
+| `sys/wait.h` | `posix.wait` | `waitpid` is plain function; `WIFEXITED` etc. are macros wrapping bit ops — tests limits of `#define` extraction |
+| `sys/ioctl.h` | `posix.ioctl` | `ioctl` itself is variadic (skipped), but `IOCTL_*` constants are complex macro expressions — tests extraction edge cases |
 
-Priority: **poll.h** (quick win, complements socket testing), **dlfcn.h** (non-libc linkage),
-**time.h** (classic struct, trivially testable).
+All high-priority candidates (delegate-as-param, void* returns, *mut i32
+returns, opaque union types) are now implemented.
 
 ---
 
@@ -168,9 +240,12 @@ producing incorrect struct layout. Affects `struct cmsghdr`
 
 ### 9. Inline function skipping
 
-`static inline` functions in headers have no symbol in the shared
-library. P/Invoke fails at runtime. Affects `htons`/`htonl` in socket
-headers. Need to detect via `Entity::get_storage_class()` or similar.
+`static inline` functions in headers have no exported symbol in the shared
+library — WinMD P/Invoke metadata cannot represent them. Detection is
+straightforward (clang `Entity::get_storage_class()` → `Static`); the fix
+is warn-and-skip, same as variadic functions. Note: `htons`/`htonl` are
+**not** affected — glibc exports them as real symbols despite the inline
+definition in the header.
 
 ---
 

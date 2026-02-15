@@ -9,13 +9,18 @@
 //!
 //! # Modules
 //! - [`posix::dirent`] — Directory entries (`opendir`, `readdir`, `closedir`, `DT_*` constants)
+//! - [`posix::dl`] — Dynamic loading (`dlopen`, `dlclose`, `dlsym`, `dlerror`, `RTLD_*` constants)
+//! - [`posix::errno`] — Error codes (`__errno_location`, `E*` constants)
 //! - [`posix::fcntl`] — File control (`creat`, `lockf`, `O_*` constants)
 //! - [`posix::inet`] — Internet addresses (`inet_pton`, `htons`, `sockaddr_in`, `IPPROTO_*`)
 //! - [`posix::mmap`] — Memory mapping (`mmap`, `munmap`, `mprotect`, `MAP_*`/`PROT_*` constants)
 //! - [`posix::netdb`] — Network database (`getaddrinfo`, `gethostbyname`, `addrinfo`, `AI_*`)
+//! - [`posix::pthread`] — POSIX threads (`pthread_create`, `pthread_mutex_lock`, `PTHREAD_*` constants)
+//! - [`posix::sched`] — Scheduling (`sched_yield`, `sched_setscheduler`, `SCHED_*` constants)
 //! - [`posix::signal`] — Signal handling (`signal`, `sigaction`, `kill`, `raise`, `SIG*`/`SA_*`)
 //! - [`posix::socket`] — Sockets (`socket`, `bind`, `listen`, `accept`, `sockaddr`, `AF_*`/`SOCK_*`)
 //! - [`posix::stat`] — File status (`stat`, `chmod`, `mkdir`, `struct stat`)
+//! - [`posix::time`] — Time functions (`clock_gettime`, `nanosleep`, `gmtime`, `CLOCK_*` constants)
 //! - [`posix::types`] — Shared POSIX types (`uid_t`, `pid_t`, `mode_t`, `off_t`, `gid_t`, …)
 //! - [`posix::unistd`] — POSIX standard (`read`, `write`, `close`, `fork`, …)
 //!

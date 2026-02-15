@@ -12,13 +12,18 @@ C-header-to-WinMD approach scales beyond test fixtures to real system APIs.
 | Module | Header(s) | Functions | Constants | Structs |
 |---|---|---|---|---|
 | `posix::dirent` | `dirent.h`, `bits/dirent.h` | 12 | ~11 | `dirent` |
+| `posix::dl`     | `dlfcn.h`, `bits/dlfcn.h` | 4 | ~8 | — |
+| `posix::errno`  | `errno.h`, `bits/errno.h`, `asm-generic/errno*.h` | 1 | ~130 | — |
 | `posix::fcntl`  | `fcntl.h` | 4 | ~60 | — |
 | `posix::inet`   | `netinet/in.h`, `arpa/inet.h` | 20 | ~75 | `sockaddr_in`, `sockaddr_in6`, `in_addr`, `in6_addr` (+unions) |
 | `posix::mmap`   | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` | 13 | ~62 | — |
 | `posix::netdb`  | `netdb.h`, `bits/netdb.h` | 56 | ~32 | `addrinfo`, `hostent`, `servent`, `protoent`, `netent` |
+| `posix::pthread` | `pthread.h`, `bits/pthreadtypes.h`, `bits/thread-shared-types.h` | ~90 | ~30 | `pthread_mutex_t`, `pthread_cond_t`, `pthread_rwlock_t`, `pthread_attr_t`, `pthread_barrier_t` (unions) |
+| `posix::sched`  | `sched.h`, `bits/sched.h`, `bits/cpu-set.h` | 10 | ~3 | `cpu_set_t`, `sched_param` |
 | `posix::signal` | `signal.h`, `bits/sigaction.h`, `bits/signum-*.h`, `bits/sigcontext.h`, `bits/types/*` | 30 | ~50 | `sigaction` (union), `siginfo_t` (nested unions), `__sigset_t`, `sigcontext`, `stack_t` |
 | `posix::socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h` | 20 | ~102 | `sockaddr`, `sockaddr_storage`, `msghdr`, `iovec`, `cmsghdr`, `linger` |
 | `posix::stat`   | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` | 17 | 4 | `stat`, `timespec` |
+| `posix::time`   | `time.h`, `bits/time.h` | ~25 | ~12 | `tm`, `itimerspec`, `__locale_struct` |
 | `posix::types`  | `sys/types.h`, `bits/types.h` | — | — | `__fsid_t` + 94 shared typedefs (`uid_t`, `pid_t`, `mode_t`, …) |
 | `posix::unistd` | `unistd.h` | 103 | ~23 | — |
 
@@ -96,19 +101,24 @@ partitions use cross-partition TypeRefs (e.g. `super::types::__uid_t`).
 ## Partition Config
 
 The TOML config lives at `tests/fixtures/bns-posix/bns-posix.toml`
-and defines ten partitions:
+and defines fifteen partitions:
 
 | Partition | Namespace | Headers traversed |
 |---|---|---|
 | Types | `posix.types` | `sys/types.h`, `bits/types.h` |
 | Dirent | `posix.dirent` | `dirent.h`, `bits/dirent.h` |
+| Dl | `posix.dl` | `dlfcn.h`, `bits/dlfcn.h` |
+| Errno | `posix.errno` | `errno.h`, `bits/errno.h`, `linux/errno.h`, `asm/errno.h`, `asm-generic/errno.h`, `asm-generic/errno-base.h` |
 | Fcntl | `posix.fcntl` | `fcntl.h` |
 | Inet | `posix.inet` | `netinet/in.h`, `arpa/inet.h` |
 | Mmap | `posix.mmap` | `sys/mman.h`, `bits/mman-linux.h`, `bits/mman-map-flags-generic.h` |
 | Netdb | `posix.netdb` | `netdb.h`, `bits/netdb.h` |
+| Pthread | `posix.pthread` | `pthread.h`, `bits/pthreadtypes.h`, `bits/thread-shared-types.h`, `bits/pthreadtypes-arch.h`, `bits/struct_mutex.h`, `bits/struct_rwlock.h`, … |
+| Sched | `posix.sched` | `sched.h`, `bits/sched.h`, `bits/types/struct_sched_param.h`, `bits/cpu-set.h` |
 | Signal | `posix.signal` | `signal.h`, `bits/sigaction.h`, `bits/signum-generic.h`, `bits/signum-arch.h`, `bits/sigcontext.h`, `bits/types/__sigset_t.h`, `bits/types/siginfo_t.h`, `bits/types/__sigval_t.h`, `bits/types/stack_t.h`, `bits/types/struct_sigstack.h` |
 | Socket | `posix.socket` | `sys/socket.h`, `bits/socket.h`, `bits/socket_type.h`, `bits/socket-constants.h`, `bits/types/struct_iovec.h` |
 | Stat | `posix.stat` | `sys/stat.h`, `bits/struct_stat.h`, `bits/types/struct_timespec.h` |
+| Time | `posix.time` | `time.h`, `bits/time.h`, `bits/types/clock_t.h`, `bits/types/struct_tm.h`, `bits/types/clockid_t.h`, `bits/types/timer_t.h`, `bits/types/struct_itimerspec.h`, … |
 | Unistd | `posix.unistd` | `unistd.h` |
 
 ## Challenges Solved
@@ -165,17 +175,216 @@ in bindscrape core (see [bns-posix.md](systesting/bns-posix.md) for details):
     partition owns them; the type registry uses first-writer-wins for
     typedefs, and the dedup pass removes duplicates from later partitions.
 
-## Extending
+## How to Add a New Partition
 
-To add more POSIX APIs (e.g., `sys/socket.h`, `pthread.h`):
+### 1. Identify the API surface
 
-1. Add a new `[[partition]]` to `bns-posix.toml` with the desired headers.
-2. Run `cargo run -p bns-posix-gen` — bindscrape extracts the new partition,
-   windows-bindgen adds a new `src/posix/<name>/mod.rs` and appends
-   the feature to `Cargo.toml`.
-3. Add the new feature to the `default` list in `Cargo.toml`.
-4. `lib.rs` already does `pub mod posix;` which picks up new sub-modules
-   automatically.
+Determine which header(s) define the API you want to bind and inspect the
+include graph to plan the traverse list:
+
+```sh
+# List extern symbols in the header
+grep -E "^extern" /usr/include/<header>.h
+
+# Show the full include tree (bits/ sub-headers you may need)
+clang -E -H /usr/include/<header>.h 2>&1 | head -80
+```
+
+Key questions:
+
+- **Is there enough API surface?** A handful of functions and constants
+  justifies its own partition. A single typedef does not.
+- **Should sub-headers become separate partitions?** If an included header
+  (e.g. `sched.h` included by `pthread.h`) is an independent POSIX API with
+  its own non-trivial surface, split it into its own partition.
+
+### 2. Add a `[[partition]]` to `bns-posix.toml`
+
+Edit `tests/fixtures/bns-posix/bns-posix.toml` and append a new partition
+block:
+
+```toml
+# Partition N: <description>
+[[partition]]
+namespace = "posix.<name>"
+library = "c"
+headers = ["<header>.h"]
+traverse = [
+    "<header>.h",
+    "bits/<sub-header>.h",          # constants, macros
+    "bits/types/<type-header>.h",   # struct/typedef definitions
+]
+```
+
+Rules:
+
+| Field | Purpose |
+|---|---|
+| `namespace` | Must be `posix.<name>`. Determines the Rust module path (`posix::<name>`) |
+| `library` | Always `"c"` — glibc 2.34+ consolidates all symbols into libc |
+| `headers` | Top-level header(s) passed to clang for parsing |
+| `traverse` | Allowlist of headers to extract symbols from. **Only** declarations in files ending with one of these suffixes are emitted. This is the most important field — missing entries cause "type not found" panics in windows-bindgen |
+
+#### Building the traverse list
+
+The traverse list is the hardest part. If a struct, typedef, or constant lives
+in a `bits/` sub-header, that sub-header *must* appear in traverse or the
+symbol will be silently omitted (or referenced but undefined, causing a
+windows-bindgen panic).
+
+Approach:
+
+```sh
+# 1. Start with just the top-level header
+traverse = ["<header>.h"]
+
+# 2. Run the generator and look for warnings/panics
+cargo run -p bns-posix-gen
+
+# 3. If windows-bindgen panics with "type not found: posix.<name>.SomeType":
+#    Find which sub-header defines SomeType:
+grep -rn "SomeType" /usr/include/<header>.h /usr/include/bits/
+
+# 4. Add that sub-header to traverse and repeat
+```
+
+Common patterns:
+- Constants in `bits/<header>.h` or `bits/<header>-linux.h`
+- Structs in `bits/struct_<name>.h` or `bits/types/struct_<name>.h`
+- Typedefs in `bits/types/<name>.h`
+- Architecture-specific definitions in `bits/<name>-arch.h`
+
+#### Partition ordering
+
+The **types** partition must remain first — it owns shared POSIX typedefs via
+first-writer-wins deduplication. New partitions can go in any order after it,
+but by convention they are appended at the end.
+
+### 3. Run the generator
+
+```sh
+cargo run -p bns-posix-gen
+```
+
+This produces:
+- `bns-posix/src/posix/<name>/mod.rs` — generated bindings
+- Updated `bns-posix/src/posix/mod.rs` — adds `pub mod <name>;`
+- Updated `bns-posix/Cargo.toml` — appends the feature below the
+  `# generated features` marker
+
+### 4. Add the feature to the default list
+
+Open `bns-posix/Cargo.toml` and add `"<name>"` to the `default` feature
+array (keep it sorted alphabetically):
+
+```toml
+[features]
+default = ["dirent", "dl", ..., "<name>", ..., "unistd"]
+```
+
+### 5. Add a doc comment to `lib.rs`
+
+Add a line to the module list in `bns-posix/src/lib.rs`:
+
+```rust
+//! - [`posix::<name>`] — <One-line description>
+```
+
+Keep the list sorted alphabetically.
+
+### 6. Inspect the generated code
+
+Review the generated `mod.rs` for correctness:
+
+```sh
+wc -l bns-posix/src/posix/<name>/mod.rs
+grep "pub unsafe fn" bns-posix/src/posix/<name>/mod.rs | wc -l
+grep "pub const" bns-posix/src/posix/<name>/mod.rs | wc -l
+```
+
+Things to check:
+- **Missing symbols** — compare against `grep "^extern"` output from step 1.
+  Missing symbols usually mean a traverse entry is missing.
+- **Variadic functions** — automatically skipped with a warning (no WinMD
+  representation). Expected for functions like `open`, `fcntl`, `ioctl`,
+  `printf`.
+- **Inline functions** — no symbol in libc, cannot be represented as P/Invoke.
+  Currently silently omitted.
+- **Cross-partition references** — functions using types from other partitions
+  generate `super::<other>::<Type>` references. These are auto-gated with
+  `#[cfg(feature = "<other>")]`.
+- **Function-pointer parameters** — emitted as `*const isize` (opaque WinMD
+  convention). Callers cast `unsafe extern "C" fn(...)` to `*const isize`.
+- **Opaque typedefs** — `typedef struct __foo BAR` where the struct is
+  incomplete maps to `isize` (Copy/Clone, like Windows handles).
+
+### 7. Write E2E tests
+
+Create `bns-posix/tests/<name>_e2e.rs`:
+
+```rust
+use bns_posix::posix::{<name>};
+
+#[test]
+fn <name>_constants() {
+    // Verify key constants have expected values
+    assert_eq!(<name>::SOME_CONST, expected_value);
+}
+
+#[test]
+fn <name>_basic_call() {
+    // Call a simple function and verify it doesn't fail
+    let ret = unsafe { <name>::some_function(...) };
+    assert!(ret >= 0, "some_function failed: {ret}");
+}
+
+#[test]
+fn struct_layout() {
+    // Verify struct sizes match C layout
+    assert_eq!(core::mem::size_of::<<name>::some_struct>(), expected_size);
+}
+```
+
+Guidelines:
+- Test constants against known values (from man pages or C headers).
+- Call at least one function to verify the P/Invoke linkage actually works.
+- Check struct sizes with `core::mem::size_of` against values obtained from
+  a C `sizeof` expression.
+- For output parameters, note that WinMD emits them as `*const T` even though
+  they are logically `*mut T`. Pass `&mut val as *mut _ as *const _`, and
+  add `#![allow(clippy::unnecessary_mut_passed)]` if clippy complains.
+- For function-pointer parameters, cast with
+  `some_fn as *const isize`.
+
+Run:
+
+```sh
+cargo test -p bns-posix
+cargo clippy --all-targets
+```
+
+### 8. Update documentation
+
+Three docs need updating:
+
+1. **`docs/design/BnsPosix.md`** — add row to Modules table, Partition Config
+   table, and Tests table.
+2. **`docs/WIP.md`** — mark the partition as done in the candidate table and
+   add a completed-section entry.
+3. **`docs/design/systesting/bns-posix.md`** — add a status row and a detailed
+   section covering partition config, API surface, design decisions, and test
+   table.
+
+### Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `type not found: posix.<name>.SomeType` panic | `SomeType` is defined in a `bits/` sub-header not in traverse | Add the sub-header to the traverse list |
+| Function missing from generated output | Function is variadic, inline, or in a header not in traverse | Check with `grep`; add header to traverse if needed |
+| `super::<other>::<Type>` compile error | Cross-partition type needs the other feature enabled | Ensure both features are in the default list |
+| Duplicate type conflict | Type already defined by an earlier partition (e.g. types) | Normal — dedup removes it. If the wrong partition owns it, reorder partitions |
+| Clippy `unnecessary_mut_passed` | WinMD `*const` output-parameter convention | Add `#![allow(clippy::unnecessary_mut_passed)]` to test file |
+| Struct size mismatch | Missing bitfield or flexible array member | Check C `sizeof` with a small C program; may need traverse additions |
 
 ## Tests
 
@@ -192,3 +401,8 @@ that call real libc functions through the generated bindings:
 | `inet_e2e.rs` | Inet (IPPROTO_* constants, struct layout, htons/htonl, inet_pton/ntop) |
 | `netdb_e2e.rs` | Netdb (AI_*/EAI_* constants, struct layout, getprotobyname, getaddrinfo) |
 | `signal_e2e.rs` | Signal (SIG_*/SA_* constants, struct layout, sigset ops, sigaction, raise, sigprocmask, kill) |
+| `dl_e2e.rs` | Dlfcn (RTLD_* constants, dlopen/dlclose, dlsym lookup, dlerror) |
+| `errno_e2e.rs` | Errno (E* constants, __errno_location pointer, set/read, failed-syscall check) |
+| `sched_e2e.rs` | Sched (SCHED_* constants, sched_yield, priority range, cpu_set_t/sched_param layout) |
+| `time_e2e.rs` | Time (CLOCK_* constants, clock_gettime, gmtime, mktime roundtrip, struct tm layout) |
+| `pthread_e2e.rs` | Pthread (PTHREAD_* constants, mutex lock/unlock, rwlock, spinlock, TLS keys, pthread_create/join, struct sizes) |

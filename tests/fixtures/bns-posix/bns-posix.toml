@@ -93,3 +93,77 @@ traverse = [
     "bits/types/stack_t.h",
     "bits/types/struct_sigstack.h",
 ]
+
+# Partition 11: dlfcn — dlopen/dlclose/dlsym/dlerror + RTLD_* constants + Dl_info struct
+# On glibc 2.34+, dl* symbols live in libc (libdl.so.2 is a stub).
+[[partition]]
+namespace = "posix.dl"
+library = "c"
+headers = ["dlfcn.h"]
+traverse = ["dlfcn.h", "bits/dlfcn.h"]
+
+# Partition 12: errno — __errno_location() returns *mut i32, E* error constants
+[[partition]]
+namespace = "posix.errno"
+library = "c"
+headers = ["errno.h"]
+traverse = [
+    "errno.h",
+    "bits/errno.h",
+    "linux/errno.h",
+    "asm/errno.h",
+    "asm-generic/errno.h",
+    "asm-generic/errno-base.h",
+]
+
+# Partition 13: sched — sched_yield/sched_setscheduler + SCHED_*/CLONE_* constants
+# clone() is variadic and will be auto-skipped.
+# On glibc 2.34+, sched_* symbols live in libc.
+[[partition]]
+namespace = "posix.sched"
+library = "c"
+headers = ["sched.h"]
+traverse = [
+    "sched.h",
+    "bits/sched.h",
+    "bits/types/struct_sched_param.h",
+    "bits/cpu-set.h",
+]
+
+# Partition 14: time — clock_gettime/nanosleep/gmtime + CLOCK_* constants + struct tm
+[[partition]]
+namespace = "posix.time"
+library = "c"
+headers = ["time.h"]
+traverse = [
+    "time.h",
+    "bits/time.h",
+    "bits/types/clock_t.h",
+    "bits/types/struct_tm.h",
+    "bits/types/clockid_t.h",
+    "bits/types/timer_t.h",
+    "bits/types/struct_itimerspec.h",
+    "bits/types/locale_t.h",
+    "bits/types/__locale_t.h",
+]
+
+# Partition 15: pthread — pthread_create/join/mutex/cond/rwlock + PTHREAD_* constants
+# pthread_create takes a function pointer param (delegate-as-param codegen path).
+# On glibc 2.34+, pthread_* symbols live in libc.
+[[partition]]
+namespace = "posix.pthread"
+library = "c"
+headers = ["pthread.h"]
+traverse = [
+    "pthread.h",
+    "bits/pthreadtypes.h",
+    "bits/thread-shared-types.h",
+    "bits/pthreadtypes-arch.h",
+    "bits/atomic_wide_counter.h",
+    "bits/struct_mutex.h",
+    "bits/struct_rwlock.h",
+    "bits/types/__sigset_t.h",
+    "bits/types/struct___jmp_buf_tag.h",
+    "bits/pthread_stack_min-dynamic.h",
+    "bits/pthread_stack_min.h",
+]

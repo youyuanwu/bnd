@@ -10,6 +10,10 @@
 
 #[cfg(feature = "dirent")]
 pub mod dirent;
+#[cfg(feature = "dl")]
+pub mod dl;
+#[cfg(feature = "errno")]
+pub mod errno;
 #[cfg(feature = "fcntl")]
 pub mod fcntl;
 #[cfg(feature = "inet")]
@@ -18,12 +22,18 @@ pub mod inet;
 pub mod mmap;
 #[cfg(feature = "netdb")]
 pub mod netdb;
+#[cfg(feature = "pthread")]
+pub mod pthread;
+#[cfg(feature = "sched")]
+pub mod sched;
 #[cfg(feature = "signal")]
 pub mod signal;
 #[cfg(feature = "socket")]
 pub mod socket;
 #[cfg(feature = "stat")]
 pub mod stat;
+#[cfg(feature = "time")]
+pub mod time;
 #[cfg(feature = "types")]
 pub mod types;
 #[cfg(feature = "unistd")]

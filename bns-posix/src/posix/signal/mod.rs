@@ -20,31 +20,41 @@ windows_link::link!("c" "C" fn killpg(__pgrp : super::types:: __pid_t, __sig : i
 windows_link::link!("c" "C" fn psiginfo(__pinfo : *const siginfo_t, __s : *const i8));
 windows_link::link!("c" "C" fn psignal(__sig : i32, __s : *const i8));
 windows_link::link!("c" "C" fn raise(__sig : i32) -> i32);
+#[cfg(feature = "pthread")]
 windows_link::link!("c" "C" fn sigaction(__sig : i32, __act : *const sigaction, __oact : *const sigaction) -> i32);
-windows_link::link!("c" "C" fn sigaddset(__set : *const __sigset_t, __signo : i32) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigaddset(__set : *const super::pthread:: __sigset_t, __signo : i32) -> i32);
 windows_link::link!("c" "C" fn sigaltstack(__ss : *const stack_t, __oss : *const stack_t) -> i32);
 windows_link::link!("c" "C" fn sigblock(__mask : i32) -> i32);
-windows_link::link!("c" "C" fn sigdelset(__set : *const __sigset_t, __signo : i32) -> i32);
-windows_link::link!("c" "C" fn sigemptyset(__set : *const __sigset_t) -> i32);
-windows_link::link!("c" "C" fn sigfillset(__set : *const __sigset_t) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigdelset(__set : *const super::pthread:: __sigset_t, __signo : i32) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigemptyset(__set : *const super::pthread:: __sigset_t) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigfillset(__set : *const super::pthread:: __sigset_t) -> i32);
 windows_link::link!("c" "C" fn siggetmask() -> i32);
 windows_link::link!("c" "C" fn siginterrupt(__sig : i32, __interrupt : i32) -> i32);
-windows_link::link!("c" "C" fn sigismember(__set : *const __sigset_t, __signo : i32) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigismember(__set : *const super::pthread:: __sigset_t, __signo : i32) -> i32);
 windows_link::link!("c" "C" fn signal(__sig : i32, __handler : __sighandler_t) -> __sighandler_t);
-windows_link::link!("c" "C" fn sigpending(__set : *const __sigset_t) -> i32);
-windows_link::link!("c" "C" fn sigprocmask(__how : i32, __set : *const __sigset_t, __oset : *const __sigset_t) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigpending(__set : *const super::pthread:: __sigset_t) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigprocmask(__how : i32, __set : *const super::pthread:: __sigset_t, __oset : *const super::pthread:: __sigset_t) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn sigqueue(__pid : super::types:: __pid_t, __sig : i32, __val : sigval) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn sigreturn(__scp : *const sigcontext) -> i32);
 windows_link::link!("c" "C" fn sigsetmask(__mask : i32) -> i32);
 windows_link::link!("c" "C" fn sigstack(__ss : *const sigstack, __oss : *const sigstack) -> i32);
-windows_link::link!("c" "C" fn sigsuspend(__set : *const __sigset_t) -> i32);
-#[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn sigtimedwait(__set : *const __sigset_t, __info : *const siginfo_t, __timeout : *const super::stat:: timespec) -> i32);
-windows_link::link!("c" "C" fn sigwait(__set : *const __sigset_t, __sig : *const i32) -> i32);
-#[cfg(feature = "types")]
-windows_link::link!("c" "C" fn sigwaitinfo(__set : *const __sigset_t, __info : *const siginfo_t) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigsuspend(__set : *const super::pthread:: __sigset_t) -> i32);
+#[cfg(all(feature = "pthread", feature = "stat", feature = "types"))]
+windows_link::link!("c" "C" fn sigtimedwait(__set : *const super::pthread:: __sigset_t, __info : *const siginfo_t, __timeout : *const super::stat:: timespec) -> i32);
+#[cfg(feature = "pthread")]
+windows_link::link!("c" "C" fn sigwait(__set : *const super::pthread:: __sigset_t, __sig : *const i32) -> i32);
+#[cfg(all(feature = "pthread", feature = "types"))]
+windows_link::link!("c" "C" fn sigwaitinfo(__set : *const super::pthread:: __sigset_t, __info : *const siginfo_t) -> i32);
 windows_link::link!("c" "C" fn ssignal(__sig : i32, __handler : __sighandler_t) -> __sighandler_t);
 pub const FP_XSTATE_MAGIC1: i32 = 1179670611i32;
 pub const FP_XSTATE_MAGIC2: i32 = 1179670597i32;
@@ -232,13 +242,15 @@ impl Default for _ymmh_state {
 }
 pub type sig_t = __sighandler_t;
 #[repr(C, packed(8))]
+#[cfg(feature = "pthread")]
 #[derive(Clone, Copy)]
 pub struct sigaction {
     pub __sigaction_handler: sigaction___sigaction_handler,
-    pub sa_mask: __sigset_t,
+    pub sa_mask: super::pthread::__sigset_t,
     pub sa_flags: i32,
     pub sa_restorer: *mut isize,
 }
+#[cfg(feature = "pthread")]
 impl Default for sigaction {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
