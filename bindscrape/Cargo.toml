@@ -16,11 +16,11 @@ name = "bindscrape"
 path = "src/bin/bindscrape.rs"
 
 [dependencies]
-anyhow = "1"
-clang = { version = "2", features = ["clang_10_0"] }
-clap = { version = "4", features = ["derive"] }
-serde = { version = "1", features = ["derive"] }
-toml = "1"
-tracing = "0.1"
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-windows-metadata = "0.59"
+anyhow.workspace = true
+clang.workspace = true
+clap.workspace = true
+serde.workspace = true
+toml.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+windows-metadata.workspace = true

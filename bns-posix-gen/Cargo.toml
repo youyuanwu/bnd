@@ -8,9 +8,9 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-bindscrape = { path = "../bindscrape" }
-tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-windows-bindgen = "0.66"
+bindscrape.workspace = true
+tracing-subscriber.workspace = true
+windows-bindgen.workspace = true
 
 [dev-dependencies]
-tempfile = "3"
+tempfile.workspace = true

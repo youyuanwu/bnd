@@ -4,9 +4,9 @@ version = "0.1.0"
 edition.workspace = true
 
 [build-dependencies]
-bindscrape = { path = "../../bindscrape" }
-windows-bindgen = "0.66"
-simple-impl = { path = "../simple-impl" }  # ensures cdylib is built first
+bindscrape.workspace = true
+windows-bindgen.workspace = true
+simple-impl.workspace = true  # ensures cdylib is built first
 
 [dependencies]
-windows-link = "0.2"
+windows-link.workspace = true
