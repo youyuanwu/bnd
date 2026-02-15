@@ -1,0 +1,19 @@
+[package]
+name = "bns-posix"
+version = "0.1.0"
+edition.workspace = true
+description = "POSIX system bindings generated as WinMD metadata"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+windows-link = "0.2"
+
+[features]
+default = ["Fcntl", "Stat", "Unistd"]
+Foundation = []
+# generated features
+Fcntl = ["Foundation"]
+Stat = ["Foundation"]
+Unistd = ["Foundation"]

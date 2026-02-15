@@ -59,15 +59,19 @@ C/C++ Headers
 | Clang extraction (`clang` crate + sonar) | `extract.rs` (613 LOC) — `collect_*` helpers for uniform extraction, custom typedef/struct discovery to work around sonar limitations |
 | Partition filtering by source location | `should_emit_by_location()` checks `Entity::get_location()` against traverse file list |
 | Type mapping (clang `TypeKind` → `CType`) | Void, Bool, char types, int/uint (all widths), float/double, Pointer, ConstantArray, IncompleteArray, Elaborated, Typedef, Record, Enum, FunctionPrototype. Incomplete records → Void. |
-| System typedef resolution | `map_system_typedef()` in `emit.rs` resolves `int32_t`, `size_t`, `off_t`, etc. at emit time. `va_list` → `*mut c_void` at extraction. |
+| System typedef resolution | `CType::Named { resolved }` carries clang's canonical type; emit falls back to it for unregistered typedefs. `va_list` → `*mut c_void` at extraction. |
 | WinMD emission | `emit.rs` (429 LOC) — enums, structs, typedefs, delegates, functions (P/Invoke), constants |
 | Function pointer → delegate | Detects `Ptr(FnPtr{...})` and bare `FnPtr{...}`, emits TypeDef extending MulticastDelegate with Invoke method |
 | `#define` integer constants | `sonar::find_definitions()` with `detailed_preprocessing_record` |
 | Cross-partition type references | `TypeRegistry` maps type name → namespace; emits `TypeRef` for named types |
 | Structured logging (`tracing`) | `RUST_LOG=bindscrape=debug` shows per-declaration detail |
+| Variadic function skipping | `collect_functions()` checks `Entity::is_variadic()` and warns/skips |
+| Array parameter decay | `extract_function()` converts `CType::Array` params → `CType::Ptr` (C semantics; avoids `ELEMENT_TYPE_ARRAY` blob incompatibility with windows-bindgen) |
+| Function deduplication | `collect_functions()` uses `HashSet<String>` to skip duplicates from glibc `__REDIRECT` macros |
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
-| Round-trip integration tests | 19 tests across 3 files |
-| E2E integration tests | 26 tests across 3 crates (including zlib against real `libz.so`) |
+| Round-trip integration tests | 28 tests across 4 files |
+| E2E integration tests | 42 tests across 4 crates (including zlib against real `libz.so` and POSIX file I/O) |
+| Package-mode code generation | `bns-posix-gen` drives bindscrape + `windows-bindgen --package` to generate the `bns-posix` source tree with feature-gated sub-modules |
 
 ### What Is NOT Yet Implemented
 
@@ -164,11 +168,13 @@ serde = { version = "1", features = ["derive"] }
    `collect_structs()` runs a supplemental pass over `StructDecl` entities
    with `entity.is_definition()`.
 
-9. **System typedefs resolved at emit time** — All typedef names preserved as
-   `CType::Named` during extraction. `ctype_to_wintype()` checks
-   `TypeRegistry::contains()` — if unregistered, falls back to
-   `map_system_typedef()` for standard C/POSIX names. Only `va_list` is
-   special-cased during extraction (→ `*mut c_void`).
+9. **System typedefs resolved via clang canonical types** — All typedef names
+   preserved as `CType::Named { name, resolved }` during extraction.
+   `resolved` holds the clang-resolved canonical primitive (e.g. `__mode_t` →
+   `U32`). At emit time, `ctype_to_wintype()` checks `TypeRegistry::contains()`
+   — if registered, emits TypeRef; if not, falls back to the `resolved` type.
+   No hardcoded typedef table needed. Only `va_list` (compiler built-in with
+   no canonical primitive) is special-cased during extraction (→ `*mut c_void`).
 
 10. **Incomplete/opaque record types** — Forward-declared structs map to
     `CType::Void` so pointers become `*mut c_void`.
@@ -227,11 +233,13 @@ heuristic. Cannot create AssemblyRef with exact assembly name like
 `windows-metadata` to expose a public `AssemblyRef()` method. The underlying
 ECMA-335 table support already exists.
 
-### C `long` Is 64-bit on Linux Host
+### C `long` Size — Linux LP64 ABI
 
-Since winmd targets the Windows ABI, C `long` must always map to 32-bit `I32`.
-The type mapping uses `TypeKind::Long` → `I32` unconditionally (not
-`get_sizeof()`).
+C `long` is 64-bit on Linux x86-64 (LP64 ABI). The type mapping uses
+`TypeKind::Long` → `I64` and `TypeKind::ULong` → `U64` to match the
+host platform. This is correct for Linux-only usage. If Windows ABI
+support is needed in the future, the mapping would need to become
+platform-conditional (`long` → 32-bit on Windows LLP64).
 
 ### `clang` Crate Max Feature Is `clang_10_0`
 

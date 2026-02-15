@@ -1,0 +1,15 @@
+[package]
+name = "bns-posix-gen"
+version = "0.1.0"
+edition.workspace = true
+description = "Generator that produces the bns-posix crate from POSIX system headers"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+
+[dependencies]
+bindscrape = { path = "../bindscrape" }
+windows-bindgen = "0.66"
+
+[dev-dependencies]
+tempfile = "3"

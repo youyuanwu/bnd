@@ -20,7 +20,7 @@ features that sockets will force.
 - **Anonymous nested types**: `in6_addr.__in6_u` is an anonymous union
   member — needs synthetic naming (`in6_addr__Anonymous_0` or similar)
 - **New system typedefs**: `socklen_t`, `sa_family_t`, `in_port_t`,
-  `in_addr_t` — extend `map_system_typedef()`
+  `in_addr_t` — auto-resolved via clang canonical types (no table needed)
 - **Packed / specific-layout structs**: `sockaddr_in` has a very specific
   layout (16 bytes, `sin_family` at offset 0, `sin_port` at offset 2,
   `sin_addr` at offset 4, `sin_zero` padding)
@@ -347,8 +347,8 @@ Suggested sequence:
 
 1. ⬜ Implement union support in model + extract + emit
 2. ⬜ Implement anonymous nested type synthetic naming
-3. ⬜ Add new system typedefs (`socklen_t`, `sa_family_t`, `in_port_t`,
-   `in_addr_t`) to `map_system_typedef()`
+3. ✅ System typedefs (`socklen_t`, `sa_family_t`, `in_port_t`,
+   `in_addr_t`) auto-resolved via `CType::Named { resolved }` — no changes needed
 4. ⬜ Create `bindscrape/tests/fixtures/posixsocket/posixsocket.toml`
 5. ⬜ Add roundtrip tests in `roundtrip_posixsocket.rs`
 6. ⬜ Create `tests/e2e-posixsocket/` crate

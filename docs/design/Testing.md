@@ -250,6 +250,9 @@ Key points:
 | `tests/simple-impl/` (cdylib, 65 LOC) | ✅ |
 | `tests/e2e-test/` (build.rs + 6 tests, `--flat`) | ✅ |
 | `tests/e2e-multi/` (build.rs + 8 tests, namespaced) | ✅ |
+| `tests/e2e-zlib/` (build.rs + 12 tests, `--flat`, real libz.so) | ✅ |
+| `bns-posix/` (15 tests, package mode, POSIX syscalls) | ✅ |
+| `bns-posix-gen/` (generator, `--package` mode) | ✅ |
 | Multi-header wrapper generation (`config.rs`) | ✅ |
 | Clang singleton fix (`AllWinmd` LazyLock) | ✅ |
-| 13 roundtrip + 8 e2e-multi + 6 e2e-test + 2 doc-tests | ✅ **29 passing, 0 warnings** |
+| 28 roundtrip + 42 e2e + 2 doc-tests | ✅ **72 passing, 0 warnings** |

@@ -37,3 +37,8 @@ jobs:
 
     - name: Run cargo test
       run: cargo +${{ matrix.rust }} test --all -- --nocapture
+
+    - name: Check no uncommitted changes
+      run: |
+        git diff --exit-code
+        git diff --cached --exit-code

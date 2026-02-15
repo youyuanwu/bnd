@@ -134,8 +134,14 @@ pub enum CType {
         len: usize,
     },
     /// A named type reference (struct, enum, typedef in another namespace).
+    /// For typedefs, `resolved` holds the canonical primitive type from clang,
+    /// used as fallback when the name isn't in the TypeRegistry.
     Named {
         name: String,
+        /// Canonical type resolved by clang. `None` for records/enums
+        /// (they must be in the registry). `Some` for typedefs so we can
+        /// fall back to the primitive when the typedef isn't extracted.
+        resolved: Option<Box<CType>>,
     },
     /// A function pointer type.
     FnPtr {

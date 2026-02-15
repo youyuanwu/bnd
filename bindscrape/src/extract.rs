@@ -154,12 +154,24 @@ fn collect_enums(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -> Ve
 /// Collect functions via sonar.
 fn collect_functions(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -> Vec<FunctionDef> {
     let mut functions = Vec::new();
+    let mut seen = HashSet::new();
     for decl in sonar::find_functions(entities.to_vec()) {
         if !in_scope(&decl.entity) {
             continue;
         }
+        // Skip variadic functions — P/Invoke metadata cannot represent `...`
+        if decl.entity.is_variadic() {
+            warn!(name = %decl.name, "skipping variadic function");
+            continue;
+        }
         match extract_function(&decl) {
             Ok(f) => {
+                // Deduplicate by name — glibc __REDIRECT macros can produce
+                // multiple declarations of the same function (e.g. lockf / lockf64).
+                if !seen.insert(f.name.clone()) {
+                    trace!(name = %f.name, "skipping duplicate function");
+                    continue;
+                }
                 debug!(name = %f.name, params = f.params.len(), "extracted function");
                 functions.push(f);
             }
@@ -349,6 +361,16 @@ fn extract_function(decl: &Declaration) -> Result<FunctionDef> {
         } else {
             CType::Void
         };
+        // C array parameters decay to pointers (e.g. `const struct timespec t[2]` → `*timespec`).
+        // We must do this here because ELEMENT_TYPE_ARRAY blobs in method signatures can confuse
+        // windows-bindgen's reader which doesn't consume all ArrayShape fields.
+        let ty = match ty {
+            CType::Array { element, .. } => CType::Ptr {
+                pointee: element,
+                is_const: false,
+            },
+            other => other,
+        };
         params.push(ParamDef { name, ty });
     }
 
@@ -391,9 +413,9 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
         TypeKind::UShort => Ok(CType::U16),
         TypeKind::Int => Ok(CType::I32),
         TypeKind::UInt => Ok(CType::U32),
-        // C `long` → 32-bit for Windows ABI (regardless of host)
-        TypeKind::Long => Ok(CType::I32),
-        TypeKind::ULong => Ok(CType::U32),
+        // C `long` is 64-bit on Linux x86-64 (LP64 ABI)
+        TypeKind::Long => Ok(CType::I64),
+        TypeKind::ULong => Ok(CType::U64),
         TypeKind::LongLong => Ok(CType::I64),
         TypeKind::ULongLong => Ok(CType::U64),
         TypeKind::Float => Ok(CType::F32),
@@ -455,9 +477,12 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
                             is_const: false,
                         });
                     }
-                    // User-defined typedef — keep the name so emit can resolve
-                    // it via the TypeRegistry (cross-partition TypeRef).
-                    return Ok(CType::Named { name });
+                    // Keep the name for cross-partition TypeRef resolution,
+                    // but also resolve the canonical type as fallback for
+                    // system typedefs that won't be in any partition.
+                    let canonical = ty.get_canonical_type();
+                    let resolved = map_clang_type(&canonical).ok().map(Box::new);
+                    return Ok(CType::Named { name, resolved });
                 }
             }
             // Unnamed or unresolvable typedef — resolve to canonical primitive
@@ -474,7 +499,10 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
                 // Incomplete/opaque types (like `struct internal_state` in zlib) are
                 // mapped to Void so that pointers to them become `*mut c_void`.
                 if ty.get_sizeof().is_ok() {
-                    return Ok(CType::Named { name });
+                    return Ok(CType::Named {
+                        name,
+                        resolved: None,
+                    });
                 } else {
                     debug!(name = %name, "incomplete record type, mapping to Void");
                     return Ok(CType::Void);
@@ -488,7 +516,10 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
             if let Some(decl) = decl
                 && let Some(name) = decl.get_name()
             {
-                return Ok(CType::Named { name });
+                return Ok(CType::Named {
+                    name,
+                    resolved: None,
+                });
             }
             anyhow::bail!("anonymous enum type without name")
         }

@@ -113,7 +113,7 @@ Key points:
 | `Byte` | `unsigned char` | `U8` |
 | `Bytef` | `Byte` (typedef-to-typedef) | alias of `Byte` |
 | `uInt` | `unsigned int` | `U32` |
-| `uLong` | `unsigned long` | `U32` (Windows ABI) |
+| `uLong` | `unsigned long` | `U64` (Linux LP64) |
 | `uIntf` | `uInt` (typedef-to-typedef) | alias of `uInt` |
 | `uLongf` | `uLong` (typedef-to-typedef) | alias of `uLong` |
 | `charf` | `char` | `I8` |
@@ -121,7 +121,7 @@ Key points:
 | `voidpc` | `const void *` | `*const c_void` |
 | `voidpf` | `void *` | `*mut c_void` |
 | `voidp` | `void *` | `*mut c_void` |
-| `z_size_t` | `size_t` (typedef-to-typedef) | `USize` |
+| `z_size_t` | `size_t` (typedef-to-typedef) | `U64` (Linux LP64) |
 | `z_crc_t` | `unsigned int` | `U32` |
 
 Constants: `MAX_MEM_LEVEL=9`, `MAX_WBITS=15`.
@@ -187,16 +187,16 @@ extracted by any partition but appear in function signatures and struct
 fields. Without handling, they become `CType::Named` references that
 windows-bindgen can't resolve.
 
-**Solution**: Extraction preserves all typedef names as `CType::Named`
-without special-casing. At emit time, `ctype_to_wintype()` checks
-`TypeRegistry::contains()` — if the type is registered (user-extracted),
-it emits a TypeRef; if not, it calls `map_system_typedef()` in `emit.rs`
-which maps standard C/POSIX names to winmd primitives:
-- `int8_t`→`I8`, `uint32_t`→`U32`, `size_t`→`USize`, etc.
-- `off_t`/`__off_t`/`off64_t`/`__off64_t` → `I64`
+**Solution**: Extraction preserves all typedef names as
+`CType::Named { name, resolved }`. The `resolved` field holds the
+clang-resolved canonical type (via `get_canonical_type()`). At emit
+time, `ctype_to_wintype()` checks `TypeRegistry::contains()` — if the
+type is registered (user-extracted), it emits a TypeRef; if not, it
+falls back to the `resolved` canonical primitive (e.g. `off_t` → `I64`,
+`size_t` → `USize`).
 
-This keeps extraction simple (no hardcoded type tables) and centralises
-system typedef knowledge in the emit layer.
+This keeps extraction simple and eliminates the need for a hardcoded
+system typedef table — clang resolves every typedef automatically.
 
 ### 4. `va_list` — compiler built-in type
 
@@ -246,14 +246,13 @@ integer and float literals). Constants like `Z_ERRNO`, `Z_STREAM_ERROR`,
 TOML directory. For system headers like `/usr/include/zlib.h`, absolute
 paths are required in the config.
 
-### 10. `uLong` size (Linux vs Windows)
+### 10. `uLong` size — Linux LP64 ABI
 
-`unsigned long` is 8 bytes on Linux x64 but 4 bytes on Windows x64. Our
-`TypeKind::Long/ULong → I32/U32` mapping targets Windows ABI. This means
-struct sizes in the winmd won't match real Linux struct sizes. The e2e
-tests still work because `windows-bindgen` generates consistent types and
-libz uses the same ABI as the host. This would be a real issue for
-cross-compilation scenarios.
+`unsigned long` is 8 bytes on Linux x64 (LP64). The type mapping uses
+`TypeKind::Long/ULong → I64/U64` to match the host platform. This
+produces correct struct sizes and function signatures for Linux. If
+cross-compilation to Windows is needed in the future, the mapping
+would need to become platform-conditional (Windows LLP64: `long` = 32-bit).
 
 ---
 
@@ -344,7 +343,7 @@ macro-based FFI.
 3. ✅ Create `tests/e2e-zlib/` crate (Cargo.toml, build.rs, src/, tests/)
 4. ✅ Fix `sonar::find_typedefs` — custom typedef discovery for typedef-to-typedef aliases
 5. ✅ Fix supplemental struct discovery — catch `gzFile_s` missed by sonar
-6. ✅ Fix system typedefs — `map_system_typedef()` in emit layer
+6. ✅ Fix system typedefs — clang canonical type resolution in `CType::Named { resolved }`
 7. ✅ Fix incomplete record types — `internal_state` mapped to Void
 8. ✅ Fix `emit_function` namespace — pass partition namespace, not empty string
 9. ✅ Add `e2e-zlib` to workspace members
@@ -370,9 +369,10 @@ macro-based FFI.
    directory. System headers need absolute paths.
 
 4. **System typedef resolution belongs in emit, not extraction.**
-   Extraction should preserve all typedef names as-is. The emit layer
-   checks the TypeRegistry and falls back to `map_system_typedef()` for
-   unregistered names (`int32_t`, `off_t`, `size_t`, etc.). Only
-   `va_list` (compiler built-in with no canonical primitive) is handled
-   during extraction. The `map_system_typedef()` table will grow with
-   each new system header target (e.g., `pid_t`, `socklen_t`, `time_t`).
+   Extraction preserves all typedef names as `CType::Named { resolved }`
+   where `resolved` holds the clang-resolved canonical primitive. The
+   emit layer checks the TypeRegistry and falls back to the resolved
+   type for unregistered names (`int32_t`, `off_t`, `size_t`, etc.).
+   Only `va_list` (compiler built-in with no canonical primitive) is
+   special-cased during extraction. No hardcoded typedef table needed —
+   new system headers (sockets, threads, etc.) work automatically.

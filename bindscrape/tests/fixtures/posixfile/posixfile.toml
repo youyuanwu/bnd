@@ -1,0 +1,27 @@
+include_paths = ["/usr/include/x86_64-linux-gnu", "/usr/include"]
+
+[output]
+name = "PosixFile"
+file = "posixfile.winmd"
+
+# Partition 1: fcntl — creat + O_* flags
+# open/openat/fcntl are variadic and will be auto-skipped
+[[partition]]
+namespace = "PosixFile.Fcntl"
+library = "c"
+headers = ["fcntl.h"]
+traverse = ["fcntl.h", "bits/fcntl-linux.h"]
+
+# Partition 2: unistd — read/write/close/lseek
+[[partition]]
+namespace = "PosixFile.Unistd"
+library = "c"
+headers = ["unistd.h"]
+traverse = ["unistd.h"]
+
+# Partition 3: sys/stat — struct stat + stat/fstat/chmod + S_* constants
+[[partition]]
+namespace = "PosixFile.Stat"
+library = "c"
+headers = ["sys/stat.h"]
+traverse = ["sys/stat.h", "bits/struct_stat.h", "bits/types/struct_timespec.h"]

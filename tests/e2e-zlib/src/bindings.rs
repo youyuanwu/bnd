@@ -52,7 +52,6 @@ windows_link::link!("z" "C" fn gzgetc_(file : gzFile) -> i32);
 windows_link::link!("z" "C" fn gzgets(file : gzFile, buf : *const i8, len : i32) -> *mut i8);
 windows_link::link!("z" "C" fn gzoffset(param0 : gzFile) -> i64);
 windows_link::link!("z" "C" fn gzopen(param0 : *const i8, param1 : *const i8) -> gzFile);
-windows_link::link!("z" "C" fn gzprintf(file : gzFile, format : *const i8) -> i32);
 windows_link::link!("z" "C" fn gzputc(file : gzFile, c : i32) -> i32);
 windows_link::link!("z" "C" fn gzputs(file : gzFile, s : *const i8) -> i32);
 windows_link::link!("z" "C" fn gzread(file : gzFile, buf : voidp, len : u32) -> i32);
@@ -67,14 +66,14 @@ windows_link::link!("z" "C" fn inflate(strm : z_streamp, flush : i32) -> i32);
 windows_link::link!("z" "C" fn inflateBack(strm : z_streamp, r#in : in_func, in_desc : *const core::ffi::c_void, out : out_func, out_desc : *const core::ffi::c_void) -> i32);
 windows_link::link!("z" "C" fn inflateBackEnd(strm : z_streamp) -> i32);
 windows_link::link!("z" "C" fn inflateBackInit_(strm : z_streamp, windowbits : i32, window : *const u8, version : *const i8, stream_size : i32) -> i32);
-windows_link::link!("z" "C" fn inflateCodesUsed(param0 : z_streamp) -> u32);
+windows_link::link!("z" "C" fn inflateCodesUsed(param0 : z_streamp) -> u64);
 windows_link::link!("z" "C" fn inflateCopy(dest : z_streamp, source : z_streamp) -> i32);
 windows_link::link!("z" "C" fn inflateEnd(strm : z_streamp) -> i32);
 windows_link::link!("z" "C" fn inflateGetDictionary(strm : z_streamp, dictionary : *const Bytef, dictlength : *const uInt) -> i32);
 windows_link::link!("z" "C" fn inflateGetHeader(strm : z_streamp, head : gz_headerp) -> i32);
 windows_link::link!("z" "C" fn inflateInit2_(strm : z_streamp, windowbits : i32, version : *const i8, stream_size : i32) -> i32);
 windows_link::link!("z" "C" fn inflateInit_(strm : z_streamp, version : *const i8, stream_size : i32) -> i32);
-windows_link::link!("z" "C" fn inflateMark(strm : z_streamp) -> i32);
+windows_link::link!("z" "C" fn inflateMark(strm : z_streamp) -> i64);
 windows_link::link!("z" "C" fn inflatePrime(strm : z_streamp, bits : i32, value : i32) -> i32);
 windows_link::link!("z" "C" fn inflateReset(strm : z_streamp) -> i32);
 windows_link::link!("z" "C" fn inflateReset2(strm : z_streamp, windowbits : i32) -> i32);
@@ -178,13 +177,13 @@ pub type out_func = Option<
 >;
 pub type uInt = u32;
 pub type uIntf = uInt;
-pub type uLong = u32;
+pub type uLong = u64;
 pub type uLongf = uLong;
 pub type voidp = *mut core::ffi::c_void;
 pub type voidpc = *mut core::ffi::c_void;
 pub type voidpf = *mut core::ffi::c_void;
 pub type z_crc_t = u32;
-pub type z_size_t = usize;
+pub type z_size_t = u64;
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct z_stream {
