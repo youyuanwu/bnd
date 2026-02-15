@@ -1,6 +1,6 @@
 //! Rust implementation of the simple.h C API.
 //!
-//! Compiled as a cdylib so it can be linked by the e2e test crates
+//! Compiled as a cdylib so it can be linked by the e2e-simple and e2e-multi test crates
 //! through the generated P/Invoke bindings.
 
 use std::sync::atomic::{AtomicI32, Ordering};

@@ -1,5 +1,5 @@
 [package]
-name = "e2e-test"
+name = "e2e-simple"
 version = "0.1.0"
 edition.workspace = true
 

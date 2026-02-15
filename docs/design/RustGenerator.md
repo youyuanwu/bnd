@@ -115,8 +115,8 @@ tests/
 │   ├── multi/ (graphics.h, audio.h, multi.toml)
 │   ├── bns-posix/ (bns-posix.toml — POSIX headers)
 │   └── zlib/ (zlib.toml — references system headers)
-├── simple-impl/              # Native C lib for e2e-test
-├── e2e-test/                 # 8 E2E tests (single partition + unions)
+├── simple-impl/              # Native C lib for e2e-simple
+├── e2e-simple/               # 8 E2E tests (single partition + unions)
 ├── e2e-multi/                # 8 E2E tests (multi-partition)
 └── e2e-zlib/                 # 12 E2E tests (system header, real libz.so)
 
@@ -238,7 +238,7 @@ Generated FFI bindings linked against real native libraries.
 
 | Crate | Tests | What it exercises |
 |---|---|---|
-| `e2e-test` | 8 | Single partition, simple.h, widgets + unions + anonymous nested types |
+| `e2e-simple` | 8 | Single partition, simple.h, widgets + unions + anonymous nested types |
 | `e2e-multi` | 8 | Multi-partition, cross-namespace type references |
 | `e2e-zlib` | 12 | System header, real libz.so, compress/uncompress roundtrip |
 | `bns-posix` | 62 | Real libc: file I/O, mmap, dirent, stat, sockets, inet, netdb (7 test files) |
