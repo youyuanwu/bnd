@@ -2,7 +2,7 @@
 
 ## Goal
 
-Build a cross-platform pipeline (**bindscrape**) that takes arbitrary C/C++ header files
+Build a cross-platform pipeline (**bnd-winmd**) that takes arbitrary C/C++ header files
 and produces an ECMA-335 `.winmd` file — without requiring Windows, Visual Studio, or
 MIDL. The pipeline reuses the same core tools as
 [microsoft/win32metadata](https://github.com/microsoft/win32metadata) but replaces
@@ -22,7 +22,7 @@ The win32metadata pipeline has **two separable concerns**:
    Windows SDK NuGet packages, and MIDL. These are Windows-only and unnecessary for
    custom headers.
 
-bindscrape replaces concern (2) while reusing concern (1).
+bnd-winmd replaces concern (2) while reusing concern (1).
 
 ---
 
@@ -329,14 +329,14 @@ part of the standard .NET SDK. No Windows-specific APIs are used.
 | [**MetadataSyntaxTreeCleaner**](https://github.com/microsoft/win32metadata/blob/main/sources/MetadataUtils/MetadataSyntaxTreeCleaner.cs) | ⚠️ Simplify | Keep remap + enum synthesis; drop Win32-specific COM fixups if not needed |
 | [**CrossArchTreeMerger**](https://github.com/microsoft/win32metadata/blob/main/sources/MetadataUtils/CrossArchTreeMerger.cs) | ❌ Skip | Only needed for multi-arch Windows SDK scraping |
 | [**WinmdGenerator MSBuild SDK**](https://github.com/microsoft/win32metadata/tree/main/sources/GeneratorSdk) | ❌ Replace | This is the Windows-only orchestration layer |
-| [**DoAll.ps1**](https://github.com/microsoft/win32metadata/blob/main/scripts/DoAll.ps1) / PowerShell scripts | ❌ Replace | Replaced by bindscrape CLI |
+| [**DoAll.ps1**](https://github.com/microsoft/win32metadata/blob/main/scripts/DoAll.ps1) / PowerShell scripts | ❌ Replace | Replaced by bnd-winmd CLI |
 | **Windows SDK NuGet packages** | ❌ Not needed | Only contain Windows headers |
 | **MIDL compiler** | ❌ Not needed | Only used for WinRT IDL, not for C headers |
 | **`.lib` file scanning** | ❌ Not needed | Only maps Win32 functions to DLLs via [`libMappings.rsp`](https://github.com/microsoft/win32metadata/blob/main/generation/WinSDK/libMappings.rsp); for custom libs, use `--with-librarypath` |
 
 ---
 
-## bindscrape Pipeline Design
+## bnd-winmd Pipeline Design
 
 ### Input
 
@@ -345,11 +345,11 @@ project/
 ├── headers/
 │   ├── mylib.h
 │   └── mylib_types.h
-├── bindscrape.toml        # Project configuration
+├── bnd-winmd.toml        # Project configuration
 └── preamble.h             # (optional) Platform defines, missing types
 ```
 
-### Configuration (`bindscrape.toml`)
+### Configuration (`bnd-winmd.toml`)
 
 ```toml
 [output]
@@ -391,7 +391,7 @@ MY_FLAGS = { type = "uint", members = ["FLAG_A", "FLAG_B", "FLAG_C"], flags = tr
 ### Execution Steps
 
 ```
-bindscrape generate
+bnd-winmd generate
 ```
 
 1. **Generate response files** — For each `[[partition]]`, produce a `.rsp` file with
@@ -485,7 +485,7 @@ and `MetadataUtils` projects directly:
 
 ### Option B: Fork + Extract
 
-Fork the relevant source files into bindscrape:
+Fork the relevant source files into bnd-winmd:
 
 - [`ClangSharpSourceWinmdGenerator.cs`](https://github.com/microsoft/win32metadata/blob/main/sources/ClangSharpSourceToWinmd/ClangSharpSourceWinmdGenerator.cs) (~1,500 lines)
 - [`ClangSharpSourceCompilation.cs`](https://github.com/microsoft/win32metadata/blob/main/sources/ClangSharpSourceToWinmd/ClangSharpSourceCompilation.cs) (~300 lines)
@@ -518,7 +518,7 @@ encoding and signature-writing logic:
 
 The generator has hardcoded `if` / `switch` branches for these Win32 types:
 
-| Hardcoded Type | What It Does | Action for bindscrape |
+| Hardcoded Type | What It Does | Action for bnd-winmd |
 |---|---|---|
 | `PWSTR` / `PSTR` | Encoded as `System.String` with specific marshaling in winmd, not as a raw `char*` pointer | Remove — encode as pointer unless user configures a string mapping |
 | `HRESULT` | Mapped to a special `Windows.Foundation.HResult`-style TypeRef | Remove — treat as `int` or user-defined struct |
@@ -529,7 +529,7 @@ The generator has hardcoded `if` / `switch` branches for these Win32 types:
 | `IUnknown` / `IDispatch` | Referenced as well-known COM base types from `Windows.Win32.System.Com` namespace | Remove or generalize — only relevant if COM interfaces are present |
 | `GUID` | Encoded as `System.Guid` | Keep — this is a standard .NET type |
 | `LARGE_INTEGER` / `ULARGE_INTEGER` | Mapped to `long` / `ulong` | Remove |
-| Win32 handle types (`HWND`, `HINSTANCE`, etc.) | Recognized by `IsHandle()` heuristic; get special struct wrapping | Remove — bindscrape treats them as opaque struct wrappers naturally |
+| Win32 handle types (`HWND`, `HINSTANCE`, etc.) | Recognized by `IsHandle()` heuristic; get special struct wrapping | Remove — bnd-winmd treats them as opaque struct wrappers naturally |
 
 ### Namespace Hardcoding
 
@@ -539,7 +539,7 @@ The generator assumes `Windows.Win32.*` namespace prefixes in several places:
 - Attribute types like `SupportedArchitectureAttribute`, `NativeTypedefAttribute`, etc.
   are expected in `Windows.Win32.Foundation.Metadata`
 
-For bindscrape, these must be parameterized or moved to a user-defined root namespace.
+For bnd-winmd, these must be parameterized or moved to a user-defined root namespace.
 The attributes (`NativeTypedefAttribute`, `SupportedOSPlatformAttribute`, etc.) need to
 be defined in the generated output or a companion assembly.
 
@@ -576,7 +576,7 @@ public static ClangSharpSourceCompilation Create(
 )
 ```
 
-**For bindscrape**: `typeImports`, `requiredNamespaces`, `apiNamesToNamespaces` can
+**For bnd-winmd**: `typeImports`, `requiredNamespaces`, `apiNamesToNamespaces` can
 all be empty dictionaries initially. `staticLibs` is replaced by `--with-librarypath`
 in the `.rsp`. `arch` should default to host architecture.
 
@@ -609,11 +609,11 @@ $DOTNET_ROOT/packs/NETStandard.Library.Ref/2.1.0/ref/netstandard2.1/netstandard.
 /snap/dotnet-sdk/current/packs/NETStandard.Library.Ref/2.1.0/ref/netstandard2.1/netstandard.dll
 ```
 
-bindscrape should discover this via:
+bnd-winmd should discover this via:
 1. `DOTNET_ROOT` environment variable
 2. `dotnet --info` output (look for "Base Path")
 3. Well-known paths (`/usr/share/dotnet`, `/usr/lib/dotnet`)
-4. User-configurable override in `bindscrape.toml`
+4. User-configurable override in `bnd-winmd.toml`
 
 ### OutputKind.WindowsRuntimeMetadata
 
@@ -628,9 +628,9 @@ critical flag that makes the output a `.winmd` rather than a `.dll`. Despite the
 
 These are unresolved design decisions to address when starting implementation:
 
-### Q1: bindscrape CLI Language — Rust or .NET?
+### Q1: bnd-winmd CLI Language — Rust or .NET?
 
-The workspace is at `rs/bindscrape`, suggesting Rust. Options:
+The workspace is at `rs/bnd-winmd`, suggesting Rust. Options:
 
 | Approach | Pros | Cons |
 |---|---|---|
@@ -646,7 +646,7 @@ wrapper around the forked Emitter.
 ### Q2: typeImports — Cross-winmd Type References
 
 win32metadata uses `typeImports` to reference types defined in *other* winmd files (e.g.,
-WinRT foundation types). For bindscrape v1, this can be empty. But if someone generates
+WinRT foundation types). For bnd-winmd v1, this can be empty. But if someone generates
 multiple winmd files (one per library) and wants cross-references, typeImports provides
 the mechanism. Worth supporting eventually.
 
@@ -661,7 +661,7 @@ The winmd format uses custom attributes like:
 - `FlexibleArrayAttribute` — marks trailing flexible array members
 
 These are defined in the `Windows.Win32.Foundation.Metadata` namespace in Win32's winmd.
-For bindscrape, they need to be either:
+For bnd-winmd, they need to be either:
 - Defined inline in the generated winmd (as TypeDefs)
 - Left as TypeRefs pointing to a shared metadata assembly
 - Omitted if the consumer doesn't need them
@@ -680,14 +680,14 @@ crate to read winmd files and generate Rust bindings. It expects:
 - COM interfaces with `InterfaceImpl` and method ordering matching vtable order
 - The custom attributes listed above (especially `NativeTypedefAttribute`)
 
-If bindscrape's output matches these conventions, `windows-bindgen` can consume it
+If bnd-winmd's output matches these conventions, `windows-bindgen` can consume it
 directly. This is the primary integration target.
 
 ### Q5: Testing Strategy
 
 - **Round-trip test**: Parse a known `.h` file → generate winmd → read it back with
   `System.Reflection.Metadata` and verify types/methods/fields match expectations
-- **Comparison test**: For Win32 headers, compare bindscrape output against the official
+- **Comparison test**: For Win32 headers, compare bnd-winmd output against the official
   `Windows.Win32.winmd` to verify compatibility
 - **Integration test**: Feed the winmd to `windows-bindgen` and verify it generates
   compilable Rust code
@@ -725,14 +725,14 @@ The Emitter needs a reference to `netstandard.dll` (2.1). On Linux, this is typi
 ```
 $DOTNET_ROOT/packs/NETStandard.Library.Ref/2.1.0/ref/netstandard2.1/netstandard.dll
 ```
-bindscrape should locate this automatically via `dotnet --list-runtimes` or the
+bnd-winmd should locate this automatically via `dotnet --list-runtimes` or the
 `DOTNET_ROOT` environment variable.
 
 ---
 
 ## Summary
 
-bindscrape reuses two proven, cross-platform components from win32metadata:
+bnd-winmd reuses two proven, cross-platform components from win32metadata:
 
 1. **ClangSharp** — Real C/C++ parsing via libClang, emitting C# P/Invoke source
 2. **The Emitter** — Roslyn compilation + `MetadataBuilder` ECMA-335 writer

@@ -22,7 +22,7 @@ Any C function with a fixed-size array parameter:
 extern int futimens(int __fd, const struct timespec __times[2]);
 ```
 
-bindscrape maps this to `Type::ArrayFixed(timespec, 2)`, which the writer
+bnd-winmd maps this to `Type::ArrayFixed(timespec, 2)`, which the writer
 encodes as `ELEMENT_TYPE_ARRAY`.
 
 ## Root Cause
@@ -75,9 +75,9 @@ type, so it hits:
 _ => panic!("{code}")   // panics with message "0"
 ```
 
-## Workaround (in bindscrape)
+## Workaround (in bnd-winmd)
 
-C array parameters always decay to pointers (C11 §6.7.6.3p7). bindscrape
+C array parameters always decay to pointers (C11 §6.7.6.3p7). bnd-winmd
 applies this decay at extraction time, avoiding `Type::ArrayFixed` entirely
 for function parameters:
 

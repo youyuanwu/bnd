@@ -22,7 +22,7 @@ and E2E test plans for one header group.
 
 ## posix — File I/O
 
-Validate bindscrape against **POSIX file I/O headers** — `<fcntl.h>`,
+Validate bnd-winmd against **POSIX file I/O headers** — `<fcntl.h>`,
 `<unistd.h>`, and `<sys/stat.h>`. This exercises many system typedefs
 (`mode_t`, `uid_t`, `pid_t`, `time_t`, etc.), variadic functions (`open`),
 large/complex structs (`struct stat`), and a dense `#define` constant
@@ -484,7 +484,7 @@ traverse = ["dirent.h", "bits/dirent.h"]
 
 ## Sockets
 
-Validate bindscrape against **POSIX socket headers** — `<sys/socket.h>`,
+Validate bnd-winmd against **POSIX socket headers** — `<sys/socket.h>`,
 `<netinet/in.h>`, `<arpa/inet.h>`, and `<netdb.h>`. This is the next
 system header target. Union support and anonymous nested type naming —
 previously blockers — are now implemented and tested.

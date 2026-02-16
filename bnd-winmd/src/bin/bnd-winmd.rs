@@ -1,16 +1,16 @@
-//! CLI entry point for bindscrape.
+//! CLI entry point for bnd-winmd.
 
 use std::path::PathBuf;
 
 use anyhow::Result;
 use clap::Parser;
 
-/// bindscrape — generate WinMD metadata from C headers.
+/// bnd-winmd — generate WinMD metadata from C headers.
 #[derive(Parser, Debug)]
-#[command(name = "bindscrape", version, about)]
+#[command(name = "bnd-winmd", version, about)]
 struct Cli {
-    /// Path to the bindscrape.toml configuration file.
-    #[arg(default_value = "bindscrape.toml")]
+    /// Path to the bnd-winmd.toml configuration file.
+    #[arg(default_value = "bnd-winmd.toml")]
     config: PathBuf,
 
     /// Output file path (overrides config).
@@ -22,11 +22,11 @@ fn main() -> Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("bindscrape=info")),
+                .unwrap_or_else(|_| tracing_subscriber::EnvFilter::new("bnd_winmd=info")),
         )
         .init();
 
     let cli = Cli::parse();
-    bindscrape::run(&cli.config, cli.output.as_deref())?;
+    bnd_winmd::run(&cli.config, cli.output.as_deref())?;
     Ok(())
 }

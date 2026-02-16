@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bindscrape", "bns-posix", "bns-posix-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib"]
+members = ["bnd-winmd", "bns-posix", "bns-posix-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib"]
 
 package.edition = "2024"
 package.authors = [ "youyuanwu@outlook.com" ]
@@ -10,7 +10,7 @@ package.license = "MIT"
 
 [workspace.dependencies]
 anyhow = "1"
-bindscrape = { path = "bindscrape" }
+bnd-winmd = { path = "bnd-winmd" }
 clang = { version = "2", features = ["clang_10_0"] }
 clap = { version = "4", features = ["derive"] }
 serde = { version = "1", features = ["derive"] }

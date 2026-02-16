@@ -1,4 +1,4 @@
-//! Configuration types for `bindscrape.toml`.
+//! Configuration types for `bnd-winmd.toml`.
 
 use serde::Deserialize;
 use std::collections::HashMap;
@@ -74,7 +74,7 @@ impl PartitionConfig {
             resolve_header(&self.headers[0], base_dir, include_paths)
         } else {
             // Generate a wrapper .c file that #includes all headers.
-            let wrapper_dir = std::env::temp_dir().join("bindscrape_wrappers");
+            let wrapper_dir = std::env::temp_dir().join("bnd_winmd_wrappers");
             std::fs::create_dir_all(&wrapper_dir).expect("create wrapper dir");
 
             // Use namespace as a stable filename
@@ -135,7 +135,7 @@ pub struct ImportedType {
     pub interface: bool,
 }
 
-/// Load and parse a `bindscrape.toml` configuration file.
+/// Load and parse a `bnd-winmd.toml` configuration file.
 pub fn load_config(path: &Path) -> anyhow::Result<Config> {
     let content = std::fs::read_to_string(path)
         .map_err(|e| anyhow::anyhow!("failed to read config file {}: {}", path.display(), e))?;

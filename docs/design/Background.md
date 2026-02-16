@@ -275,7 +275,7 @@ file was actually named `sdk.props`. This was fixed by renaming to the correct c
 the reporter confirmed that even after this fix, the pipeline fails at the next step
 (PowerShell invocation), and likely at many steps after that.
 
-### Implications for bindscrape
+### Implications for bnd-winmd
 
 If we want to build a similar pipeline that runs on Linux, we need to:
 
@@ -380,7 +380,7 @@ to either:
   to generate C# from your headers
 - Use the Emitter code (or a subset of it) to compile the C# into a winmd
 - Skip the parts you don't need (MIDL, lib scanning, cross-arch merging)
-- This is essentially what bindscrape aims to do
+- This is essentially what bnd-winmd aims to do
 
 **Option C: Skip winmd entirely**
 - Use `ClangSharpPInvokeGenerator` to generate C# bindings directly

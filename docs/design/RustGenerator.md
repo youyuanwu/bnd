@@ -28,7 +28,7 @@ C/C++ Headers
        │  Entity / Type / Declaration
        ▼
 ┌─────────────┐
-│  bindscrape  │  Maps Entity → intermediate model → ECMA-335
+│  bnd-winmd   │  Maps Entity → intermediate model → ECMA-335
 │  (extract +  │  No intermediate code generation
 │   emit)      │
 └──────┬───────┘
@@ -68,7 +68,7 @@ C/C++ Headers
 | Function pointer → delegate | Detects `Ptr(FnPtr{...})` and bare `FnPtr{...}`, emits TypeDef extending MulticastDelegate with Invoke method |
 | `#define` integer constants | `sonar::find_definitions()` with `detailed_preprocessing_record` + supplemental hex pass |
 | Cross-partition type references | `TypeRegistry` maps type name → namespace; emits `TypeRef` for named types |
-| Structured logging (`tracing`) | `RUST_LOG=bindscrape=debug` shows per-declaration detail |
+| Structured logging (`tracing`) | `RUST_LOG=bnd_winmd=debug` shows per-declaration detail |
 | Variadic function skipping | `collect_functions()` checks `Entity::is_variadic()` and warns/skips |
 | Array parameter decay | `extract_function()` converts `CType::Array` params → `CType::Ptr` (C semantics; avoids `ELEMENT_TYPE_ARRAY` blob incompatibility with windows-bindgen) |
 | Function deduplication | `collect_functions()` uses `HashSet<String>` to skip duplicates from glibc `__REDIRECT` macros |
@@ -76,7 +76,7 @@ C/C++ Headers
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
 | Round-trip integration tests | Across 4 files |
 | E2E integration tests | Across 4 crates (zlib against real `libz.so`, POSIX file I/O, mmap, dirent, sockets, inet, netdb, signal) |
-| Package-mode code generation | `bns-posix-gen` drives bindscrape + `windows-bindgen --package` to generate the `bns-posix` source tree with feature-gated sub-modules |
+| Package-mode code generation | `bns-posix-gen` drives bnd-winmd + `windows-bindgen --package` to generate the `bns-posix` source tree with feature-gated sub-modules |
 
 ### What Is NOT Yet Implemented
 
@@ -94,7 +94,7 @@ C/C++ Headers
 ## File Structure
 
 ```
-bindscrape/
+bnd-winmd/
 ├── Cargo.toml
 ├── src/
 │   ├── lib.rs               # Public API + module declarations (115 LOC)
@@ -296,7 +296,7 @@ method to be exposed.
 
 ### `windows-bindgen` Compatibility Conventions
 
-For bindscrape output to be consumed by `windows-bindgen`, these conventions
+For bnd-winmd output to be consumed by `windows-bindgen`, these conventions
 must hold:
 
 - TypeDef row ordering — `FieldList`/`MethodList` delimit ownership via row indices

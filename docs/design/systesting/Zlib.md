@@ -2,7 +2,7 @@
 
 ## Goal
 
-Validate bindscrape against **real system headers** — not hand-written
+Validate bnd-winmd against **real system headers** — not hand-written
 fixtures. This proves the pipeline handles production-grade C APIs with
 macro-heavy declarations, transitive includes, platform typedefs, opaque
 pointers, and typedef-to-typedef aliases.
@@ -54,14 +54,14 @@ Solution: **two partitions** with cross-partition TypeRef resolution.
 ### Crate Layout
 
 ```
-bindscrape/tests/
+bnd-winmd/tests/
 ├── fixtures/zlib/
 │   └── zlib.toml               ← two-partition config
 ├── roundtrip_zlib.rs           ← 6 winmd roundtrip tests (own LazyLock)
 
 tests/e2e-zlib/
 ├── Cargo.toml
-├── build.rs                    ← bindscrape + windows-bindgen + link libz
+├── build.rs                    ← bnd-winmd + windows-bindgen + link libz
 ├── src/
 │   ├── lib.rs                  ← mod bindings; pub use bindings::*;
 │   └── bindings.rs             ← generated (216 lines)
@@ -258,7 +258,7 @@ would need to become platform-conditional (Windows LLP64: `long` = 32-bit).
 
 ## Test Results
 
-### Roundtrip Tests — `bindscrape/tests/roundtrip_zlib.rs` ✅
+### Roundtrip Tests — `bnd-winmd/tests/roundtrip_zlib.rs` ✅
 
 Own `LazyLock<Vec<u8>>` — separate binary, no Clang singleton race.
 
@@ -302,8 +302,8 @@ fn main() {
 
     // Step 1: Generate winmd
     let winmd_path = out_dir.join("zlib.winmd");
-    bindscrape::run(&fixtures.join("zlib.toml"), Some(&winmd_path))
-        .expect("bindscrape failed");
+    bnd_winmd::run(&fixtures.join("zlib.toml"), Some(&winmd_path))
+        .expect("bnd-winmd failed");
 
     // Step 2: Generate bindings (flat + sys for multi-partition)
     let bindings_path = manifest_dir.join("src/bindings.rs");

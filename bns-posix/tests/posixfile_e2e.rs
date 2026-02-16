@@ -8,7 +8,7 @@ use std::ffi::CString;
 
 /// Helper: create a temporary file path with a unique name.
 fn tmp_path(name: &str) -> CString {
-    CString::new(format!("/tmp/bindscrape_e2e_{name}_{}", std::process::id())).unwrap()
+    CString::new(format!("/tmp/bnd_winmd_e2e_{name}_{}", std::process::id())).unwrap()
 }
 
 // ---------------------------------------------------------------------------
@@ -70,7 +70,7 @@ fn write_then_read() {
     let path = tmp_path("write_read");
     let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0, "creat failed");
-    let data = b"hello bindscrape";
+    let data = b"hello bnd-winmd";
     let written = unsafe {
         unistd::write(
             fd,
@@ -152,7 +152,7 @@ fn access_existing_file() {
 
 #[test]
 fn access_nonexistent_file() {
-    let path = CString::new("/tmp/bindscrape_e2e_no_such_file_ever").unwrap();
+    let path = CString::new("/tmp/bnd_winmd_e2e_no_such_file_ever").unwrap();
     let rc = unsafe { unistd::access(path.as_ptr(), unistd::F_OK) };
     assert_eq!(rc, -1, "access should fail for nonexistent file");
 }

@@ -2,9 +2,9 @@
 
 `bns-posix` provides Rust bindings for POSIX file I/O and process APIs on
 Linux, generated from C system headers through the
-**bindscrape → WinMD → windows-bindgen** pipeline.
+**bnd-winmd → WinMD → windows-bindgen** pipeline.
 
-This is the first *product* crate built on bindscrape, demonstrating that the
+This is the first *product* crate built on bnd-winmd, demonstrating that the
 C-header-to-WinMD approach scales beyond test fixtures to real system APIs.
 
 ## Modules
@@ -59,7 +59,7 @@ and checked into the `bns-posix` source tree — there is no `build.rs`.
   bns-posix-gen (cargo run -p bns-posix-gen)
   ┌─────────────────────────────────────────────────────────┐
   │                                                         │
-  │  bns-posix.toml ──▶ bindscrape ──▶ .winmd               │
+  │  bns-posix.toml ──▶ bnd-winmd ──▶ .winmd               │
   │                                      │                  │
   │                          windows-bindgen --package       │
   │                                      │                  │
@@ -80,7 +80,7 @@ To regenerate:
 cargo run -p bns-posix-gen
 ```
 
-1. **bindscrape** parses `bns-posix.toml`, invokes clang on system headers,
+1. **bnd-winmd** parses `bns-posix.toml`, invokes clang on system headers,
    extracts types/functions/constants, and writes a temporary `.winmd` file.
 2. **windows-bindgen `--package`** reads the `.winmd` and generates one
    `mod.rs` per namespace under `src/posix/`, with `#[cfg(feature)]`
@@ -93,7 +93,7 @@ cargo run -p bns-posix-gen
 
 Multiple partitions reference overlapping system types (`off_t`, `mode_t`,
 `uid_t`, etc.). A dedicated **types** partition (`posix.types`) owns these
-shared typedefs. During generation, bindscrape deduplicates: the types
+shared typedefs. During generation, bnd-winmd deduplicates: the types
 partition is processed first (first-writer-wins for typedefs), and later
 partitions' duplicate copies are removed. Function signatures in other
 partitions use cross-partition TypeRefs (e.g. `super::types::__uid_t`).
@@ -124,7 +124,7 @@ and defines fifteen partitions:
 ## Challenges Solved
 
 These are issues encountered while building real system bindings and fixed
-in bindscrape core (see [bns-posix.md](systesting/bns-posix.md) for details):
+in bnd-winmd core (see [bns-posix.md](systesting/bns-posix.md) for details):
 
 1. **System typedef resolution** — `CType::Named { resolved }` carries
    clang's canonical type; no hardcoded table.

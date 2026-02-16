@@ -134,7 +134,7 @@ fn pthread_create_join() {
         let mut tid: pthread::pthread_t = 0;
         let arg = 21usize as *mut core::ffi::c_void;
 
-        // Cast function pointer to *const isize (the WinMD/bindscrape representation)
+        // Cast function pointer to *const isize (the WinMD/bnd-winmd representation)
         let start_routine: *const isize = thread_fn as *const isize;
 
         let ret = pthread::pthread_create(&mut tid, core::ptr::null(), start_routine, arg);

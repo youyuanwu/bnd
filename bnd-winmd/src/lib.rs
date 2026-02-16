@@ -1,4 +1,4 @@
-//! bindscrape — C header → WinMD metadata generator.
+//! bnd-winmd — C header → WinMD metadata generator.
 //!
 //! Parses C headers via libclang and emits ECMA-335 `.winmd` files using the
 //! `windows-metadata` writer crate.
@@ -10,8 +10,8 @@
 //! ```no_run
 //! use std::path::Path;
 //!
-//! // Reads bindscrape.toml, parses headers, writes the .winmd file.
-//! bindscrape::run(Path::new("bindscrape.toml"), None).unwrap();
+//! // Reads config TOML, parses headers, writes the .winmd file.
+//! bnd_winmd::run(Path::new("bnd-winmd.toml"), None).unwrap();
 //! ```
 //!
 //! Or get the raw bytes without writing to disk:
@@ -19,7 +19,7 @@
 //! ```no_run
 //! use std::path::Path;
 //!
-//! let winmd_bytes = bindscrape::generate(Path::new("bindscrape.toml")).unwrap();
+//! let winmd_bytes = bnd_winmd::generate(Path::new("bnd-winmd.toml")).unwrap();
 //! ```
 
 use std::path::{Path, PathBuf};
@@ -35,7 +35,7 @@ pub mod model;
 /// Run the full pipeline: load config, parse C headers, emit WinMD, and write
 /// the output file.
 ///
-/// `config_path` is the path to a `bindscrape.toml` file.  
+/// `config_path` is the path to a `bnd-winmd.toml` configuration file.  
 /// `output` optionally overrides the output file path from the config.
 ///
 /// This is the top-level entry point intended for use in `build.rs` scripts
@@ -67,7 +67,7 @@ pub fn run(config_path: &Path, output: Option<&Path>) -> Result<PathBuf> {
     Ok(output_path)
 }
 
-/// Parse a `bindscrape.toml` config file, extract declarations from the
+/// Parse a `bnd-winmd.toml` config file, extract declarations from the
 /// referenced C headers, and return the generated WinMD bytes without
 /// writing to disk.
 pub fn generate(config_path: &Path) -> Result<Vec<u8>> {

@@ -6,7 +6,7 @@ use std::sync::LazyLock;
 static POSIXFILE_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
     let path =
         Path::new(env!("CARGO_MANIFEST_DIR")).join("../tests/fixtures/bns-posix/bns-posix.toml");
-    bindscrape::generate(&path).expect("generate posixfile winmd")
+    bnd_winmd::generate(&path).expect("generate posixfile winmd")
 });
 
 fn open_index() -> windows_metadata::reader::Index {

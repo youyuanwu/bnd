@@ -7,7 +7,7 @@ use bns_posix::posix::unistd;
 use std::ffi::CString;
 
 fn tmp_path(name: &str) -> CString {
-    CString::new(format!("/tmp/bindscrape_e2e_{name}_{}", std::process::id())).unwrap()
+    CString::new(format!("/tmp/bnd_winmd_e2e_{name}_{}", std::process::id())).unwrap()
 }
 
 #[test]

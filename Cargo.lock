@@ -68,7 +68,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f0e0fee31ef5ed1ba1316088939cea399010ed7731dba877ed44aeb407a75ea"
 
 [[package]]
-name = "bindscrape"
+name = "bitflags"
+version = "2.11.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
+
+[[package]]
+name = "bnd-winmd"
 version = "0.1.0"
 dependencies = [
  "anyhow",
@@ -82,12 +88,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "bitflags"
-version = "2.11.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
-
-[[package]]
 name = "bns-posix"
 version = "0.1.0"
 dependencies = [
@@ -98,7 +98,7 @@ dependencies = [
 name = "bns-posix-gen"
 version = "0.1.0"
 dependencies = [
- "bindscrape",
+ "bnd-winmd",
  "tempfile",
  "tracing-subscriber",
  "windows-bindgen",
@@ -180,7 +180,7 @@ checksum = "b05b61dc5112cbb17e4b6cd61790d9845d13888356391624cbe7e41efeac1e75"
 name = "e2e-multi"
 version = "0.1.0"
 dependencies = [
- "bindscrape",
+ "bnd-winmd",
  "simple-impl",
  "windows-bindgen",
  "windows-link",
@@ -190,7 +190,7 @@ dependencies = [
 name = "e2e-simple"
 version = "0.1.0"
 dependencies = [
- "bindscrape",
+ "bnd-winmd",
  "simple-impl",
  "windows-bindgen",
  "windows-link",
@@ -200,7 +200,7 @@ dependencies = [
 name = "e2e-zlib"
 version = "0.1.0"
 dependencies = [
- "bindscrape",
+ "bnd-winmd",
  "windows-bindgen",
  "windows-link",
 ]

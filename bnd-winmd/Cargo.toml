@@ -1,5 +1,5 @@
 [package]
-name = "bindscrape"
+name = "bnd-winmd"
 version = "0.1.0"
 edition.workspace = true
 authors.workspace = true
@@ -8,12 +8,12 @@ repository.workspace = true
 license.workspace = true
 
 [lib]
-name = "bindscrape"
+name = "bnd_winmd"
 path = "src/lib.rs"
 
 [[bin]]
-name = "bindscrape"
-path = "src/bin/bindscrape.rs"
+name = "bnd-winmd"
+path = "src/bin/bnd-winmd.rs"
 
 [dependencies]
 anyhow.workspace = true

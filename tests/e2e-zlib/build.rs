@@ -5,7 +5,7 @@ fn main() {
 
     // Step 1: Generate winmd from the zlib config
     let winmd_path = out_dir.join("zlib.winmd");
-    bindscrape::run(&fixtures.join("zlib.toml"), Some(&winmd_path)).expect("bindscrape failed");
+    bnd_winmd::run(&fixtures.join("zlib.toml"), Some(&winmd_path)).expect("bnd-winmd failed");
 
     // Step 2: Generate Rust bindings (flat + sys for single partition)
     let bindings_path = manifest_dir.join("src/bindings.rs");
@@ -26,5 +26,5 @@ fn main() {
 
     // Rerun if sources change
     println!("cargo:rerun-if-changed=../../tests/fixtures/zlib/");
-    println!("cargo:rerun-if-changed=../../bindscrape/src/");
+    println!("cargo:rerun-if-changed=../../bnd-winmd/src/");
 }

@@ -5,7 +5,7 @@ use std::sync::LazyLock;
 
 static MULTI_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
     let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../tests/fixtures/multi/multi.toml");
-    bindscrape::generate(&path).expect("generate multi winmd")
+    bnd_winmd::generate(&path).expect("generate multi winmd")
 });
 
 fn open_multi_index() -> windows_metadata::reader::Index {

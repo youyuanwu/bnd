@@ -4,7 +4,7 @@ use std::path::Path;
 
 /// Generate the bns-posix source tree at `output_dir`.
 ///
-/// 1. Runs bindscrape on `bns-posix.toml` to produce a `.winmd`.
+/// 1. Runs bnd-winmd on `bns-posix.toml` to produce a `.winmd`.
 /// 2. Runs `windows-bindgen --package` to emit `src/posix/*/mod.rs`.
 /// 3. Deletes the intermediate `.winmd`.
 pub fn generate(output_dir: &Path) {
@@ -13,8 +13,8 @@ pub fn generate(output_dir: &Path) {
 
     // Step 1: Generate .winmd
     let winmd_path = output_dir.join("bns-posix.winmd");
-    bindscrape::run(&fixtures.join("bns-posix.toml"), Some(&winmd_path))
-        .expect("bindscrape failed to generate winmd");
+    bnd_winmd::run(&fixtures.join("bns-posix.toml"), Some(&winmd_path))
+        .expect("bnd-winmd failed to generate winmd");
 
     // Step 2: Generate crate source tree via windows-bindgen package mode
     windows_bindgen::bindgen([

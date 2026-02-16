@@ -8,7 +8,7 @@ repository.workspace = true
 license.workspace = true
 
 [dependencies]
-bindscrape.workspace = true
+bnd-winmd.workspace = true
 tracing-subscriber.workspace = true
 windows-bindgen.workspace = true
 

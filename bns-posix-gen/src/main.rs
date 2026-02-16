@@ -1,6 +1,6 @@
 //! Generator that produces the `bns-posix` crate from POSIX system headers.
 //!
-//! This crate drives the **bindscrape → WinMD → windows-bindgen (package mode)**
+//! This crate drives the **bnd-winmd → WinMD → windows-bindgen (package mode)**
 //! pipeline. Run it to regenerate the `bns-posix` crate:
 //!
 //! ```sh

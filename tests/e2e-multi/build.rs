@@ -5,7 +5,7 @@ fn main() {
 
     // Step 1: Generate winmd from the multi-partition config
     let winmd_path = out_dir.join("multi_test.winmd");
-    bindscrape::run(&fixtures.join("multi.toml"), Some(&winmd_path)).expect("bindscrape failed");
+    bnd_winmd::run(&fixtures.join("multi.toml"), Some(&winmd_path)).expect("bnd-winmd failed");
 
     // Step 2: Generate Rust bindings with namespace modules (no --flat)
     let bindings_path = manifest_dir.join("src/bindings.rs");
@@ -34,5 +34,5 @@ fn main() {
 
     // Rerun if sources change
     println!("cargo:rerun-if-changed=../../tests/fixtures/multi/");
-    println!("cargo:rerun-if-changed=../../bindscrape/src/");
+    println!("cargo:rerun-if-changed=../../bnd-winmd/src/");
 }
