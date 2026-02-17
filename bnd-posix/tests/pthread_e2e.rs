@@ -101,7 +101,7 @@ fn rwlock_read_write() {
 fn pthread_key_create_delete() {
     unsafe {
         let mut key: pthread::pthread_key_t = 0;
-        let ret = pthread::pthread_key_create(&mut key, core::ptr::null());
+        let ret = pthread::pthread_key_create(&mut key, core::ptr::null_mut());
         assert_eq!(ret, 0, "pthread_key_create should succeed");
 
         // Set and get thread-specific data
@@ -134,17 +134,14 @@ fn pthread_create_join() {
         let mut tid: pthread::pthread_t = 0;
         let arg = 21usize as *mut core::ffi::c_void;
 
-        // Cast function pointer to *const isize (the WinMD/bnd-winmd representation)
-        let start_routine: *const isize = thread_fn as *const isize;
+        // Cast function pointer to *mut isize (the WinMD/bnd-winmd representation)
+        let start_routine: *mut isize = thread_fn as *mut isize;
 
         let ret = pthread::pthread_create(&mut tid, core::ptr::null(), start_routine, arg);
         assert_eq!(ret, 0, "pthread_create should succeed");
 
         let mut result: *mut core::ffi::c_void = core::ptr::null_mut();
-        let ret = pthread::pthread_join(
-            tid,
-            &mut result as *mut *mut core::ffi::c_void as *const *const core::ffi::c_void,
-        );
+        let ret = pthread::pthread_join(tid, &mut result as *mut *mut core::ffi::c_void);
         assert_eq!(ret, 0, "pthread_join should succeed");
         assert_eq!(result as usize, 42, "thread should return arg * 2");
     }

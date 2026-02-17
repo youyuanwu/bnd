@@ -11,28 +11,28 @@
 #[cfg(feature = "bio")]
 windows_link::link!("ssl" "C" fn BIO_f_ssl() -> *mut super::bio:: BIO_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn BIO_new_buffer_ssl_connect(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: BIO);
+windows_link::link!("ssl" "C" fn BIO_new_buffer_ssl_connect(ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn BIO_new_ssl(ctx : *const super::types:: SSL_CTX, client : i32) -> *mut super::types:: BIO);
+windows_link::link!("ssl" "C" fn BIO_new_ssl(ctx : *mut super::types:: SSL_CTX, client : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn BIO_new_ssl_connect(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: BIO);
+windows_link::link!("ssl" "C" fn BIO_new_ssl_connect(ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn BIO_ssl_copy_session_id(to : *const super::types:: BIO, from : *const super::types:: BIO) -> i32);
+windows_link::link!("ssl" "C" fn BIO_ssl_copy_session_id(to : *mut super::types:: BIO, from : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn BIO_ssl_shutdown(ssl_bio : *const super::types:: BIO));
+windows_link::link!("ssl" "C" fn BIO_ssl_shutdown(ssl_bio : *mut super::types:: BIO));
 windows_link::link!("ssl" "C" fn DTLS_client_method() -> *mut SSL_METHOD);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn DTLS_get_data_mtu(s : *const super::types:: SSL) -> u64);
 windows_link::link!("ssl" "C" fn DTLS_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn DTLS_server_method() -> *mut SSL_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn DTLS_set_timer_cb(s : *const super::types:: SSL, cb : DTLS_timer_cb));
+windows_link::link!("ssl" "C" fn DTLS_set_timer_cb(s : *mut super::types:: SSL, cb : DTLS_timer_cb));
 windows_link::link!("ssl" "C" fn DTLSv1_2_client_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn DTLSv1_2_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn DTLSv1_2_server_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn DTLSv1_client_method() -> *mut SSL_METHOD);
 #[cfg(all(feature = "bio", feature = "types"))]
-windows_link::link!("ssl" "C" fn DTLSv1_listen(s : *const super::types:: SSL, client : *const super::bio:: BIO_ADDR) -> i32);
+windows_link::link!("ssl" "C" fn DTLSv1_listen(s : *mut super::types:: SSL, client : *mut super::bio:: BIO_ADDR) -> i32);
 windows_link::link!("ssl" "C" fn DTLSv1_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn DTLSv1_server_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn OPENSSL_cipher_name(rfc_name : *const i8) -> *mut i8);
@@ -41,20 +41,20 @@ windows_link::link!("ssl" "C" fn OPENSSL_init_ssl(opts : u64, settings : *const 
 windows_link::link!("ssl" "C" fn OSSL_default_cipher_list() -> *mut i8);
 windows_link::link!("ssl" "C" fn OSSL_default_ciphersuites() -> *mut i8);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("ssl" "C" fn PEM_read_SSL_SESSION(out : *const super::crypto:: _IO_FILE, x : *const *const SSL_SESSION, cb : *const super::types:: pem_password_cb, u : *const core::ffi::c_void) -> *mut SSL_SESSION);
+windows_link::link!("ssl" "C" fn PEM_read_SSL_SESSION(out : *mut super::crypto:: _IO_FILE, x : *mut *mut SSL_SESSION, cb : *mut super::types:: pem_password_cb, u : *mut core::ffi::c_void) -> *mut SSL_SESSION);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn PEM_read_bio_SSL_SESSION(out : *const super::types:: BIO, x : *const *const SSL_SESSION, cb : *const super::types:: pem_password_cb, u : *const core::ffi::c_void) -> *mut SSL_SESSION);
+windows_link::link!("ssl" "C" fn PEM_read_bio_SSL_SESSION(out : *mut super::types:: BIO, x : *mut *mut SSL_SESSION, cb : *mut super::types:: pem_password_cb, u : *mut core::ffi::c_void) -> *mut SSL_SESSION);
 #[cfg(feature = "crypto")]
-windows_link::link!("ssl" "C" fn PEM_write_SSL_SESSION(out : *const super::crypto:: _IO_FILE, x : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn PEM_write_SSL_SESSION(out : *mut super::crypto:: _IO_FILE, x : *const SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn PEM_write_bio_SSL_SESSION(out : *const super::types:: BIO, x : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn PEM_write_bio_SSL_SESSION(out : *mut super::types:: BIO, x : *const SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SRP_Calc_A_param(s : *const super::types:: SSL) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CIPHER_description(param0 : *const SSL_CIPHER, buf : *const i8, size : i32) -> *mut i8);
+windows_link::link!("ssl" "C" fn SRP_Calc_A_param(s : *mut super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CIPHER_description(param0 : *const SSL_CIPHER, buf : *mut i8, size : i32) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CIPHER_find(ssl : *const super::types:: SSL, ptr : *const u8) -> *mut SSL_CIPHER);
+windows_link::link!("ssl" "C" fn SSL_CIPHER_find(ssl : *mut super::types:: SSL, ptr : *const u8) -> *mut SSL_CIPHER);
 windows_link::link!("ssl" "C" fn SSL_CIPHER_get_auth_nid(c : *const SSL_CIPHER) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CIPHER_get_bits(c : *const SSL_CIPHER, alg_bits : *const i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CIPHER_get_bits(c : *const SSL_CIPHER, alg_bits : *mut i32) -> i32);
 windows_link::link!("ssl" "C" fn SSL_CIPHER_get_cipher_nid(c : *const SSL_CIPHER) -> i32);
 windows_link::link!("ssl" "C" fn SSL_CIPHER_get_digest_nid(c : *const SSL_CIPHER) -> i32);
 #[cfg(feature = "types")]
@@ -67,68 +67,68 @@ windows_link::link!("ssl" "C" fn SSL_CIPHER_get_version(c : *const SSL_CIPHER) -
 windows_link::link!("ssl" "C" fn SSL_CIPHER_is_aead(c : *const SSL_CIPHER) -> i32);
 windows_link::link!("ssl" "C" fn SSL_CIPHER_standard_name(c : *const SSL_CIPHER) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_COMP_add_compression_method(id : i32, cm : *const super::types:: COMP_METHOD) -> i32);
+windows_link::link!("ssl" "C" fn SSL_COMP_add_compression_method(id : i32, cm : *mut super::types:: COMP_METHOD) -> i32);
 windows_link::link!("ssl" "C" fn SSL_COMP_get0_name(comp : *const SSL_COMP) -> *mut i8);
 windows_link::link!("ssl" "C" fn SSL_COMP_get_compression_methods() -> *mut core::ffi::c_void);
 windows_link::link!("ssl" "C" fn SSL_COMP_get_id(comp : *const SSL_COMP) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_COMP_get_name(comp : *const super::types:: COMP_METHOD) -> *mut i8);
-windows_link::link!("ssl" "C" fn SSL_COMP_set0_compression_methods(meths : *const core::ffi::c_void) -> *mut core::ffi::c_void);
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_clear_flags(cctx : *const SSL_CONF_CTX, flags : u32) -> u32);
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_finish(cctx : *const SSL_CONF_CTX) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_free(cctx : *const SSL_CONF_CTX));
+windows_link::link!("ssl" "C" fn SSL_COMP_set0_compression_methods(meths : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_clear_flags(cctx : *mut SSL_CONF_CTX, flags : u32) -> u32);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_finish(cctx : *mut SSL_CONF_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_free(cctx : *mut SSL_CONF_CTX));
 windows_link::link!("ssl" "C" fn SSL_CONF_CTX_new() -> *mut SSL_CONF_CTX);
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set1_prefix(cctx : *const SSL_CONF_CTX, pre : *const i8) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_flags(cctx : *const SSL_CONF_CTX, flags : u32) -> u32);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set1_prefix(cctx : *mut SSL_CONF_CTX, pre : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_flags(cctx : *mut SSL_CONF_CTX, flags : u32) -> u32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_ssl(cctx : *const SSL_CONF_CTX, ssl : *const super::types:: SSL));
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_ssl(cctx : *mut SSL_CONF_CTX, ssl : *mut super::types:: SSL));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_ssl_ctx(cctx : *const SSL_CONF_CTX, ctx : *const super::types:: SSL_CTX));
-windows_link::link!("ssl" "C" fn SSL_CONF_cmd(cctx : *const SSL_CONF_CTX, cmd : *const i8, value : *const i8) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CONF_cmd_argv(cctx : *const SSL_CONF_CTX, pargc : *const i32, pargv : *const *const *const i8) -> i32);
-windows_link::link!("ssl" "C" fn SSL_CONF_cmd_value_type(cctx : *const SSL_CONF_CTX, cmd : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CONF_CTX_set_ssl_ctx(cctx : *mut SSL_CONF_CTX, ctx : *mut super::types:: SSL_CTX));
+windows_link::link!("ssl" "C" fn SSL_CONF_cmd(cctx : *mut SSL_CONF_CTX, cmd : *const i8, value : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CONF_cmd_argv(cctx : *mut SSL_CONF_CTX, pargc : *mut i32, pargv : *mut *mut *mut i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CONF_cmd_value_type(cctx : *mut SSL_CONF_CTX, cmd : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_SRP_CTX_free(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_SRP_CTX_free(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_SRP_CTX_init(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_SRP_CTX_init(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add1_to_CA_list(ctx : *const super::types:: SSL_CTX, x : *const super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add1_to_CA_list(ctx : *mut super::types:: SSL_CTX, x : *const super::types:: X509) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add_client_CA(ctx : *const super::types:: SSL_CTX, x : *const super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add_client_CA(ctx : *mut super::types:: SSL_CTX, x : *mut super::types:: X509) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add_client_custom_ext(ctx : *const super::types:: SSL_CTX, ext_type : u32, add_cb : custom_ext_add_cb, free_cb : custom_ext_free_cb, add_arg : *const core::ffi::c_void, parse_cb : custom_ext_parse_cb, parse_arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add_client_custom_ext(ctx : *mut super::types:: SSL_CTX, ext_type : u32, add_cb : custom_ext_add_cb, free_cb : custom_ext_free_cb, add_arg : *mut core::ffi::c_void, parse_cb : custom_ext_parse_cb, parse_arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add_custom_ext(ctx : *const super::types:: SSL_CTX, ext_type : u32, context : u32, add_cb : SSL_custom_ext_add_cb_ex, free_cb : SSL_custom_ext_free_cb_ex, add_arg : *const core::ffi::c_void, parse_cb : SSL_custom_ext_parse_cb_ex, parse_arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add_custom_ext(ctx : *mut super::types:: SSL_CTX, ext_type : u32, context : u32, add_cb : SSL_custom_ext_add_cb_ex, free_cb : SSL_custom_ext_free_cb_ex, add_arg : *mut core::ffi::c_void, parse_cb : SSL_custom_ext_parse_cb_ex, parse_arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add_server_custom_ext(ctx : *const super::types:: SSL_CTX, ext_type : u32, add_cb : custom_ext_add_cb, free_cb : custom_ext_free_cb, add_arg : *const core::ffi::c_void, parse_cb : custom_ext_parse_cb, parse_arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add_server_custom_ext(ctx : *mut super::types:: SSL_CTX, ext_type : u32, add_cb : custom_ext_add_cb, free_cb : custom_ext_free_cb, add_arg : *mut core::ffi::c_void, parse_cb : custom_ext_parse_cb, parse_arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_add_session(ctx : *const super::types:: SSL_CTX, session : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_add_session(ctx : *mut super::types:: SSL_CTX, session : *mut SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_callback_ctrl(param0 : *const super::types:: SSL_CTX, param1 : i32, param2 : *const isize) -> i64);
+windows_link::link!("ssl" "C" fn SSL_CTX_callback_ctrl(param0 : *mut super::types:: SSL_CTX, param1 : i32, param2 : *mut isize) -> i64);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_check_private_key(ctx : *const super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_clear_options(ctx : *const super::types:: SSL_CTX, op : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_CTX_clear_options(ctx : *mut super::types:: SSL_CTX, op : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_config(ctx : *const super::types:: SSL_CTX, name : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_config(ctx : *mut super::types:: SSL_CTX, name : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_ct_is_enabled(ctx : *const super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_ctrl(ctx : *const super::types:: SSL_CTX, cmd : i32, larg : i64, parg : *const core::ffi::c_void) -> i64);
+windows_link::link!("ssl" "C" fn SSL_CTX_ctrl(ctx : *mut super::types:: SSL_CTX, cmd : i32, larg : i64, parg : *mut core::ffi::c_void) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_dane_clear_flags(ctx : *const super::types:: SSL_CTX, flags : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_CTX_dane_clear_flags(ctx : *mut super::types:: SSL_CTX, flags : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_dane_enable(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_dane_enable(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_dane_mtype_set(ctx : *const super::types:: SSL_CTX, md : *const super::types:: EVP_MD, mtype : u8, ord : u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_dane_mtype_set(ctx : *mut super::types:: SSL_CTX, md : *const super::types:: EVP_MD, mtype : u8, ord : u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_dane_set_flags(ctx : *const super::types:: SSL_CTX, flags : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_CTX_dane_set_flags(ctx : *mut super::types:: SSL_CTX, flags : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_enable_ct(ctx : *const super::types:: SSL_CTX, validation_mode : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_enable_ct(ctx : *mut super::types:: SSL_CTX, validation_mode : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_flush_sessions(ctx : *const super::types:: SSL_CTX, tm : i64));
+windows_link::link!("ssl" "C" fn SSL_CTX_flush_sessions(ctx : *mut super::types:: SSL_CTX, tm : i64));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_free(param0 : *const super::types:: SSL_CTX));
+windows_link::link!("ssl" "C" fn SSL_CTX_free(param0 : *mut super::types:: SSL_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get0_CA_list(ctx : *const super::types:: SSL_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
@@ -136,7 +136,7 @@ windows_link::link!("ssl" "C" fn SSL_CTX_get0_certificate(ctx : *const super::ty
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get0_ctlog_store(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: CTLOG_STORE);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_get0_param(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: X509_VERIFY_PARAM);
+windows_link::link!("ssl" "C" fn SSL_CTX_get0_param(ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: X509_VERIFY_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get0_privatekey(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
@@ -148,15 +148,15 @@ windows_link::link!("ssl" "C" fn SSL_CTX_get_ciphers(ctx : *const super::types::
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get_client_CA_list(s : *const super::types:: SSL_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_get_client_cert_cb(ctx : *const super::types:: SSL_CTX) -> *mut isize);
+windows_link::link!("ssl" "C" fn SSL_CTX_get_client_cert_cb(ctx : *mut super::types:: SSL_CTX) -> *mut isize);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_get_default_passwd_cb(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: pem_password_cb);
+windows_link::link!("ssl" "C" fn SSL_CTX_get_default_passwd_cb(ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: pem_password_cb);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_get_default_passwd_cb_userdata(ctx : *const super::types:: SSL_CTX) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_CTX_get_default_passwd_cb_userdata(ctx : *mut super::types:: SSL_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get_ex_data(ssl : *const super::types:: SSL_CTX, idx : i32) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_get_info_callback(ctx : *const super::types:: SSL_CTX) -> *mut isize);
+windows_link::link!("ssl" "C" fn SSL_CTX_get_info_callback(ctx : *mut super::types:: SSL_CTX) -> *mut isize);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_get_keylog_callback(ctx : *const super::types:: SSL_CTX) -> SSL_CTX_keylog_cb_func);
 #[cfg(feature = "types")]
@@ -188,229 +188,229 @@ windows_link::link!("ssl" "C" fn SSL_CTX_get_verify_mode(ctx : *const super::typ
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_has_client_custom_ext(ctx : *const super::types:: SSL_CTX, ext_type : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_dir(ctx : *const super::types:: SSL_CTX, capath : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_dir(ctx : *mut super::types:: SSL_CTX, capath : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_file(ctx : *const super::types:: SSL_CTX, cafile : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_file(ctx : *mut super::types:: SSL_CTX, cafile : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_locations(ctx : *const super::types:: SSL_CTX, cafile : *const i8, capath : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_locations(ctx : *mut super::types:: SSL_CTX, cafile : *const i8, capath : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_store(ctx : *const super::types:: SSL_CTX, castore : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_load_verify_store(ctx : *mut super::types:: SSL_CTX, castore : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_CTX_new(meth : *const SSL_METHOD) -> *mut super::types:: SSL_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_new_ex(libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8, meth : *const SSL_METHOD) -> *mut super::types:: SSL_CTX);
+windows_link::link!("ssl" "C" fn SSL_CTX_new_ex(libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8, meth : *const SSL_METHOD) -> *mut super::types:: SSL_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_remove_session(ctx : *const super::types:: SSL_CTX, session : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_remove_session(ctx : *mut super::types:: SSL_CTX, session : *mut SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_get_cb(ctx : *const super::types:: SSL_CTX) -> *mut isize);
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_get_cb(ctx : *mut super::types:: SSL_CTX) -> *mut isize);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_new_cb(ctx : *const super::types:: SSL_CTX) -> *mut isize);
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_new_cb(ctx : *mut super::types:: SSL_CTX) -> *mut isize);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_remove_cb(ctx : *const super::types:: SSL_CTX) -> *mut isize);
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_get_remove_cb(ctx : *mut super::types:: SSL_CTX) -> *mut isize);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_get_cb(ctx : *const super::types:: SSL_CTX, get_session_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_get_cb(ctx : *mut super::types:: SSL_CTX, get_session_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_new_cb(ctx : *const super::types:: SSL_CTX, new_session_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_new_cb(ctx : *mut super::types:: SSL_CTX, new_session_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_remove_cb(ctx : *const super::types:: SSL_CTX, remove_session_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_sess_set_remove_cb(ctx : *mut super::types:: SSL_CTX, remove_session_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_sessions(ctx : *const super::types:: SSL_CTX) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_CTX_sessions(ctx : *mut super::types:: SSL_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set0_CA_list(ctx : *const super::types:: SSL_CTX, name_list : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set0_CA_list(ctx : *mut super::types:: SSL_CTX, name_list : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set0_ctlog_store(ctx : *const super::types:: SSL_CTX, logs : *const super::types:: CTLOG_STORE));
+windows_link::link!("ssl" "C" fn SSL_CTX_set0_ctlog_store(ctx : *mut super::types:: SSL_CTX, logs : *mut super::types:: CTLOG_STORE));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set0_security_ex_data(ctx : *const super::types:: SSL_CTX, ex : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set0_security_ex_data(ctx : *mut super::types:: SSL_CTX, ex : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set0_tmp_dh_pkey(ctx : *const super::types:: SSL_CTX, dhpkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set0_tmp_dh_pkey(ctx : *mut super::types:: SSL_CTX, dhpkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set1_cert_store(param0 : *const super::types:: SSL_CTX, param1 : *const super::types:: X509_STORE));
+windows_link::link!("ssl" "C" fn SSL_CTX_set1_cert_store(param0 : *mut super::types:: SSL_CTX, param1 : *mut super::types:: X509_STORE));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set1_param(ctx : *const super::types:: SSL_CTX, vpm : *const super::types:: X509_VERIFY_PARAM) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set1_param(ctx : *mut super::types:: SSL_CTX, vpm : *mut super::types:: X509_VERIFY_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_allow_early_data_cb(ctx : *const super::types:: SSL_CTX, cb : SSL_allow_early_data_cb_fn, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_allow_early_data_cb(ctx : *mut super::types:: SSL_CTX, cb : SSL_allow_early_data_cb_fn, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_alpn_protos(ctx : *const super::types:: SSL_CTX, protos : *const u8, protos_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_alpn_protos(ctx : *mut super::types:: SSL_CTX, protos : *const u8, protos_len : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_alpn_select_cb(ctx : *const super::types:: SSL_CTX, cb : SSL_CTX_alpn_select_cb_func, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_alpn_select_cb(ctx : *mut super::types:: SSL_CTX, cb : SSL_CTX_alpn_select_cb_func, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_async_callback(ctx : *const super::types:: SSL_CTX, callback : SSL_async_callback_fn) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_async_callback(ctx : *mut super::types:: SSL_CTX, callback : SSL_async_callback_fn) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_async_callback_arg(ctx : *const super::types:: SSL_CTX, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_async_callback_arg(ctx : *mut super::types:: SSL_CTX, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_block_padding(ctx : *const super::types:: SSL_CTX, block_size : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_block_padding(ctx : *mut super::types:: SSL_CTX, block_size : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_cb(c : *const super::types:: SSL_CTX, cb : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_cb(c : *mut super::types:: SSL_CTX, cb : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_store(param0 : *const super::types:: SSL_CTX, param1 : *const super::types:: X509_STORE));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_store(param0 : *mut super::types:: SSL_CTX, param1 : *mut super::types:: X509_STORE));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_verify_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cert_verify_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cipher_list(param0 : *const super::types:: SSL_CTX, str : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cipher_list(param0 : *mut super::types:: SSL_CTX, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_ciphersuites(ctx : *const super::types:: SSL_CTX, str : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_ciphersuites(ctx : *mut super::types:: SSL_CTX, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_client_CA_list(ctx : *const super::types:: SSL_CTX, name_list : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_client_CA_list(ctx : *mut super::types:: SSL_CTX, name_list : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_client_cert_cb(ctx : *const super::types:: SSL_CTX, client_cert_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_client_cert_cb(ctx : *mut super::types:: SSL_CTX, client_cert_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_client_cert_engine(ctx : *const super::types:: SSL_CTX, e : *const super::types:: ENGINE) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_client_cert_engine(ctx : *mut super::types:: SSL_CTX, e : *mut super::types:: ENGINE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_client_hello_cb(c : *const super::types:: SSL_CTX, cb : SSL_client_hello_cb_fn, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_client_hello_cb(c : *mut super::types:: SSL_CTX, cb : SSL_client_hello_cb_fn, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cookie_generate_cb(ctx : *const super::types:: SSL_CTX, app_gen_cookie_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cookie_generate_cb(ctx : *mut super::types:: SSL_CTX, app_gen_cookie_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_cookie_verify_cb(ctx : *const super::types:: SSL_CTX, app_verify_cookie_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_cookie_verify_cb(ctx : *mut super::types:: SSL_CTX, app_verify_cookie_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_ct_validation_callback(ctx : *const super::types:: SSL_CTX, callback : ssl_ct_validation_cb, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_ct_validation_callback(ctx : *mut super::types:: SSL_CTX, callback : ssl_ct_validation_cb, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_ctlog_list_file(ctx : *const super::types:: SSL_CTX, path : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_ctlog_list_file(ctx : *mut super::types:: SSL_CTX, path : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_ctlog_list_file(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_ctlog_list_file(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_passwd_cb(ctx : *const super::types:: SSL_CTX, cb : *const super::types:: pem_password_cb));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_passwd_cb(ctx : *mut super::types:: SSL_CTX, cb : *mut super::types:: pem_password_cb));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_passwd_cb_userdata(ctx : *const super::types:: SSL_CTX, u : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_passwd_cb_userdata(ctx : *mut super::types:: SSL_CTX, u : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_read_buffer_len(ctx : *const super::types:: SSL_CTX, len : u64));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_read_buffer_len(ctx : *mut super::types:: SSL_CTX, len : u64));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_dir(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_dir(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_file(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_file(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_paths(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_paths(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_store(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_default_verify_store(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_ex_data(ssl : *const super::types:: SSL_CTX, idx : i32, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_ex_data(ssl : *mut super::types:: SSL_CTX, idx : i32, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_generate_session_id(ctx : *const super::types:: SSL_CTX, cb : GEN_SESSION_CB) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_generate_session_id(ctx : *mut super::types:: SSL_CTX, cb : GEN_SESSION_CB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_info_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_info_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_keylog_callback(ctx : *const super::types:: SSL_CTX, cb : SSL_CTX_keylog_cb_func));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_keylog_callback(ctx : *mut super::types:: SSL_CTX, cb : SSL_CTX_keylog_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_max_early_data(ctx : *const super::types:: SSL_CTX, max_early_data : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_max_early_data(ctx : *mut super::types:: SSL_CTX, max_early_data : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_msg_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_msg_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_next_proto_select_cb(s : *const super::types:: SSL_CTX, cb : SSL_CTX_npn_select_cb_func, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_next_proto_select_cb(s : *mut super::types:: SSL_CTX, cb : SSL_CTX_npn_select_cb_func, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_next_protos_advertised_cb(s : *const super::types:: SSL_CTX, cb : SSL_CTX_npn_advertised_cb_func, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_next_protos_advertised_cb(s : *mut super::types:: SSL_CTX, cb : SSL_CTX_npn_advertised_cb_func, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_not_resumable_session_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_not_resumable_session_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_num_tickets(ctx : *const super::types:: SSL_CTX, num_tickets : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_num_tickets(ctx : *mut super::types:: SSL_CTX, num_tickets : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_options(ctx : *const super::types:: SSL_CTX, op : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_options(ctx : *mut super::types:: SSL_CTX, op : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_post_handshake_auth(ctx : *const super::types:: SSL_CTX, val : i32));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_post_handshake_auth(ctx : *mut super::types:: SSL_CTX, val : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_client_callback(ctx : *const super::types:: SSL_CTX, cb : SSL_psk_client_cb_func));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_client_callback(ctx : *mut super::types:: SSL_CTX, cb : SSL_psk_client_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_find_session_callback(ctx : *const super::types:: SSL_CTX, cb : SSL_psk_find_session_cb_func));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_find_session_callback(ctx : *mut super::types:: SSL_CTX, cb : SSL_psk_find_session_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_server_callback(ctx : *const super::types:: SSL_CTX, cb : SSL_psk_server_cb_func));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_server_callback(ctx : *mut super::types:: SSL_CTX, cb : SSL_psk_server_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_use_session_callback(ctx : *const super::types:: SSL_CTX, cb : SSL_psk_use_session_cb_func));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_psk_use_session_callback(ctx : *mut super::types:: SSL_CTX, cb : SSL_psk_use_session_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_purpose(ctx : *const super::types:: SSL_CTX, purpose : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_purpose(ctx : *mut super::types:: SSL_CTX, purpose : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_quiet_shutdown(ctx : *const super::types:: SSL_CTX, mode : i32));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_quiet_shutdown(ctx : *mut super::types:: SSL_CTX, mode : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_record_padding_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_record_padding_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_record_padding_callback_arg(ctx : *const super::types:: SSL_CTX, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_record_padding_callback_arg(ctx : *mut super::types:: SSL_CTX, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_recv_max_early_data(ctx : *const super::types:: SSL_CTX, recv_max_early_data : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_recv_max_early_data(ctx : *mut super::types:: SSL_CTX, recv_max_early_data : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_security_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_security_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_security_level(ctx : *const super::types:: SSL_CTX, level : i32));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_security_level(ctx : *mut super::types:: SSL_CTX, level : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_session_id_context(ctx : *const super::types:: SSL_CTX, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_session_id_context(ctx : *mut super::types:: SSL_CTX, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_session_ticket_cb(ctx : *const super::types:: SSL_CTX, gen_cb : SSL_CTX_generate_session_ticket_fn, dec_cb : SSL_CTX_decrypt_session_ticket_fn, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_session_ticket_cb(ctx : *mut super::types:: SSL_CTX, gen_cb : SSL_CTX_generate_session_ticket_fn, dec_cb : SSL_CTX_decrypt_session_ticket_fn, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_cb_arg(ctx : *const super::types:: SSL_CTX, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_cb_arg(ctx : *mut super::types:: SSL_CTX, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_client_pwd_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_client_pwd_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_password(ctx : *const super::types:: SSL_CTX, password : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_password(ctx : *mut super::types:: SSL_CTX, password : *mut i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_strength(ctx : *const super::types:: SSL_CTX, strength : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_strength(ctx : *mut super::types:: SSL_CTX, strength : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_username(ctx : *const super::types:: SSL_CTX, name : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_username(ctx : *mut super::types:: SSL_CTX, name : *mut i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_username_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_username_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_verify_param_callback(ctx : *const super::types:: SSL_CTX, cb : *const isize) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_srp_verify_param_callback(ctx : *mut super::types:: SSL_CTX, cb : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_ssl_version(ctx : *const super::types:: SSL_CTX, meth : *const SSL_METHOD) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_ssl_version(ctx : *mut super::types:: SSL_CTX, meth : *const SSL_METHOD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_stateless_cookie_generate_cb(ctx : *const super::types:: SSL_CTX, gen_stateless_cookie_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_stateless_cookie_generate_cb(ctx : *mut super::types:: SSL_CTX, gen_stateless_cookie_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_stateless_cookie_verify_cb(ctx : *const super::types:: SSL_CTX, verify_stateless_cookie_cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_stateless_cookie_verify_cb(ctx : *mut super::types:: SSL_CTX, verify_stateless_cookie_cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_timeout(ctx : *const super::types:: SSL_CTX, t : i64) -> i64);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_timeout(ctx : *mut super::types:: SSL_CTX, t : i64) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_tlsext_max_fragment_length(ctx : *const super::types:: SSL_CTX, mode : u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_tlsext_max_fragment_length(ctx : *mut super::types:: SSL_CTX, mode : u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_tlsext_ticket_key_evp_cb(ctx : *const super::types:: SSL_CTX, fp : *const isize) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_tlsext_ticket_key_evp_cb(ctx : *mut super::types:: SSL_CTX, fp : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_tmp_dh_callback(ctx : *const super::types:: SSL_CTX, dh : *const isize));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_tmp_dh_callback(ctx : *mut super::types:: SSL_CTX, dh : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_trust(ctx : *const super::types:: SSL_CTX, trust : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_set_trust(ctx : *mut super::types:: SSL_CTX, trust : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_verify(ctx : *const super::types:: SSL_CTX, mode : i32, callback : SSL_verify_cb));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_verify(ctx : *mut super::types:: SSL_CTX, mode : i32, callback : SSL_verify_cb));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_set_verify_depth(ctx : *const super::types:: SSL_CTX, depth : i32));
+windows_link::link!("ssl" "C" fn SSL_CTX_set_verify_depth(ctx : *mut super::types:: SSL_CTX, depth : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_up_ref(ctx : *const super::types:: SSL_CTX) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_up_ref(ctx : *mut super::types:: SSL_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey(ctx : *const super::types:: SSL_CTX, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey(ctx : *mut super::types:: SSL_CTX, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey_ASN1(pk : i32, ctx : *const super::types:: SSL_CTX, d : *const u8, len : i64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey_ASN1(pk : i32, ctx : *mut super::types:: SSL_CTX, d : *const u8, len : i64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey_file(ctx : *const super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_PrivateKey_file(ctx : *mut super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey(ctx : *const super::types:: SSL_CTX, rsa : *const super::types:: RSA) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey(ctx : *mut super::types:: SSL_CTX, rsa : *mut super::types:: RSA) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey_ASN1(ctx : *const super::types:: SSL_CTX, d : *const u8, len : i64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey_ASN1(ctx : *mut super::types:: SSL_CTX, d : *const u8, len : i64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey_file(ctx : *const super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_RSAPrivateKey_file(ctx : *mut super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_cert_and_key(ctx : *const super::types:: SSL_CTX, x509 : *const super::types:: X509, privatekey : *const super::types:: EVP_PKEY, chain : *const core::ffi::c_void, r#override : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_cert_and_key(ctx : *mut super::types:: SSL_CTX, x509 : *mut super::types:: X509, privatekey : *mut super::types:: EVP_PKEY, chain : *mut core::ffi::c_void, r#override : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate(ctx : *const super::types:: SSL_CTX, x : *const super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate(ctx : *mut super::types:: SSL_CTX, x : *mut super::types:: X509) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_ASN1(ctx : *const super::types:: SSL_CTX, len : i32, d : *const u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_ASN1(ctx : *mut super::types:: SSL_CTX, len : i32, d : *const u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_chain_file(ctx : *const super::types:: SSL_CTX, file : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_chain_file(ctx : *mut super::types:: SSL_CTX, file : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_file(ctx : *const super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_certificate_file(ctx : *mut super::types:: SSL_CTX, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_psk_identity_hint(ctx : *const super::types:: SSL_CTX, identity_hint : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_psk_identity_hint(ctx : *mut super::types:: SSL_CTX, identity_hint : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo(ctx : *const super::types:: SSL_CTX, serverinfo : *const u8, serverinfo_length : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo(ctx : *mut super::types:: SSL_CTX, serverinfo : *const u8, serverinfo_length : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo_ex(ctx : *const super::types:: SSL_CTX, version : u32, serverinfo : *const u8, serverinfo_length : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo_ex(ctx : *mut super::types:: SSL_CTX, version : u32, serverinfo : *const u8, serverinfo_length : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo_file(ctx : *const super::types:: SSL_CTX, file : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_CTX_use_serverinfo_file(ctx : *mut super::types:: SSL_CTX, file : *const i8) -> i32);
 windows_link::link!("ssl" "C" fn SSL_SESSION_dup(src : *const SSL_SESSION) -> *mut SSL_SESSION);
-windows_link::link!("ssl" "C" fn SSL_SESSION_free(ses : *const SSL_SESSION));
-windows_link::link!("ssl" "C" fn SSL_SESSION_get0_alpn_selected(s : *const SSL_SESSION, alpn : *const *const u8, len : *const u64));
+windows_link::link!("ssl" "C" fn SSL_SESSION_free(ses : *mut SSL_SESSION));
+windows_link::link!("ssl" "C" fn SSL_SESSION_get0_alpn_selected(s : *const SSL_SESSION, alpn : *mut *mut u8, len : *mut u64));
 windows_link::link!("ssl" "C" fn SSL_SESSION_get0_cipher(s : *const SSL_SESSION) -> *mut SSL_CIPHER);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get0_hostname(s : *const SSL_SESSION) -> *mut i8);
-windows_link::link!("ssl" "C" fn SSL_SESSION_get0_id_context(s : *const SSL_SESSION, len : *const u32) -> *mut u8);
+windows_link::link!("ssl" "C" fn SSL_SESSION_get0_id_context(s : *const SSL_SESSION, len : *mut u32) -> *mut u8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_SESSION_get0_peer(s : *const SSL_SESSION) -> *mut super::types:: X509);
-windows_link::link!("ssl" "C" fn SSL_SESSION_get0_ticket(s : *const SSL_SESSION, tick : *const *const u8, len : *const u64));
-windows_link::link!("ssl" "C" fn SSL_SESSION_get0_ticket_appdata(ss : *const SSL_SESSION, data : *const *const core::ffi::c_void, len : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_get0_peer(s : *mut SSL_SESSION) -> *mut super::types:: X509);
+windows_link::link!("ssl" "C" fn SSL_SESSION_get0_ticket(s : *const SSL_SESSION, tick : *mut *mut u8, len : *mut u64));
+windows_link::link!("ssl" "C" fn SSL_SESSION_get0_ticket_appdata(ss : *mut SSL_SESSION, data : *mut *mut core::ffi::c_void, len : *mut u64) -> i32);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get_compress_id(s : *const SSL_SESSION) -> u32);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get_ex_data(ss : *const SSL_SESSION, idx : i32) -> *mut core::ffi::c_void);
-windows_link::link!("ssl" "C" fn SSL_SESSION_get_id(s : *const SSL_SESSION, len : *const u32) -> *mut u8);
-windows_link::link!("ssl" "C" fn SSL_SESSION_get_master_key(sess : *const SSL_SESSION, out : *const u8, outlen : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_SESSION_get_id(s : *const SSL_SESSION, len : *mut u32) -> *mut u8);
+windows_link::link!("ssl" "C" fn SSL_SESSION_get_master_key(sess : *const SSL_SESSION, out : *mut u8, outlen : u64) -> u64);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get_max_early_data(s : *const SSL_SESSION) -> u32);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get_max_fragment_length(sess : *const SSL_SESSION) -> u8);
 windows_link::link!("ssl" "C" fn SSL_SESSION_get_protocol_version(s : *const SSL_SESSION) -> i32);
@@ -421,134 +421,134 @@ windows_link::link!("ssl" "C" fn SSL_SESSION_has_ticket(s : *const SSL_SESSION) 
 windows_link::link!("ssl" "C" fn SSL_SESSION_is_resumable(s : *const SSL_SESSION) -> i32);
 windows_link::link!("ssl" "C" fn SSL_SESSION_new() -> *mut SSL_SESSION);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_SESSION_print(fp : *const super::types:: BIO, ses : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_print(fp : *mut super::types:: BIO, ses : *const SSL_SESSION) -> i32);
 #[cfg(feature = "crypto")]
-windows_link::link!("ssl" "C" fn SSL_SESSION_print_fp(fp : *const super::crypto:: _IO_FILE, ses : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_print_fp(fp : *mut super::crypto:: _IO_FILE, ses : *const SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_SESSION_print_keylog(bp : *const super::types:: BIO, x : *const SSL_SESSION) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_alpn_selected(s : *const SSL_SESSION, alpn : *const u8, len : u64) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_hostname(s : *const SSL_SESSION, hostname : *const i8) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_id(s : *const SSL_SESSION, sid : *const u8, sid_len : u32) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_id_context(s : *const SSL_SESSION, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_master_key(sess : *const SSL_SESSION, r#in : *const u8, len : u64) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set1_ticket_appdata(ss : *const SSL_SESSION, data : *const core::ffi::c_void, len : u64) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_cipher(s : *const SSL_SESSION, cipher : *const SSL_CIPHER) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_ex_data(ss : *const SSL_SESSION, idx : i32, data : *const core::ffi::c_void) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_max_early_data(s : *const SSL_SESSION, max_early_data : u32) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_protocol_version(s : *const SSL_SESSION, version : i32) -> i32);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_time(s : *const SSL_SESSION, t : i64) -> i64);
-windows_link::link!("ssl" "C" fn SSL_SESSION_set_timeout(s : *const SSL_SESSION, t : i64) -> i64);
-windows_link::link!("ssl" "C" fn SSL_SESSION_up_ref(ses : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_print_keylog(bp : *mut super::types:: BIO, x : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_alpn_selected(s : *mut SSL_SESSION, alpn : *const u8, len : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_hostname(s : *mut SSL_SESSION, hostname : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_id(s : *mut SSL_SESSION, sid : *const u8, sid_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_id_context(s : *mut SSL_SESSION, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_master_key(sess : *mut SSL_SESSION, r#in : *const u8, len : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set1_ticket_appdata(ss : *mut SSL_SESSION, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_cipher(s : *mut SSL_SESSION, cipher : *const SSL_CIPHER) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_ex_data(ss : *mut SSL_SESSION, idx : i32, data : *mut core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_max_early_data(s : *mut SSL_SESSION, max_early_data : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_protocol_version(s : *mut SSL_SESSION, version : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_time(s : *mut SSL_SESSION, t : i64) -> i64);
+windows_link::link!("ssl" "C" fn SSL_SESSION_set_timeout(s : *mut SSL_SESSION, t : i64) -> i64);
+windows_link::link!("ssl" "C" fn SSL_SESSION_up_ref(ses : *mut SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_SRP_CTX_free(ctx : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SRP_CTX_free(ctx : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_SRP_CTX_init(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_SRP_CTX_init(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_accept(ssl : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_accept(ssl : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_add1_host(s : *const super::types:: SSL, hostname : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add1_host(s : *mut super::types:: SSL, hostname : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_add1_to_CA_list(ssl : *const super::types:: SSL, x : *const super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add1_to_CA_list(ssl : *mut super::types:: SSL, x : *const super::types:: X509) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_add_client_CA(ssl : *const super::types:: SSL, x : *const super::types:: X509) -> i32);
-windows_link::link!("ssl" "C" fn SSL_add_dir_cert_subjects_to_stack(stackcas : *const core::ffi::c_void, dir : *const i8) -> i32);
-windows_link::link!("ssl" "C" fn SSL_add_file_cert_subjects_to_stack(stackcas : *const core::ffi::c_void, file : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add_client_CA(ssl : *mut super::types:: SSL, x : *mut super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add_dir_cert_subjects_to_stack(stackcas : *mut core::ffi::c_void, dir : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add_file_cert_subjects_to_stack(stackcas : *mut core::ffi::c_void, file : *const i8) -> i32);
 windows_link::link!("ssl" "C" fn SSL_add_ssl_module());
-windows_link::link!("ssl" "C" fn SSL_add_store_cert_subjects_to_stack(stackcas : *const core::ffi::c_void, uri : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_add_store_cert_subjects_to_stack(stackcas : *mut core::ffi::c_void, uri : *const i8) -> i32);
 windows_link::link!("ssl" "C" fn SSL_alert_desc_string(value : i32) -> *mut i8);
 windows_link::link!("ssl" "C" fn SSL_alert_desc_string_long(value : i32) -> *mut i8);
 windows_link::link!("ssl" "C" fn SSL_alert_type_string(value : i32) -> *mut i8);
 windows_link::link!("ssl" "C" fn SSL_alert_type_string_long(value : i32) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_alloc_buffers(ssl : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_alloc_buffers(ssl : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_bytes_to_cipher_list(s : *const super::types:: SSL, bytes : *const u8, len : u64, isv2format : i32, sk : *const *const core::ffi::c_void, scsvs : *const *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_bytes_to_cipher_list(s : *mut super::types:: SSL, bytes : *const u8, len : u64, isv2format : i32, sk : *mut *mut core::ffi::c_void, scsvs : *mut *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_callback_ctrl(param0 : *const super::types:: SSL, param1 : i32, param2 : *const isize) -> i64);
+windows_link::link!("ssl" "C" fn SSL_callback_ctrl(param0 : *mut super::types:: SSL, param1 : i32, param2 : *mut isize) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_certs_clear(s : *const super::types:: SSL));
+windows_link::link!("ssl" "C" fn SSL_certs_clear(s : *mut super::types:: SSL));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_check_chain(s : *const super::types:: SSL, x : *const super::types:: X509, pk : *const super::types:: EVP_PKEY, chain : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_check_chain(s : *mut super::types:: SSL, x : *mut super::types:: X509, pk : *mut super::types:: EVP_PKEY, chain : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_check_private_key(ctx : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_clear(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_clear(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_clear_options(s : *const super::types:: SSL, op : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_clear_options(s : *mut super::types:: SSL, op : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_ciphers(s : *const super::types:: SSL, out : *const *const u8) -> u64);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_ciphers(s : *mut super::types:: SSL, out : *mut *mut u8) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_compression_methods(s : *const super::types:: SSL, out : *const *const u8) -> u64);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_compression_methods(s : *mut super::types:: SSL, out : *mut *mut u8) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_ext(s : *const super::types:: SSL, r#type : u32, out : *const *const u8, outlen : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_ext(s : *mut super::types:: SSL, r#type : u32, out : *mut *mut u8, outlen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_legacy_version(s : *const super::types:: SSL) -> u32);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_legacy_version(s : *mut super::types:: SSL) -> u32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_random(s : *const super::types:: SSL, out : *const *const u8) -> u64);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_random(s : *mut super::types:: SSL, out : *mut *mut u8) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get0_session_id(s : *const super::types:: SSL, out : *const *const u8) -> u64);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get0_session_id(s : *mut super::types:: SSL, out : *mut *mut u8) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_get1_extensions_present(s : *const super::types:: SSL, out : *const *const i32, outlen : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_client_hello_get1_extensions_present(s : *mut super::types:: SSL, out : *mut *mut i32, outlen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_client_hello_isv2(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_client_hello_isv2(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_client_version(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_config(s : *const super::types:: SSL, name : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_config(s : *mut super::types:: SSL, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_connect(ssl : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_connect(ssl : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_copy_session_id(to : *const super::types:: SSL, from : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_copy_session_id(to : *mut super::types:: SSL, from : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_ct_is_enabled(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_ctrl(ssl : *const super::types:: SSL, cmd : i32, larg : i64, parg : *const core::ffi::c_void) -> i64);
+windows_link::link!("ssl" "C" fn SSL_ctrl(ssl : *mut super::types:: SSL, cmd : i32, larg : i64, parg : *mut core::ffi::c_void) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_dane_clear_flags(ssl : *const super::types:: SSL, flags : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_dane_clear_flags(ssl : *mut super::types:: SSL, flags : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_dane_enable(s : *const super::types:: SSL, basedomain : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_dane_enable(s : *mut super::types:: SSL, basedomain : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_dane_set_flags(ssl : *const super::types:: SSL, flags : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_dane_set_flags(ssl : *mut super::types:: SSL, flags : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_dane_tlsa_add(s : *const super::types:: SSL, usage : u8, selector : u8, mtype : u8, data : *const u8, dlen : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_dane_tlsa_add(s : *mut super::types:: SSL, usage : u8, selector : u8, mtype : u8, data : *const u8, dlen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_do_handshake(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_do_handshake(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_dup(ssl : *const super::types:: SSL) -> *mut super::types:: SSL);
+windows_link::link!("ssl" "C" fn SSL_dup(ssl : *mut super::types:: SSL) -> *mut super::types:: SSL);
 windows_link::link!("ssl" "C" fn SSL_dup_CA_list(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_enable_ct(s : *const super::types:: SSL, validation_mode : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_enable_ct(s : *mut super::types:: SSL, validation_mode : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_export_keying_material(s : *const super::types:: SSL, out : *const u8, olen : u64, label : *const i8, llen : u64, context : *const u8, contextlen : u64, use_context : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_export_keying_material(s : *mut super::types:: SSL, out : *mut u8, olen : u64, label : *const i8, llen : u64, context : *const u8, contextlen : u64, use_context : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_export_keying_material_early(s : *const super::types:: SSL, out : *const u8, olen : u64, label : *const i8, llen : u64, context : *const u8, contextlen : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_export_keying_material_early(s : *mut super::types:: SSL, out : *mut u8, olen : u64, label : *const i8, llen : u64, context : *const u8, contextlen : u64) -> i32);
 windows_link::link!("ssl" "C" fn SSL_extension_supported(ext_type : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_free(ssl : *const super::types:: SSL));
+windows_link::link!("ssl" "C" fn SSL_free(ssl : *mut super::types:: SSL));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_free_buffers(ssl : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_free_buffers(ssl : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get0_CA_list(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_alpn_selected(ssl : *const super::types:: SSL, data : *const *const u8, len : *const u32));
+windows_link::link!("ssl" "C" fn SSL_get0_alpn_selected(ssl : *const super::types:: SSL, data : *mut *mut u8, len : *mut u32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_dane(ssl : *const super::types:: SSL) -> *mut super::types:: SSL_DANE);
+windows_link::link!("ssl" "C" fn SSL_get0_dane(ssl : *mut super::types:: SSL) -> *mut super::types:: SSL_DANE);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_dane_authority(s : *const super::types:: SSL, mcert : *const *const super::types:: X509, mspki : *const *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get0_dane_authority(s : *mut super::types:: SSL, mcert : *mut *mut super::types:: X509, mspki : *mut *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_dane_tlsa(s : *const super::types:: SSL, usage : *const u8, selector : *const u8, mtype : *const u8, data : *const *const u8, dlen : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get0_dane_tlsa(s : *mut super::types:: SSL, usage : *mut u8, selector : *mut u8, mtype : *mut u8, data : *mut *mut u8, dlen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_next_proto_negotiated(s : *const super::types:: SSL, data : *const *const u8, len : *const u32));
+windows_link::link!("ssl" "C" fn SSL_get0_next_proto_negotiated(s : *const super::types:: SSL, data : *mut *mut u8, len : *mut u32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_param(ssl : *const super::types:: SSL) -> *mut super::types:: X509_VERIFY_PARAM);
+windows_link::link!("ssl" "C" fn SSL_get0_param(ssl : *mut super::types:: SSL) -> *mut super::types:: X509_VERIFY_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get0_peer_CA_list(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get0_peer_certificate(s : *const super::types:: SSL) -> *mut super::types:: X509);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_peer_scts(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_get0_peer_scts(s : *mut super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get0_peername(s : *const super::types:: SSL) -> *mut i8);
+windows_link::link!("ssl" "C" fn SSL_get0_peername(s : *mut super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get0_security_ex_data(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
@@ -556,19 +556,19 @@ windows_link::link!("ssl" "C" fn SSL_get0_verified_chain(s : *const super::types
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get1_peer_certificate(s : *const super::types:: SSL) -> *mut super::types:: X509);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get1_session(ssl : *const super::types:: SSL) -> *mut SSL_SESSION);
+windows_link::link!("ssl" "C" fn SSL_get1_session(ssl : *mut super::types:: SSL) -> *mut SSL_SESSION);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get1_supported_ciphers(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_get1_supported_ciphers(s : *mut super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_SSL_CTX(ssl : *const super::types:: SSL) -> *mut super::types:: SSL_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_all_async_fds(s : *const super::types:: SSL, fds : *const i32, numfds : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_all_async_fds(s : *mut super::types:: SSL, fds : *mut i32, numfds : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_async_status(s : *const super::types:: SSL, status : *const i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_async_status(s : *mut super::types:: SSL, status : *mut i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_certificate(ssl : *const super::types:: SSL) -> *mut super::types:: X509);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_changed_async_fds(s : *const super::types:: SSL, addfd : *const i32, numaddfds : *const u64, delfd : *const i32, numdelfds : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_changed_async_fds(s : *mut super::types:: SSL, addfd : *mut i32, numaddfds : *mut u64, delfd : *mut i32, numdelfds : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_cipher_list(s : *const super::types:: SSL, n : i32) -> *mut i8);
 #[cfg(feature = "types")]
@@ -578,7 +578,7 @@ windows_link::link!("ssl" "C" fn SSL_get_client_CA_list(s : *const super::types:
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_client_ciphers(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_client_random(ssl : *const super::types:: SSL, out : *const u8, outlen : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_get_client_random(ssl : *const super::types:: SSL, out : *mut u8, outlen : u64) -> u64);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_current_cipher(s : *const super::types:: SSL) -> *mut SSL_CIPHER);
 #[cfg(feature = "types")]
@@ -586,9 +586,9 @@ windows_link::link!("ssl" "C" fn SSL_get_current_compression(s : *const super::t
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_current_expansion(s : *const super::types:: SSL) -> *mut super::types:: COMP_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_default_passwd_cb(s : *const super::types:: SSL) -> *mut super::types:: pem_password_cb);
+windows_link::link!("ssl" "C" fn SSL_get_default_passwd_cb(s : *mut super::types:: SSL) -> *mut super::types:: pem_password_cb);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_default_passwd_cb_userdata(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_get_default_passwd_cb_userdata(s : *mut super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_default_timeout(s : *const super::types:: SSL) -> i64);
 #[cfg(feature = "types")]
@@ -601,7 +601,7 @@ windows_link::link!("ssl" "C" fn SSL_get_ex_data_X509_STORE_CTX_idx() -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_fd(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_finished(s : *const super::types:: SSL, buf : *const core::ffi::c_void, count : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_get_finished(s : *const super::types:: SSL, buf : *mut core::ffi::c_void, count : u64) -> u64);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_info_callback(ssl : *const super::types:: SSL) -> *mut isize);
 #[cfg(feature = "types")]
@@ -615,9 +615,9 @@ windows_link::link!("ssl" "C" fn SSL_get_options(s : *const super::types:: SSL) 
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_peer_cert_chain(s : *const super::types:: SSL) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_peer_finished(s : *const super::types:: SSL, buf : *const core::ffi::c_void, count : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_get_peer_finished(s : *const super::types:: SSL, buf : *mut core::ffi::c_void, count : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_peer_signature_type_nid(s : *const super::types:: SSL, pnid : *const i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_peer_signature_type_nid(s : *const super::types:: SSL, pnid : *mut i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_pending_cipher(s : *const super::types:: SSL) -> *mut SSL_CIPHER);
 #[cfg(feature = "types")]
@@ -643,7 +643,7 @@ windows_link::link!("ssl" "C" fn SSL_get_security_callback(s : *const super::typ
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_security_level(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_server_random(ssl : *const super::types:: SSL, out : *const u8, outlen : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_get_server_random(ssl : *const super::types:: SSL, out : *mut u8, outlen : u64) -> u64);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_servername(s : *const super::types:: SSL, r#type : i32) -> *mut i8);
 #[cfg(feature = "types")]
@@ -651,23 +651,23 @@ windows_link::link!("ssl" "C" fn SSL_get_servername_type(s : *const super::types
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_session(ssl : *const super::types:: SSL) -> *mut SSL_SESSION);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_shared_ciphers(s : *const super::types:: SSL, buf : *const i8, size : i32) -> *mut i8);
+windows_link::link!("ssl" "C" fn SSL_get_shared_ciphers(s : *const super::types:: SSL, buf : *mut i8, size : i32) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_shared_sigalgs(s : *const super::types:: SSL, idx : i32, psign : *const i32, phash : *const i32, psignandhash : *const i32, rsig : *const u8, rhash : *const u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_shared_sigalgs(s : *mut super::types:: SSL, idx : i32, psign : *mut i32, phash : *mut i32, psignandhash : *mut i32, rsig : *mut u8, rhash : *mut u8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_shutdown(ssl : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_sigalgs(s : *const super::types:: SSL, idx : i32, psign : *const i32, phash : *const i32, psignandhash : *const i32, rsig : *const u8, rhash : *const u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_sigalgs(s : *mut super::types:: SSL, idx : i32, psign : *mut i32, phash : *mut i32, psignandhash : *mut i32, rsig : *mut u8, rhash : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_signature_type_nid(s : *const super::types:: SSL, pnid : *const i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_get_signature_type_nid(s : *const super::types:: SSL, pnid : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_srp_N(s : *const super::types:: SSL) -> *mut super::types:: BIGNUM);
+windows_link::link!("ssl" "C" fn SSL_get_srp_N(s : *mut super::types:: SSL) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_srp_g(s : *const super::types:: SSL) -> *mut super::types:: BIGNUM);
+windows_link::link!("ssl" "C" fn SSL_get_srp_g(s : *mut super::types:: SSL) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_srp_userinfo(s : *const super::types:: SSL) -> *mut i8);
+windows_link::link!("ssl" "C" fn SSL_get_srp_userinfo(s : *mut super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_get_srp_username(s : *const super::types:: SSL) -> *mut i8);
+windows_link::link!("ssl" "C" fn SSL_get_srp_username(s : *mut super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_ssl_method(s : *const super::types:: SSL) -> *mut SSL_METHOD);
 #[cfg(feature = "types")]
@@ -687,7 +687,7 @@ windows_link::link!("ssl" "C" fn SSL_get_wbio(s : *const super::types:: SSL) -> 
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_get_wfd(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_group_to_name(s : *const super::types:: SSL, id : i32) -> *mut i8);
+windows_link::link!("ssl" "C" fn SSL_group_to_name(s : *mut super::types:: SSL, id : i32) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_has_matching_session_id(s : *const super::types:: SSL, id : *const u8, id_len : u32) -> i32);
 #[cfg(feature = "types")]
@@ -703,224 +703,224 @@ windows_link::link!("ssl" "C" fn SSL_is_init_finished(s : *const super::types:: 
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_is_server(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_key_update(s : *const super::types:: SSL, updatetype : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_key_update(s : *mut super::types:: SSL, updatetype : i32) -> i32);
 windows_link::link!("ssl" "C" fn SSL_load_client_CA_file(file : *const i8) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_load_client_CA_file_ex(file : *const i8, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn SSL_load_client_CA_file_ex(file : *const i8, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_new(ctx : *const super::types:: SSL_CTX) -> *mut super::types:: SSL);
+windows_link::link!("ssl" "C" fn SSL_new(ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: SSL);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_new_session_ticket(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_new_session_ticket(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_peek(ssl : *const super::types:: SSL, buf : *const core::ffi::c_void, num : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_peek(ssl : *mut super::types:: SSL, buf : *mut core::ffi::c_void, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_peek_ex(ssl : *const super::types:: SSL, buf : *const core::ffi::c_void, num : u64, readbytes : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_peek_ex(ssl : *mut super::types:: SSL, buf : *mut core::ffi::c_void, num : u64, readbytes : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_pending(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_read(ssl : *const super::types:: SSL, buf : *const core::ffi::c_void, num : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_read(ssl : *mut super::types:: SSL, buf : *mut core::ffi::c_void, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_read_early_data(s : *const super::types:: SSL, buf : *const core::ffi::c_void, num : u64, readbytes : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_read_early_data(s : *mut super::types:: SSL, buf : *mut core::ffi::c_void, num : u64, readbytes : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_read_ex(ssl : *const super::types:: SSL, buf : *const core::ffi::c_void, num : u64, readbytes : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_read_ex(ssl : *mut super::types:: SSL, buf : *mut core::ffi::c_void, num : u64, readbytes : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_renegotiate(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_renegotiate(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_renegotiate_abbreviated(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_renegotiate_abbreviated(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_renegotiate_pending(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_rstate_string(s : *const super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_rstate_string_long(s : *const super::types:: SSL) -> *mut i8);
-windows_link::link!("ssl" "C" fn SSL_select_next_proto(out : *const *const u8, outlen : *const u8, r#in : *const u8, inlen : u32, client : *const u8, client_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_select_next_proto(out : *mut *mut u8, outlen : *mut u8, r#in : *const u8, inlen : u32, client : *const u8, client_len : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_sendfile(s : *const super::types:: SSL, fd : i32, offset : i64, size : u64, flags : i32) -> i64);
+windows_link::link!("ssl" "C" fn SSL_sendfile(s : *mut super::types:: SSL, fd : i32, offset : i64, size : u64, flags : i32) -> i64);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_session_reused(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set0_CA_list(s : *const super::types:: SSL, name_list : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set0_CA_list(s : *mut super::types:: SSL, name_list : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set0_rbio(s : *const super::types:: SSL, rbio : *const super::types:: BIO));
+windows_link::link!("ssl" "C" fn SSL_set0_rbio(s : *mut super::types:: SSL, rbio : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set0_security_ex_data(s : *const super::types:: SSL, ex : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set0_security_ex_data(s : *mut super::types:: SSL, ex : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set0_tmp_dh_pkey(s : *const super::types:: SSL, dhpkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set0_tmp_dh_pkey(s : *mut super::types:: SSL, dhpkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set0_wbio(s : *const super::types:: SSL, wbio : *const super::types:: BIO));
+windows_link::link!("ssl" "C" fn SSL_set0_wbio(s : *mut super::types:: SSL, wbio : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set1_host(s : *const super::types:: SSL, hostname : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set1_host(s : *mut super::types:: SSL, hostname : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set1_param(ssl : *const super::types:: SSL, vpm : *const super::types:: X509_VERIFY_PARAM) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set1_param(ssl : *mut super::types:: SSL, vpm : *mut super::types:: X509_VERIFY_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_SSL_CTX(ssl : *const super::types:: SSL, ctx : *const super::types:: SSL_CTX) -> *mut super::types:: SSL_CTX);
+windows_link::link!("ssl" "C" fn SSL_set_SSL_CTX(ssl : *mut super::types:: SSL, ctx : *mut super::types:: SSL_CTX) -> *mut super::types:: SSL_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_accept_state(s : *const super::types:: SSL));
+windows_link::link!("ssl" "C" fn SSL_set_accept_state(s : *mut super::types:: SSL));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_allow_early_data_cb(s : *const super::types:: SSL, cb : SSL_allow_early_data_cb_fn, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set_allow_early_data_cb(s : *mut super::types:: SSL, cb : SSL_allow_early_data_cb_fn, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_alpn_protos(ssl : *const super::types:: SSL, protos : *const u8, protos_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_alpn_protos(ssl : *mut super::types:: SSL, protos : *const u8, protos_len : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_async_callback(s : *const super::types:: SSL, callback : SSL_async_callback_fn) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_async_callback(s : *mut super::types:: SSL, callback : SSL_async_callback_fn) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_async_callback_arg(s : *const super::types:: SSL, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_async_callback_arg(s : *mut super::types:: SSL, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_bio(s : *const super::types:: SSL, rbio : *const super::types:: BIO, wbio : *const super::types:: BIO));
+windows_link::link!("ssl" "C" fn SSL_set_bio(s : *mut super::types:: SSL, rbio : *mut super::types:: BIO, wbio : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_block_padding(ssl : *const super::types:: SSL, block_size : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_block_padding(ssl : *mut super::types:: SSL, block_size : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_cert_cb(s : *const super::types:: SSL, cb : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set_cert_cb(s : *mut super::types:: SSL, cb : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_cipher_list(s : *const super::types:: SSL, str : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_cipher_list(s : *mut super::types:: SSL, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_ciphersuites(s : *const super::types:: SSL, str : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_ciphersuites(s : *mut super::types:: SSL, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_client_CA_list(s : *const super::types:: SSL, name_list : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set_client_CA_list(s : *mut super::types:: SSL, name_list : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_connect_state(s : *const super::types:: SSL));
+windows_link::link!("ssl" "C" fn SSL_set_connect_state(s : *mut super::types:: SSL));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_ct_validation_callback(s : *const super::types:: SSL, callback : ssl_ct_validation_cb, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_ct_validation_callback(s : *mut super::types:: SSL, callback : ssl_ct_validation_cb, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_debug(s : *const super::types:: SSL, debug : i32));
+windows_link::link!("ssl" "C" fn SSL_set_debug(s : *mut super::types:: SSL, debug : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_default_passwd_cb(s : *const super::types:: SSL, cb : *const super::types:: pem_password_cb));
+windows_link::link!("ssl" "C" fn SSL_set_default_passwd_cb(s : *mut super::types:: SSL, cb : *mut super::types:: pem_password_cb));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_default_passwd_cb_userdata(s : *const super::types:: SSL, u : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set_default_passwd_cb_userdata(s : *mut super::types:: SSL, u : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_default_read_buffer_len(s : *const super::types:: SSL, len : u64));
+windows_link::link!("ssl" "C" fn SSL_set_default_read_buffer_len(s : *mut super::types:: SSL, len : u64));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_ex_data(ssl : *const super::types:: SSL, idx : i32, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_ex_data(ssl : *mut super::types:: SSL, idx : i32, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_fd(s : *const super::types:: SSL, fd : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_fd(s : *mut super::types:: SSL, fd : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_generate_session_id(s : *const super::types:: SSL, cb : GEN_SESSION_CB) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_generate_session_id(s : *mut super::types:: SSL, cb : GEN_SESSION_CB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_hostflags(s : *const super::types:: SSL, flags : u32));
+windows_link::link!("ssl" "C" fn SSL_set_hostflags(s : *mut super::types:: SSL, flags : u32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_info_callback(ssl : *const super::types:: SSL, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_set_info_callback(ssl : *mut super::types:: SSL, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_max_early_data(s : *const super::types:: SSL, max_early_data : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_max_early_data(s : *mut super::types:: SSL, max_early_data : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_msg_callback(ssl : *const super::types:: SSL, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_set_msg_callback(ssl : *mut super::types:: SSL, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_not_resumable_session_callback(ssl : *const super::types:: SSL, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_set_not_resumable_session_callback(ssl : *mut super::types:: SSL, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_num_tickets(s : *const super::types:: SSL, num_tickets : u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_num_tickets(s : *mut super::types:: SSL, num_tickets : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_options(s : *const super::types:: SSL, op : u64) -> u64);
+windows_link::link!("ssl" "C" fn SSL_set_options(s : *mut super::types:: SSL, op : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_post_handshake_auth(s : *const super::types:: SSL, val : i32));
+windows_link::link!("ssl" "C" fn SSL_set_post_handshake_auth(s : *mut super::types:: SSL, val : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_psk_client_callback(ssl : *const super::types:: SSL, cb : SSL_psk_client_cb_func));
+windows_link::link!("ssl" "C" fn SSL_set_psk_client_callback(ssl : *mut super::types:: SSL, cb : SSL_psk_client_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_psk_find_session_callback(s : *const super::types:: SSL, cb : SSL_psk_find_session_cb_func));
+windows_link::link!("ssl" "C" fn SSL_set_psk_find_session_callback(s : *mut super::types:: SSL, cb : SSL_psk_find_session_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_psk_server_callback(ssl : *const super::types:: SSL, cb : SSL_psk_server_cb_func));
+windows_link::link!("ssl" "C" fn SSL_set_psk_server_callback(ssl : *mut super::types:: SSL, cb : SSL_psk_server_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_psk_use_session_callback(s : *const super::types:: SSL, cb : SSL_psk_use_session_cb_func));
+windows_link::link!("ssl" "C" fn SSL_set_psk_use_session_callback(s : *mut super::types:: SSL, cb : SSL_psk_use_session_cb_func));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_purpose(ssl : *const super::types:: SSL, purpose : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_purpose(ssl : *mut super::types:: SSL, purpose : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_quiet_shutdown(ssl : *const super::types:: SSL, mode : i32));
+windows_link::link!("ssl" "C" fn SSL_set_quiet_shutdown(ssl : *mut super::types:: SSL, mode : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_read_ahead(s : *const super::types:: SSL, yes : i32));
+windows_link::link!("ssl" "C" fn SSL_set_read_ahead(s : *mut super::types:: SSL, yes : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_record_padding_callback(ssl : *const super::types:: SSL, cb : *const isize) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_record_padding_callback(ssl : *mut super::types:: SSL, cb : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_record_padding_callback_arg(ssl : *const super::types:: SSL, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_set_record_padding_callback_arg(ssl : *mut super::types:: SSL, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_recv_max_early_data(s : *const super::types:: SSL, recv_max_early_data : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_recv_max_early_data(s : *mut super::types:: SSL, recv_max_early_data : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_rfd(s : *const super::types:: SSL, fd : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_rfd(s : *mut super::types:: SSL, fd : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_security_callback(s : *const super::types:: SSL, cb : *const isize));
+windows_link::link!("ssl" "C" fn SSL_set_security_callback(s : *mut super::types:: SSL, cb : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_security_level(s : *const super::types:: SSL, level : i32));
+windows_link::link!("ssl" "C" fn SSL_set_security_level(s : *mut super::types:: SSL, level : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_session(to : *const super::types:: SSL, session : *const SSL_SESSION) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_session(to : *mut super::types:: SSL, session : *mut SSL_SESSION) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_session_id_context(ssl : *const super::types:: SSL, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_session_id_context(ssl : *mut super::types:: SSL, sid_ctx : *const u8, sid_ctx_len : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_session_secret_cb(s : *const super::types:: SSL, session_secret_cb : tls_session_secret_cb_fn, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_session_secret_cb(s : *mut super::types:: SSL, session_secret_cb : tls_session_secret_cb_fn, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_session_ticket_ext(s : *const super::types:: SSL, ext_data : *const core::ffi::c_void, ext_len : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_session_ticket_ext(s : *mut super::types:: SSL, ext_data : *mut core::ffi::c_void, ext_len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_session_ticket_ext_cb(s : *const super::types:: SSL, cb : tls_session_ticket_ext_cb_fn, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_session_ticket_ext_cb(s : *mut super::types:: SSL, cb : tls_session_ticket_ext_cb_fn, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_shutdown(ssl : *const super::types:: SSL, mode : i32));
+windows_link::link!("ssl" "C" fn SSL_set_shutdown(ssl : *mut super::types:: SSL, mode : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_srp_server_param(s : *const super::types:: SSL, n : *const super::types:: BIGNUM, g : *const super::types:: BIGNUM, sa : *const super::types:: BIGNUM, v : *const super::types:: BIGNUM, info : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_srp_server_param(s : *mut super::types:: SSL, n : *const super::types:: BIGNUM, g : *const super::types:: BIGNUM, sa : *mut super::types:: BIGNUM, v : *mut super::types:: BIGNUM, info : *mut i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_srp_server_param_pw(s : *const super::types:: SSL, user : *const i8, pass : *const i8, grp : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_srp_server_param_pw(s : *mut super::types:: SSL, user : *const i8, pass : *const i8, grp : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_ssl_method(s : *const super::types:: SSL, method : *const SSL_METHOD) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_ssl_method(s : *mut super::types:: SSL, method : *const SSL_METHOD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_tlsext_max_fragment_length(ssl : *const super::types:: SSL, mode : u8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_tlsext_max_fragment_length(ssl : *mut super::types:: SSL, mode : u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_tmp_dh_callback(ssl : *const super::types:: SSL, dh : *const isize));
+windows_link::link!("ssl" "C" fn SSL_set_tmp_dh_callback(ssl : *mut super::types:: SSL, dh : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_trust(ssl : *const super::types:: SSL, trust : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_trust(ssl : *mut super::types:: SSL, trust : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_verify(s : *const super::types:: SSL, mode : i32, callback : SSL_verify_cb));
+windows_link::link!("ssl" "C" fn SSL_set_verify(s : *mut super::types:: SSL, mode : i32, callback : SSL_verify_cb));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_verify_depth(s : *const super::types:: SSL, depth : i32));
+windows_link::link!("ssl" "C" fn SSL_set_verify_depth(s : *mut super::types:: SSL, depth : i32));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_verify_result(ssl : *const super::types:: SSL, v : i64));
+windows_link::link!("ssl" "C" fn SSL_set_verify_result(ssl : *mut super::types:: SSL, v : i64));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_set_wfd(s : *const super::types:: SSL, fd : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_set_wfd(s : *mut super::types:: SSL, fd : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_shutdown(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_shutdown(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_srp_server_param_with_username(s : *const super::types:: SSL, ad : *const i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_srp_server_param_with_username(s : *mut super::types:: SSL, ad : *mut i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_state_string(s : *const super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_state_string_long(s : *const super::types:: SSL) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_stateless(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_stateless(s : *mut super::types:: SSL) -> i32);
 windows_link::link!("ssl" "C" fn SSL_test_functions() -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_trace(write_p : i32, version : i32, content_type : i32, buf : *const core::ffi::c_void, len : u64, ssl : *const super::types:: SSL, arg : *const core::ffi::c_void));
+windows_link::link!("ssl" "C" fn SSL_trace(write_p : i32, version : i32, content_type : i32, buf : *const core::ffi::c_void, len : u64, ssl : *mut super::types:: SSL, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_up_ref(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_up_ref(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_PrivateKey(ssl : *const super::types:: SSL, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_PrivateKey(ssl : *mut super::types:: SSL, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_PrivateKey_ASN1(pk : i32, ssl : *const super::types:: SSL, d : *const u8, len : i64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_PrivateKey_ASN1(pk : i32, ssl : *mut super::types:: SSL, d : *const u8, len : i64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_PrivateKey_file(ssl : *const super::types:: SSL, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_PrivateKey_file(ssl : *mut super::types:: SSL, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey(ssl : *const super::types:: SSL, rsa : *const super::types:: RSA) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey(ssl : *mut super::types:: SSL, rsa : *mut super::types:: RSA) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey_ASN1(ssl : *const super::types:: SSL, d : *const u8, len : i64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey_ASN1(ssl : *mut super::types:: SSL, d : *const u8, len : i64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey_file(ssl : *const super::types:: SSL, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_RSAPrivateKey_file(ssl : *mut super::types:: SSL, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_cert_and_key(ssl : *const super::types:: SSL, x509 : *const super::types:: X509, privatekey : *const super::types:: EVP_PKEY, chain : *const core::ffi::c_void, r#override : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_cert_and_key(ssl : *mut super::types:: SSL, x509 : *mut super::types:: X509, privatekey : *mut super::types:: EVP_PKEY, chain : *mut core::ffi::c_void, r#override : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_certificate(ssl : *const super::types:: SSL, x : *const super::types:: X509) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_certificate(ssl : *mut super::types:: SSL, x : *mut super::types:: X509) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_certificate_ASN1(ssl : *const super::types:: SSL, d : *const u8, len : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_certificate_ASN1(ssl : *mut super::types:: SSL, d : *const u8, len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_certificate_chain_file(ssl : *const super::types:: SSL, file : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_certificate_chain_file(ssl : *mut super::types:: SSL, file : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_certificate_file(ssl : *const super::types:: SSL, file : *const i8, r#type : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_certificate_file(ssl : *mut super::types:: SSL, file : *const i8, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_use_psk_identity_hint(s : *const super::types:: SSL, identity_hint : *const i8) -> i32);
+windows_link::link!("ssl" "C" fn SSL_use_psk_identity_hint(s : *mut super::types:: SSL, identity_hint : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_verify_client_post_handshake(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_verify_client_post_handshake(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_version(ssl : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_waiting_for_async(s : *const super::types:: SSL) -> i32);
+windows_link::link!("ssl" "C" fn SSL_waiting_for_async(s : *mut super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("ssl" "C" fn SSL_want(s : *const super::types:: SSL) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_write(ssl : *const super::types:: SSL, buf : *const core::ffi::c_void, num : i32) -> i32);
+windows_link::link!("ssl" "C" fn SSL_write(ssl : *mut super::types:: SSL, buf : *const core::ffi::c_void, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_write_early_data(s : *const super::types:: SSL, buf : *const core::ffi::c_void, num : u64, written : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_write_early_data(s : *mut super::types:: SSL, buf : *const core::ffi::c_void, num : u64, written : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("ssl" "C" fn SSL_write_ex(s : *const super::types:: SSL, buf : *const core::ffi::c_void, num : u64, written : *const u64) -> i32);
+windows_link::link!("ssl" "C" fn SSL_write_ex(s : *mut super::types:: SSL, buf : *const core::ffi::c_void, num : u64, written : *mut u64) -> i32);
 windows_link::link!("ssl" "C" fn TLS_client_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn TLS_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn TLS_server_method() -> *mut SSL_METHOD);
@@ -933,23 +933,23 @@ windows_link::link!("ssl" "C" fn TLSv1_2_server_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn TLSv1_client_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn TLSv1_method() -> *mut SSL_METHOD);
 windows_link::link!("ssl" "C" fn TLSv1_server_method() -> *mut SSL_METHOD);
-windows_link::link!("ssl" "C" fn d2i_SSL_SESSION(a : *const *const SSL_SESSION, pp : *const *const u8, length : i64) -> *mut SSL_SESSION);
-windows_link::link!("ssl" "C" fn i2d_SSL_SESSION(r#in : *const SSL_SESSION, pp : *const *const u8) -> i32);
+windows_link::link!("ssl" "C" fn d2i_SSL_SESSION(a : *mut *mut SSL_SESSION, pp : *mut *mut u8, length : i64) -> *mut SSL_SESSION);
+windows_link::link!("ssl" "C" fn i2d_SSL_SESSION(r#in : *const SSL_SESSION, pp : *mut *mut u8) -> i32);
 windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_compfunc_type(cmp : sk_SRTP_PROTECTION_PROFILE_compfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_copyfunc_type(cpy : sk_SRTP_PROTECTION_PROFILE_copyfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_freefunc_type(fr : sk_SRTP_PROTECTION_PROFILE_freefunc) -> *mut isize);
-windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
-windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_type(ptr : *const SRTP_PROTECTION_PROFILE) -> *mut SRTP_PROTECTION_PROFILE);
+windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_sk_type(sk : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn ossl_check_SRTP_PROTECTION_PROFILE_type(ptr : *mut SRTP_PROTECTION_PROFILE) -> *mut SRTP_PROTECTION_PROFILE);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_compfunc_type(cmp : sk_SSL_CIPHER_compfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_copyfunc_type(cpy : sk_SSL_CIPHER_copyfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_freefunc_type(fr : sk_SSL_CIPHER_freefunc) -> *mut isize);
-windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_sk_type(sk : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_CIPHER_type(ptr : *const SSL_CIPHER) -> *mut SSL_CIPHER);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_compfunc_type(cmp : sk_SSL_COMP_compfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_copyfunc_type(cpy : sk_SSL_COMP_copyfunc) -> *mut isize);
 windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_freefunc_type(fr : sk_SSL_COMP_freefunc) -> *mut isize);
-windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
-windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_type(ptr : *const SSL_COMP) -> *mut SSL_COMP);
+windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_sk_type(sk : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("ssl" "C" fn ossl_check_SSL_COMP_type(ptr : *mut SSL_COMP) -> *mut SSL_COMP);
 windows_link::link!("ssl" "C" fn ossl_check_const_SRTP_PROTECTION_PROFILE_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
 windows_link::link!("ssl" "C" fn ossl_check_const_SSL_CIPHER_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
 windows_link::link!("ssl" "C" fn ossl_check_const_SSL_COMP_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);

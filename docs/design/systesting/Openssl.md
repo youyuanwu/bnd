@@ -388,7 +388,7 @@ public fields, but wrapped in `#ifndef OPENSSL_NO_DEPRECATED_3_0`
 | 2 | Two shared libraries (`crypto`, `ssl`) | Worked — needed `build.rs` with `cargo:rustc-link-lib` directives |
 | 3 | `__owur` / deprecation attributes | No issue — clang strips attributes from AST |
 | 4 | `STACK_OF(TYPE)` macro types | No issue — clang expands to real struct names, opaque ones map to `isize` |
-| 5 | `const EVP_MD *` returns | Worked — `PtrConst` → `*mut isize` as expected |
+| 5 | `const EVP_MD *` returns | Worked — `PtrConst` → `*mut isize` as expected. Mutable pointer params now correctly emit `*mut` via `ParamAttributes::Out` fix ([bug doc](../../bugs/pointer-mutability-lost.md)) |
 | 6 | Variadic functions | Auto-skipped with warnings, same as bnd-posix |
 | 7 | Deprecated structs behind `#ifdef` | Visible by default on Ubuntu (`OPENSSL_NO_DEPRECATED_3_0` not defined) |
 | 8 | Macro aliases (`EVP_MD_CTX_create`) | Not extracted (expected) — underlying real functions are available |
@@ -563,7 +563,7 @@ E2E tests live in `bnd-openssl/tests/`, one per partition:
    Added bn, evp, sha, bio, ssl; skipped err (LHASH issue); fixed
    crypto traverse (struct_tm.h, struct_FILE.h) and ssl traverse (tls1.h)
 8. ✅ Write E2E tests in `bnd-openssl/tests/` (per-partition files)
-9. ⬜ Update `docs/WIP.md` — add OpenSSL to candidate/status table
+9. ✅ Update `docs/WIP.md` — added OpenSSL to system library testing section
 10. ✅ Verify all tests pass: `cargo test` (full workspace)
 
 ### Iterative Approach (Actual)

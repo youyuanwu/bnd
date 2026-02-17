@@ -317,7 +317,16 @@ fn emit_function(
     file.ImplMap(method, pinvoke_flags, &f.name, library);
 
     for (i, param) in f.params.iter().enumerate() {
-        file.Param(&param.name, (i + 1) as u16, ParamAttributes::default());
+        // windows-bindgen treats non-Out parameters as input and applies
+        // to_const_ptr(), converting PtrMut → PtrConst → `*const`.
+        // Set ParamAttributes::Out on mutable pointer params so that
+        // windows-bindgen preserves `*mut` in the generated Rust.
+        let attrs = if param.ty.is_outer_ptr_mut() {
+            ParamAttributes::Out
+        } else {
+            ParamAttributes::default()
+        };
+        file.Param(&param.name, (i + 1) as u16, attrs);
     }
 
     debug!(name = %f.name, params = f.params.len(), "emitted function");
@@ -380,10 +389,12 @@ fn ctype_to_wintype(ctype: &CType, default_namespace: &str, registry: &TypeRegis
             pointee,
             is_const: _,
         } => {
-            // Always emit PtrMut — windows-bindgen cannot parse nested
-            // PtrConst blobs (ELEMENT_TYPE_CMOD_REQD mid-chain panics in
-            // from_blob_impl). Const-ness is tracked by ConstAttribute on
-            // method parameters instead.
+            // Always emit PtrMut in the type blob — windows-bindgen cannot
+            // parse nested PtrConst blobs (ELEMENT_TYPE_CMOD_REQD mid-chain
+            // panics in from_blob_impl). Mutability for parameters is
+            // controlled by ParamAttributes::Out on the Param row: non-Out
+            // params get to_const_ptr() applied by windows-bindgen, producing
+            // `*const`; Out params preserve `*mut`. See emit_function().
             let inner = ctype_to_wintype(pointee, default_namespace, registry);
             Type::PtrMut(Box::new(inner), 1)
         }

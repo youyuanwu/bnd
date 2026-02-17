@@ -113,10 +113,10 @@ fn sighandler_type_is_option_fn_pointer() {
 #[test]
 fn sigemptyset_and_sigaddset() {
     let mut set = pthread::__sigset_t::default();
-    let rc = unsafe { signal::sigemptyset(&mut set as *mut _ as *const _) };
+    let rc = unsafe { signal::sigemptyset(&mut set) };
     assert_eq!(rc, 0, "sigemptyset should succeed");
 
-    let rc = unsafe { signal::sigaddset(&mut set as *mut _ as *const _, signal::SIGUSR1) };
+    let rc = unsafe { signal::sigaddset(&mut set, signal::SIGUSR1) };
     assert_eq!(rc, 0, "sigaddset should succeed");
 
     let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGUSR1) };
@@ -129,13 +129,13 @@ fn sigemptyset_and_sigaddset() {
 #[test]
 fn sigfillset_and_sigdelset() {
     let mut set = pthread::__sigset_t::default();
-    let rc = unsafe { signal::sigfillset(&mut set as *mut _ as *const _) };
+    let rc = unsafe { signal::sigfillset(&mut set) };
     assert_eq!(rc, 0, "sigfillset should succeed");
 
     let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGINT) };
     assert_eq!(ismember, 1, "SIGINT should be in a full set");
 
-    let rc = unsafe { signal::sigdelset(&mut set as *mut _ as *const _, signal::SIGINT) };
+    let rc = unsafe { signal::sigdelset(&mut set, signal::SIGINT) };
     assert_eq!(rc, 0, "sigdelset should succeed");
 
     let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGINT) };
@@ -197,10 +197,10 @@ fn sigaction_install_handler() {
 
     // Empty the mask
     unsafe {
-        signal::sigemptyset(&mut sa.sa_mask as *mut _ as *const _);
+        signal::sigemptyset(&mut sa.sa_mask);
     }
 
-    let rc = unsafe { signal::sigaction(signal::SIGUSR2, &sa as *const _, core::ptr::null()) };
+    let rc = unsafe { signal::sigaction(signal::SIGUSR2, &sa as *const _, core::ptr::null_mut()) };
     assert_eq!(rc, 0, "sigaction should succeed");
 
     // Raise SIGUSR2
@@ -216,8 +216,12 @@ fn sigaction_install_handler() {
     // Restore default
     let mut default_sa = signal::sigaction::default();
     unsafe {
-        signal::sigemptyset(&mut default_sa.sa_mask as *mut _ as *const _);
-        signal::sigaction(signal::SIGUSR2, &default_sa as *const _, core::ptr::null());
+        signal::sigemptyset(&mut default_sa.sa_mask);
+        signal::sigaction(
+            signal::SIGUSR2,
+            &default_sa as *const _,
+            core::ptr::null_mut(),
+        );
     }
 }
 
@@ -228,23 +232,18 @@ fn sigaction_install_handler() {
 #[test]
 fn sigprocmask_block_and_pending() {
     let mut block_set = pthread::__sigset_t::default();
-    unsafe { signal::sigemptyset(&mut block_set as *mut _ as *const _) };
-    unsafe { signal::sigaddset(&mut block_set as *mut _ as *const _, signal::SIGUSR1) };
+    unsafe { signal::sigemptyset(&mut block_set) };
+    unsafe { signal::sigaddset(&mut block_set, signal::SIGUSR1) };
 
     // Save old mask and block SIGUSR1
     let mut old_set = pthread::__sigset_t::default();
-    let rc = unsafe {
-        signal::sigprocmask(
-            signal::SIG_BLOCK,
-            &block_set as *const _,
-            &mut old_set as *mut _ as *const _,
-        )
-    };
+    let rc =
+        unsafe { signal::sigprocmask(signal::SIG_BLOCK, &block_set as *const _, &mut old_set) };
     assert_eq!(rc, 0, "sigprocmask SIG_BLOCK should succeed");
 
     // Check pending set — SIGUSR1 should NOT be pending yet (not raised)
     let mut pending = pthread::__sigset_t::default();
-    let rc = unsafe { signal::sigpending(&mut pending as *mut _ as *const _) };
+    let rc = unsafe { signal::sigpending(&mut pending) };
     assert_eq!(rc, 0, "sigpending should succeed");
 
     let is_pending = unsafe { signal::sigismember(&pending as *const _, signal::SIGUSR1) };
@@ -252,7 +251,11 @@ fn sigprocmask_block_and_pending() {
 
     // Restore old mask
     let rc = unsafe {
-        signal::sigprocmask(signal::SIG_SETMASK, &old_set as *const _, core::ptr::null())
+        signal::sigprocmask(
+            signal::SIG_SETMASK,
+            &old_set as *const _,
+            core::ptr::null_mut(),
+        )
     };
     assert_eq!(rc, 0, "sigprocmask SIG_SETMASK restore should succeed");
 }

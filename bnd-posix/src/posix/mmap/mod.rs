@@ -8,18 +8,18 @@
     clippy::all
 )]
 
-windows_link::link!("c" "C" fn madvise(__addr : *const core::ffi::c_void, __len : u64, __advice : i32) -> i32);
-windows_link::link!("c" "C" fn mincore(__start : *const core::ffi::c_void, __len : u64, __vec : *const u8) -> i32);
+windows_link::link!("c" "C" fn madvise(__addr : *mut core::ffi::c_void, __len : u64, __advice : i32) -> i32);
+windows_link::link!("c" "C" fn mincore(__start : *mut core::ffi::c_void, __len : u64, __vec : *mut u8) -> i32);
 windows_link::link!("c" "C" fn mlock(__addr : *const core::ffi::c_void, __len : u64) -> i32);
 windows_link::link!("c" "C" fn mlockall(__flags : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn mmap(__addr : *const core::ffi::c_void, __len : u64, __prot : i32, __flags : i32, __fd : i32, __offset : super::types:: __off_t) -> *mut core::ffi::c_void);
-windows_link::link!("c" "C" fn mprotect(__addr : *const core::ffi::c_void, __len : u64, __prot : i32) -> i32);
-windows_link::link!("c" "C" fn msync(__addr : *const core::ffi::c_void, __len : u64, __flags : i32) -> i32);
+windows_link::link!("c" "C" fn mmap(__addr : *mut core::ffi::c_void, __len : u64, __prot : i32, __flags : i32, __fd : i32, __offset : super::types:: __off_t) -> *mut core::ffi::c_void);
+windows_link::link!("c" "C" fn mprotect(__addr : *mut core::ffi::c_void, __len : u64, __prot : i32) -> i32);
+windows_link::link!("c" "C" fn msync(__addr : *mut core::ffi::c_void, __len : u64, __flags : i32) -> i32);
 windows_link::link!("c" "C" fn munlock(__addr : *const core::ffi::c_void, __len : u64) -> i32);
 windows_link::link!("c" "C" fn munlockall() -> i32);
-windows_link::link!("c" "C" fn munmap(__addr : *const core::ffi::c_void, __len : u64) -> i32);
-windows_link::link!("c" "C" fn posix_madvise(__addr : *const core::ffi::c_void, __len : u64, __advice : i32) -> i32);
+windows_link::link!("c" "C" fn munmap(__addr : *mut core::ffi::c_void, __len : u64) -> i32);
+windows_link::link!("c" "C" fn posix_madvise(__addr : *mut core::ffi::c_void, __len : u64, __advice : i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn shm_open(__name : *const i8, __oflag : i32, __mode : super::types:: mode_t) -> i32);
 windows_link::link!("c" "C" fn shm_unlink(__name : *const i8) -> i32);

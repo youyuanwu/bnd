@@ -33,8 +33,8 @@ pub mod MultiTest {
         }
     }
     pub mod Widgets {
-        windows_link::link!("simple" "C" fn create_widget(name : *const i8, bounds : super::Types:: Rect, out : *const Widget) -> i32);
-        windows_link::link!("simple" "C" fn destroy_widget(w : *const Widget));
+        windows_link::link!("simple" "C" fn create_widget(name : *const i8, bounds : super::Types:: Rect, out : *mut Widget) -> i32);
+        windows_link::link!("simple" "C" fn destroy_widget(w : *mut Widget));
         windows_link::link!("simple" "C" fn widget_count() -> i32);
         #[repr(C, packed(8))]
         #[derive(Clone, Copy)]

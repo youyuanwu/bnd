@@ -10,15 +10,15 @@
 
 windows_link::link!("c" "C" fn __sched_cpualloc(__count : u64) -> *mut cpu_set_t);
 windows_link::link!("c" "C" fn __sched_cpucount(__setsize : u64, __setp : *const cpu_set_t) -> i32);
-windows_link::link!("c" "C" fn __sched_cpufree(__set : *const cpu_set_t));
+windows_link::link!("c" "C" fn __sched_cpufree(__set : *mut cpu_set_t));
 windows_link::link!("c" "C" fn sched_get_priority_max(__algorithm : i32) -> i32);
 windows_link::link!("c" "C" fn sched_get_priority_min(__algorithm : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn sched_getparam(__pid : super::types:: __pid_t, __param : *const sched_param) -> i32);
+windows_link::link!("c" "C" fn sched_getparam(__pid : super::types:: __pid_t, __param : *mut sched_param) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn sched_getscheduler(__pid : super::types:: __pid_t) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn sched_rr_get_interval(__pid : super::types:: __pid_t, __t : *const super::stat:: timespec) -> i32);
+windows_link::link!("c" "C" fn sched_rr_get_interval(__pid : super::types:: __pid_t, __t : *mut super::stat:: timespec) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn sched_setparam(__pid : super::types:: __pid_t, __param : *const sched_param) -> i32);
 #[cfg(feature = "types")]

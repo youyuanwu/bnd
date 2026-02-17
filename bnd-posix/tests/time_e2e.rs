@@ -20,7 +20,7 @@ fn clock_constants() {
 #[test]
 fn time_returns_epoch() {
     unsafe {
-        let t = time::time(core::ptr::null());
+        let t = time::time(core::ptr::null_mut());
         // Should return seconds since epoch — at least year 2024
         assert!(
             t > 1_700_000_000,

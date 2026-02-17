@@ -8,10 +8,10 @@
     clippy::all
 )]
 
-windows_link::link!("c" "C" fn dlclose(__handle : *const core::ffi::c_void) -> i32);
+windows_link::link!("c" "C" fn dlclose(__handle : *mut core::ffi::c_void) -> i32);
 windows_link::link!("c" "C" fn dlerror() -> *mut i8);
 windows_link::link!("c" "C" fn dlopen(__file : *const i8, __mode : i32) -> *mut core::ffi::c_void);
-windows_link::link!("c" "C" fn dlsym(__handle : *const core::ffi::c_void, __name : *const i8) -> *mut core::ffi::c_void);
+windows_link::link!("c" "C" fn dlsym(__handle : *mut core::ffi::c_void, __name : *const i8) -> *mut core::ffi::c_void);
 pub const RTLD_BINDING_MASK: i32 = 3i32;
 pub const RTLD_DEEPBIND: i32 = 8i32;
 pub const RTLD_GLOBAL: i32 = 256i32;

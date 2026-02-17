@@ -115,7 +115,7 @@ fn socketpair_unix() {
             socket::PF_LOCAL,
             socket::SOCK_STREAM as i32,
             0,
-            fds.as_mut_ptr() as *const i32,
+            fds.as_mut_ptr(),
         )
     };
     assert_eq!(rc, 0, "socketpair failed");
@@ -152,8 +152,8 @@ fn getsockname_after_bind() {
     let rc = unsafe {
         socket::getsockname(
             fd,
-            &mut out as *mut _ as *const socket::sockaddr,
-            &mut len as *mut u32 as *const u32,
+            &mut out as *mut _ as *mut socket::sockaddr,
+            &mut len as *mut u32,
         )
     };
     assert_eq!(rc, 0, "getsockname failed");
@@ -217,7 +217,7 @@ fn send_recv_socketpair() {
             socket::PF_LOCAL,
             socket::SOCK_STREAM as i32,
             0,
-            fds.as_mut_ptr() as *const i32,
+            fds.as_mut_ptr(),
         )
     };
     assert_eq!(rc, 0);
@@ -237,7 +237,7 @@ fn send_recv_socketpair() {
     let recvd = unsafe {
         socket::recv(
             fds[1],
-            buf.as_mut_ptr() as *const core::ffi::c_void,
+            buf.as_mut_ptr() as *mut core::ffi::c_void,
             buf.len() as u64,
             0,
         )

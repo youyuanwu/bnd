@@ -30,7 +30,7 @@ fn mmap_anonymous_roundtrip() {
     unsafe {
         let size: u64 = 4096;
         let ptr = mmap::mmap(
-            core::ptr::null(),
+            core::ptr::null_mut(),
             size,
             mmap::PROT_READ | mmap::PROT_WRITE,
             mmap::MAP_PRIVATE | mmap::MAP_ANONYMOUS,
@@ -59,7 +59,7 @@ fn mprotect_guard_page() {
     unsafe {
         let size: u64 = 4096;
         let ptr = mmap::mmap(
-            core::ptr::null(),
+            core::ptr::null_mut(),
             size,
             mmap::PROT_READ | mmap::PROT_WRITE,
             mmap::MAP_PRIVATE | mmap::MAP_ANONYMOUS,

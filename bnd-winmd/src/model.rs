@@ -153,6 +153,20 @@ pub enum CType {
     },
 }
 
+impl CType {
+    /// Returns `true` if the outermost type is a mutable pointer (`T *`,
+    /// i.e. `Ptr { is_const: false }`).
+    pub fn is_outer_ptr_mut(&self) -> bool {
+        matches!(
+            self,
+            CType::Ptr {
+                is_const: false,
+                ..
+            }
+        )
+    }
+}
+
 /// Global type registry — tracks which namespace each named type lives in.
 ///
 /// Built during extraction by scanning all partitions, then used during

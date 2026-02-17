@@ -49,7 +49,7 @@ mod tests {
             };
             let mut widget: Widget = std::mem::zeroed();
 
-            let result = create_widget(name, bounds, &mut widget as *mut Widget as *const Widget);
+            let result = create_widget(name, bounds, &mut widget as *mut Widget);
             assert_eq!(result, 0);
             assert_eq!(widget_count(), 1);
             assert_eq!(widget.color, COLOR_RED);
@@ -59,7 +59,7 @@ mod tests {
             let returned_name = std::ffi::CStr::from_ptr(widget.name);
             assert_eq!(returned_name.to_str().unwrap(), "hello");
 
-            destroy_widget(&mut widget as *mut Widget as *const Widget);
+            destroy_widget(&mut widget as *mut Widget);
             assert_eq!(widget_count(), 0);
         }
     }
@@ -73,7 +73,7 @@ mod tests {
                 width: 0,
                 height: 0,
             };
-            let result = create_widget(std::ptr::null(), bounds, std::ptr::null());
+            let result = create_widget(std::ptr::null(), bounds, std::ptr::null_mut());
             assert_eq!(result, -1);
         }
     }

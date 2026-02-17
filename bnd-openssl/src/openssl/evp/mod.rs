@@ -17,13 +17,13 @@ windows_link::link!("crypto" "C" fn BIO_f_md() -> *mut super::bio:: BIO_METHOD);
 #[cfg(feature = "bio")]
 windows_link::link!("crypto" "C" fn BIO_f_reliable() -> *mut super::bio:: BIO_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_cipher(b : *const super::types:: BIO, c : *const super::types:: EVP_CIPHER, k : *const u8, i : *const u8, enc : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_set_cipher(b : *mut super::types:: BIO, c : *const super::types:: EVP_CIPHER, k : *const u8, i : *const u8, enc : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_ASYM_CIPHER);
+windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_ASYM_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_free(cipher : *const super::types:: EVP_ASYM_CIPHER));
+windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_free(cipher : *mut super::types:: EVP_ASYM_CIPHER));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_get0_description(cipher : *const super::types:: EVP_ASYM_CIPHER) -> *mut i8);
 #[cfg(feature = "types")]
@@ -35,29 +35,29 @@ windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_gettable_ctx_params(ciph : *
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_is_a(cipher : *const super::types:: EVP_ASYM_CIPHER, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_names_do_all(cipher : *const super::types:: EVP_ASYM_CIPHER, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_names_do_all(cipher : *const super::types:: EVP_ASYM_CIPHER, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_settable_ctx_params(ciph : *const super::types:: EVP_ASYM_CIPHER) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_up_ref(cipher : *const super::types:: EVP_ASYM_CIPHER) -> i32);
+windows_link::link!("crypto" "C" fn EVP_ASYM_CIPHER_up_ref(cipher : *mut super::types:: EVP_ASYM_CIPHER) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_BytesToKey(r#type : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, salt : *const u8, data : *const u8, datal : i32, count : i32, key : *const u8, iv : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_BytesToKey(r#type : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, salt : *const u8, data : *const u8, datal : i32, count : i32, key : *mut u8, iv : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_buf_noconst(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_buf_noconst(ctx : *mut super::types:: EVP_CIPHER_CTX) -> *mut u8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_cipher(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_clear_flags(ctx : *const super::types:: EVP_CIPHER_CTX, flags : i32));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_clear_flags(ctx : *mut super::types:: EVP_CIPHER_CTX, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_copy(out : *const super::types:: EVP_CIPHER_CTX, r#in : *const super::types:: EVP_CIPHER_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_copy(out : *mut super::types:: EVP_CIPHER_CTX, r#in : *const super::types:: EVP_CIPHER_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_ctrl(ctx : *const super::types:: EVP_CIPHER_CTX, r#type : i32, arg : i32, ptr : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_ctrl(ctx : *mut super::types:: EVP_CIPHER_CTX, r#type : i32, arg : i32, ptr : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_free(c : *const super::types:: EVP_CIPHER_CTX));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_free(c : *mut super::types:: EVP_CIPHER_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get0_cipher(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get1_cipher(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut super::types:: EVP_CIPHER);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get1_cipher(ctx : *mut super::types:: EVP_CIPHER_CTX) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_app_data(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
@@ -73,57 +73,57 @@ windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_nid(ctx : *const super::t
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_num(ctx : *const super::types:: EVP_CIPHER_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_original_iv(ctx : *const super::types:: EVP_CIPHER_CTX, buf : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_original_iv(ctx : *mut super::types:: EVP_CIPHER_CTX, buf : *mut core::ffi::c_void, len : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_params(ctx : *const super::types:: EVP_CIPHER_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_params(ctx : *mut super::types:: EVP_CIPHER_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_tag_length(ctx : *const super::types:: EVP_CIPHER_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_updated_iv(ctx : *const super::types:: EVP_CIPHER_CTX, buf : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_get_updated_iv(ctx : *mut super::types:: EVP_CIPHER_CTX, buf : *mut core::ffi::c_void, len : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_gettable_params(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_gettable_params(ctx : *mut super::types:: EVP_CIPHER_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_is_encrypting(ctx : *const super::types:: EVP_CIPHER_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_iv(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut u8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_iv_noconst(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_iv_noconst(ctx : *mut super::types:: EVP_CIPHER_CTX) -> *mut u8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_new() -> *mut super::types:: EVP_CIPHER_CTX);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_original_iv(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut u8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_rand_key(ctx : *const super::types:: EVP_CIPHER_CTX, key : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_rand_key(ctx : *mut super::types:: EVP_CIPHER_CTX, key : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_reset(c : *const super::types:: EVP_CIPHER_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_reset(c : *mut super::types:: EVP_CIPHER_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_app_data(ctx : *const super::types:: EVP_CIPHER_CTX, data : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_app_data(ctx : *mut super::types:: EVP_CIPHER_CTX, data : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_cipher_data(ctx : *const super::types:: EVP_CIPHER_CTX, cipher_data : *const core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_cipher_data(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher_data : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_flags(ctx : *const super::types:: EVP_CIPHER_CTX, flags : i32));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_flags(ctx : *mut super::types:: EVP_CIPHER_CTX, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_key_length(x : *const super::types:: EVP_CIPHER_CTX, keylen : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_key_length(x : *mut super::types:: EVP_CIPHER_CTX, keylen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_num(ctx : *const super::types:: EVP_CIPHER_CTX, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_num(ctx : *mut super::types:: EVP_CIPHER_CTX, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_padding(c : *const super::types:: EVP_CIPHER_CTX, pad : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_padding(c : *mut super::types:: EVP_CIPHER_CTX, pad : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_params(ctx : *const super::types:: EVP_CIPHER_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_set_params(ctx : *mut super::types:: EVP_CIPHER_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_settable_params(ctx : *const super::types:: EVP_CIPHER_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_settable_params(ctx : *mut super::types:: EVP_CIPHER_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_CTX_test_flags(ctx : *const super::types:: EVP_CIPHER_CTX, flags : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_asn1_to_param(c : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: ASN1_TYPE) -> i32);
-windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all(r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_asn1_to_param(c : *mut super::types:: EVP_CIPHER_CTX, r#type : *mut super::types:: ASN1_TYPE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all(r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
-windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all_sorted(r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_do_all_sorted(r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_CIPHER);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_free(cipher : *const super::types:: EVP_CIPHER));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_free(cipher : *mut super::types:: EVP_CIPHER));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_get0_description(cipher : *const super::types:: EVP_CIPHER) -> *mut i8);
 #[cfg(feature = "types")]
@@ -131,7 +131,7 @@ windows_link::link!("crypto" "C" fn EVP_CIPHER_get0_name(cipher : *const super::
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_get0_provider(cipher : *const super::types:: EVP_CIPHER) -> *mut super::types:: OSSL_PROVIDER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_get_asn1_iv(c : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: ASN1_TYPE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_get_asn1_iv(c : *mut super::types:: EVP_CIPHER_CTX, r#type : *mut super::types:: ASN1_TYPE) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_get_block_size(cipher : *const super::types:: EVP_CIPHER) -> i32);
 #[cfg(feature = "types")]
@@ -145,7 +145,7 @@ windows_link::link!("crypto" "C" fn EVP_CIPHER_get_mode(cipher : *const super::t
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_get_nid(cipher : *const super::types:: EVP_CIPHER) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_get_params(cipher : *const super::types:: EVP_CIPHER, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_get_params(cipher : *mut super::types:: EVP_CIPHER, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_get_type(cipher : *const super::types:: EVP_CIPHER) -> i32);
 #[cfg(feature = "types")]
@@ -159,7 +159,7 @@ windows_link::link!("crypto" "C" fn EVP_CIPHER_is_a(cipher : *const super::types
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_dup(cipher : *const super::types:: EVP_CIPHER) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_free(cipher : *const super::types:: EVP_CIPHER));
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_free(cipher : *mut super::types:: EVP_CIPHER));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_get_cleanup(cipher : *const super::types:: EVP_CIPHER) -> *mut isize);
 #[cfg(feature = "types")]
@@ -175,135 +175,135 @@ windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_get_set_asn1_params(cipher :
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_new(cipher_type : i32, block_size : i32, key_len : i32) -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_cleanup(cipher : *const super::types:: EVP_CIPHER, cleanup : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_cleanup(cipher : *mut super::types:: EVP_CIPHER, cleanup : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_ctrl(cipher : *const super::types:: EVP_CIPHER, ctrl : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_ctrl(cipher : *mut super::types:: EVP_CIPHER, ctrl : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_do_cipher(cipher : *const super::types:: EVP_CIPHER, do_cipher : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_do_cipher(cipher : *mut super::types:: EVP_CIPHER, do_cipher : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_flags(cipher : *const super::types:: EVP_CIPHER, flags : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_flags(cipher : *mut super::types:: EVP_CIPHER, flags : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_get_asn1_params(cipher : *const super::types:: EVP_CIPHER, get_asn1_parameters : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_get_asn1_params(cipher : *mut super::types:: EVP_CIPHER, get_asn1_parameters : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_impl_ctx_size(cipher : *const super::types:: EVP_CIPHER, ctx_size : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_impl_ctx_size(cipher : *mut super::types:: EVP_CIPHER, ctx_size : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_init(cipher : *const super::types:: EVP_CIPHER, init : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_init(cipher : *mut super::types:: EVP_CIPHER, init : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_iv_length(cipher : *const super::types:: EVP_CIPHER, iv_len : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_iv_length(cipher : *mut super::types:: EVP_CIPHER, iv_len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_set_asn1_params(cipher : *const super::types:: EVP_CIPHER, set_asn1_parameters : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_meth_set_set_asn1_params(cipher : *mut super::types:: EVP_CIPHER, set_asn1_parameters : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_names_do_all(cipher : *const super::types:: EVP_CIPHER, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_names_do_all(cipher : *const super::types:: EVP_CIPHER, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_param_to_asn1(c : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: ASN1_TYPE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_param_to_asn1(c : *mut super::types:: EVP_CIPHER_CTX, r#type : *mut super::types:: ASN1_TYPE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_set_asn1_iv(c : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: ASN1_TYPE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_set_asn1_iv(c : *mut super::types:: EVP_CIPHER_CTX, r#type : *mut super::types:: ASN1_TYPE) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_CIPHER_settable_ctx_params(cipher : *const super::types:: EVP_CIPHER) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CIPHER_up_ref(cipher : *const super::types:: EVP_CIPHER) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CIPHER_up_ref(cipher : *mut super::types:: EVP_CIPHER) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_Cipher(c : *const super::types:: EVP_CIPHER_CTX, out : *const u8, r#in : *const u8, inl : u32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_Cipher(c : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, r#in : *const u8, inl : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherFinal(ctx : *const super::types:: EVP_CIPHER_CTX, outm : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherFinal(ctx : *mut super::types:: EVP_CIPHER_CTX, outm : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherFinal_ex(ctx : *const super::types:: EVP_CIPHER_CTX, outm : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherFinal_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, outm : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherInit(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, enc : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherInit(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, enc : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherInit_ex(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *const super::types:: ENGINE, key : *const u8, iv : *const u8, enc : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherInit_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *mut super::types:: ENGINE, key : *const u8, iv : *const u8, enc : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherInit_ex2(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, enc : i32, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherInit_ex2(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, enc : i32, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_CipherUpdate(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32, r#in : *const u8, inl : i32) -> i32);
-windows_link::link!("crypto" "C" fn EVP_DecodeBlock(t : *const u8, f : *const u8, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_CipherUpdate(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32, r#in : *const u8, inl : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecodeBlock(t : *mut u8, f : *const u8, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecodeFinal(ctx : *const super::types:: EVP_ENCODE_CTX, out : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecodeFinal(ctx : *mut super::types:: EVP_ENCODE_CTX, out : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecodeInit(ctx : *const super::types:: EVP_ENCODE_CTX));
+windows_link::link!("crypto" "C" fn EVP_DecodeInit(ctx : *mut super::types:: EVP_ENCODE_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecodeUpdate(ctx : *const super::types:: EVP_ENCODE_CTX, out : *const u8, outl : *const i32, r#in : *const u8, inl : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecodeUpdate(ctx : *mut super::types:: EVP_ENCODE_CTX, out : *mut u8, outl : *mut i32, r#in : *const u8, inl : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptFinal(ctx : *const super::types:: EVP_CIPHER_CTX, outm : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptFinal(ctx : *mut super::types:: EVP_CIPHER_CTX, outm : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptFinal_ex(ctx : *const super::types:: EVP_CIPHER_CTX, outm : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptFinal_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, outm : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptInit(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptInit(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptInit_ex(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *const super::types:: ENGINE, key : *const u8, iv : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptInit_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *mut super::types:: ENGINE, key : *const u8, iv : *const u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptInit_ex2(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptInit_ex2(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DecryptUpdate(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32, r#in : *const u8, inl : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DecryptUpdate(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32, r#in : *const u8, inl : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_Digest(data : *const core::ffi::c_void, count : u64, md : *const u8, size : *const u32, r#type : *const super::types:: EVP_MD, r#impl : *const super::types:: ENGINE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_Digest(data : *const core::ffi::c_void, count : u64, md : *mut u8, size : *mut u32, r#type : *const super::types:: EVP_MD, r#impl : *mut super::types:: ENGINE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestFinal(ctx : *const super::types:: EVP_MD_CTX, md : *const u8, s : *const u32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestFinal(ctx : *mut super::types:: EVP_MD_CTX, md : *mut u8, s : *mut u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestFinalXOF(ctx : *const super::types:: EVP_MD_CTX, md : *const u8, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestFinalXOF(ctx : *mut super::types:: EVP_MD_CTX, md : *mut u8, len : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestFinal_ex(ctx : *const super::types:: EVP_MD_CTX, md : *const u8, s : *const u32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestFinal_ex(ctx : *mut super::types:: EVP_MD_CTX, md : *mut u8, s : *mut u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestInit(ctx : *const super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestInit(ctx : *mut super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestInit_ex(ctx : *const super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD, r#impl : *const super::types:: ENGINE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestInit_ex(ctx : *mut super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD, r#impl : *mut super::types:: ENGINE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestInit_ex2(ctx : *const super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestInit_ex2(ctx : *mut super::types:: EVP_MD_CTX, r#type : *const super::types:: EVP_MD, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestSign(ctx : *const super::types:: EVP_MD_CTX, sigret : *const u8, siglen : *const u64, tbs : *const u8, tbslen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestSign(ctx : *mut super::types:: EVP_MD_CTX, sigret : *mut u8, siglen : *mut u64, tbs : *const u8, tbslen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestSignFinal(ctx : *const super::types:: EVP_MD_CTX, sigret : *const u8, siglen : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestSignFinal(ctx : *mut super::types:: EVP_MD_CTX, sigret : *mut u8, siglen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestSignInit(ctx : *const super::types:: EVP_MD_CTX, pctx : *const *const super::types:: EVP_PKEY_CTX, r#type : *const super::types:: EVP_MD, e : *const super::types:: ENGINE, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestSignInit(ctx : *mut super::types:: EVP_MD_CTX, pctx : *mut *mut super::types:: EVP_PKEY_CTX, r#type : *const super::types:: EVP_MD, e : *mut super::types:: ENGINE, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestSignInit_ex(ctx : *const super::types:: EVP_MD_CTX, pctx : *const *const super::types:: EVP_PKEY_CTX, mdname : *const i8, libctx : *const super::types:: OSSL_LIB_CTX, props : *const i8, pkey : *const super::types:: EVP_PKEY, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestSignInit_ex(ctx : *mut super::types:: EVP_MD_CTX, pctx : *mut *mut super::types:: EVP_PKEY_CTX, mdname : *const i8, libctx : *mut super::types:: OSSL_LIB_CTX, props : *const i8, pkey : *mut super::types:: EVP_PKEY, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestSignUpdate(ctx : *const super::types:: EVP_MD_CTX, data : *const core::ffi::c_void, dsize : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestSignUpdate(ctx : *mut super::types:: EVP_MD_CTX, data : *const core::ffi::c_void, dsize : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestUpdate(ctx : *const super::types:: EVP_MD_CTX, d : *const core::ffi::c_void, cnt : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestUpdate(ctx : *mut super::types:: EVP_MD_CTX, d : *const core::ffi::c_void, cnt : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestVerify(ctx : *const super::types:: EVP_MD_CTX, sigret : *const u8, siglen : u64, tbs : *const u8, tbslen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestVerify(ctx : *mut super::types:: EVP_MD_CTX, sigret : *const u8, siglen : u64, tbs : *const u8, tbslen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestVerifyFinal(ctx : *const super::types:: EVP_MD_CTX, sig : *const u8, siglen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestVerifyFinal(ctx : *mut super::types:: EVP_MD_CTX, sig : *const u8, siglen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestVerifyInit(ctx : *const super::types:: EVP_MD_CTX, pctx : *const *const super::types:: EVP_PKEY_CTX, r#type : *const super::types:: EVP_MD, e : *const super::types:: ENGINE, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestVerifyInit(ctx : *mut super::types:: EVP_MD_CTX, pctx : *mut *mut super::types:: EVP_PKEY_CTX, r#type : *const super::types:: EVP_MD, e : *mut super::types:: ENGINE, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestVerifyInit_ex(ctx : *const super::types:: EVP_MD_CTX, pctx : *const *const super::types:: EVP_PKEY_CTX, mdname : *const i8, libctx : *const super::types:: OSSL_LIB_CTX, props : *const i8, pkey : *const super::types:: EVP_PKEY, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestVerifyInit_ex(ctx : *mut super::types:: EVP_MD_CTX, pctx : *mut *mut super::types:: EVP_PKEY_CTX, mdname : *const i8, libctx : *mut super::types:: OSSL_LIB_CTX, props : *const i8, pkey : *mut super::types:: EVP_PKEY, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_DigestVerifyUpdate(ctx : *const super::types:: EVP_MD_CTX, data : *const core::ffi::c_void, dsize : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_DigestVerifyUpdate(ctx : *mut super::types:: EVP_MD_CTX, data : *const core::ffi::c_void, dsize : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_copy(dctx : *const super::types:: EVP_ENCODE_CTX, sctx : *const super::types:: EVP_ENCODE_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_copy(dctx : *mut super::types:: EVP_ENCODE_CTX, sctx : *const super::types:: EVP_ENCODE_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_free(ctx : *const super::types:: EVP_ENCODE_CTX));
+windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_free(ctx : *mut super::types:: EVP_ENCODE_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_new() -> *mut super::types:: EVP_ENCODE_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_num(ctx : *const super::types:: EVP_ENCODE_CTX) -> i32);
-windows_link::link!("crypto" "C" fn EVP_EncodeBlock(t : *const u8, f : *const u8, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_ENCODE_CTX_num(ctx : *mut super::types:: EVP_ENCODE_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncodeBlock(t : *mut u8, f : *const u8, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncodeFinal(ctx : *const super::types:: EVP_ENCODE_CTX, out : *const u8, outl : *const i32));
+windows_link::link!("crypto" "C" fn EVP_EncodeFinal(ctx : *mut super::types:: EVP_ENCODE_CTX, out : *mut u8, outl : *mut i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncodeInit(ctx : *const super::types:: EVP_ENCODE_CTX));
+windows_link::link!("crypto" "C" fn EVP_EncodeInit(ctx : *mut super::types:: EVP_ENCODE_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncodeUpdate(ctx : *const super::types:: EVP_ENCODE_CTX, out : *const u8, outl : *const i32, r#in : *const u8, inl : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncodeUpdate(ctx : *mut super::types:: EVP_ENCODE_CTX, out : *mut u8, outl : *mut i32, r#in : *const u8, inl : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptFinal(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptFinal(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptFinal_ex(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptFinal_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptInit(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptInit(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptInit_ex(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *const super::types:: ENGINE, key : *const u8, iv : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptInit_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, r#impl : *mut super::types:: ENGINE, key : *const u8, iv : *const u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptInit_ex2(ctx : *const super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptInit_ex2(ctx : *mut super::types:: EVP_CIPHER_CTX, cipher : *const super::types:: EVP_CIPHER, key : *const u8, iv : *const u8, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_EncryptUpdate(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32, r#in : *const u8, inl : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_EncryptUpdate(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32, r#in : *const u8, inl : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEM_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_KEM_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEM_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEM);
+windows_link::link!("crypto" "C" fn EVP_KEM_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEM_free(wrap : *const super::types:: EVP_KEM));
+windows_link::link!("crypto" "C" fn EVP_KEM_free(wrap : *mut super::types:: EVP_KEM));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEM_get0_description(wrap : *const super::types:: EVP_KEM) -> *mut i8);
 #[cfg(feature = "types")]
@@ -315,17 +315,17 @@ windows_link::link!("crypto" "C" fn EVP_KEM_gettable_ctx_params(kem : *const sup
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEM_is_a(wrap : *const super::types:: EVP_KEM, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEM_names_do_all(wrap : *const super::types:: EVP_KEM, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEM_names_do_all(wrap : *const super::types:: EVP_KEM, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEM_settable_ctx_params(kem : *const super::types:: EVP_KEM) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEM_up_ref(wrap : *const super::types:: EVP_KEM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEM_up_ref(wrap : *mut super::types:: EVP_KEM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYEXCH_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, data : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_KEYEXCH_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, data : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYEXCH_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEYEXCH);
+windows_link::link!("crypto" "C" fn EVP_KEYEXCH_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEYEXCH);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYEXCH_free(exchange : *const super::types:: EVP_KEYEXCH));
+windows_link::link!("crypto" "C" fn EVP_KEYEXCH_free(exchange : *mut super::types:: EVP_KEYEXCH));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYEXCH_get0_description(keyexch : *const super::types:: EVP_KEYEXCH) -> *mut i8);
 #[cfg(feature = "types")]
@@ -337,17 +337,17 @@ windows_link::link!("crypto" "C" fn EVP_KEYEXCH_gettable_ctx_params(keyexch : *c
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYEXCH_is_a(keyexch : *const super::types:: EVP_KEYEXCH, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYEXCH_names_do_all(keyexch : *const super::types:: EVP_KEYEXCH, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEYEXCH_names_do_all(keyexch : *const super::types:: EVP_KEYEXCH, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYEXCH_settable_ctx_params(keyexch : *const super::types:: EVP_KEYEXCH) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYEXCH_up_ref(exchange : *const super::types:: EVP_KEYEXCH) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEYEXCH_up_ref(exchange : *mut super::types:: EVP_KEYEXCH) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYMGMT_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_KEYMGMT_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYMGMT_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEYMGMT);
+windows_link::link!("crypto" "C" fn EVP_KEYMGMT_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_KEYMGMT);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYMGMT_free(keymgmt : *const super::types:: EVP_KEYMGMT));
+windows_link::link!("crypto" "C" fn EVP_KEYMGMT_free(keymgmt : *mut super::types:: EVP_KEYMGMT));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYMGMT_gen_settable_params(keymgmt : *const super::types:: EVP_KEYMGMT) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
@@ -361,41 +361,41 @@ windows_link::link!("crypto" "C" fn EVP_KEYMGMT_gettable_params(keymgmt : *const
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYMGMT_is_a(keymgmt : *const super::types:: EVP_KEYMGMT, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYMGMT_names_do_all(keymgmt : *const super::types:: EVP_KEYMGMT, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEYMGMT_names_do_all(keymgmt : *const super::types:: EVP_KEYMGMT, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_KEYMGMT_settable_params(keymgmt : *const super::types:: EVP_KEYMGMT) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_KEYMGMT_up_ref(keymgmt : *const super::types:: EVP_KEYMGMT) -> i32);
+windows_link::link!("crypto" "C" fn EVP_KEYMGMT_up_ref(keymgmt : *mut super::types:: EVP_KEYMGMT) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_CTX_dup(src : *const super::types:: EVP_MAC_CTX) -> *mut super::types:: EVP_MAC_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_free(ctx : *const super::types:: EVP_MAC_CTX));
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_free(ctx : *mut super::types:: EVP_MAC_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get0_mac(ctx : *const super::types:: EVP_MAC_CTX) -> *mut super::types:: EVP_MAC);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get0_mac(ctx : *mut super::types:: EVP_MAC_CTX) -> *mut super::types:: EVP_MAC);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_block_size(ctx : *const super::types:: EVP_MAC_CTX) -> u64);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_block_size(ctx : *mut super::types:: EVP_MAC_CTX) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_mac_size(ctx : *const super::types:: EVP_MAC_CTX) -> u64);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_mac_size(ctx : *mut super::types:: EVP_MAC_CTX) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_params(ctx : *const super::types:: EVP_MAC_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_get_params(ctx : *mut super::types:: EVP_MAC_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_gettable_params(ctx : *const super::types:: EVP_MAC_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_gettable_params(ctx : *mut super::types:: EVP_MAC_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_new(mac : *const super::types:: EVP_MAC) -> *mut super::types:: EVP_MAC_CTX);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_new(mac : *mut super::types:: EVP_MAC) -> *mut super::types:: EVP_MAC_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_set_params(ctx : *const super::types:: EVP_MAC_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_set_params(ctx : *mut super::types:: EVP_MAC_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_CTX_settable_params(ctx : *const super::types:: EVP_MAC_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_MAC_CTX_settable_params(ctx : *mut super::types:: EVP_MAC_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_MAC_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_fetch(libctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_MAC);
+windows_link::link!("crypto" "C" fn EVP_MAC_fetch(libctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_MAC);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_final(ctx : *const super::types:: EVP_MAC_CTX, out : *const u8, outl : *const u64, outsize : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_final(ctx : *mut super::types:: EVP_MAC_CTX, out : *mut u8, outl : *mut u64, outsize : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_finalXOF(ctx : *const super::types:: EVP_MAC_CTX, out : *const u8, outsize : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_finalXOF(ctx : *mut super::types:: EVP_MAC_CTX, out : *mut u8, outsize : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_free(mac : *const super::types:: EVP_MAC));
+windows_link::link!("crypto" "C" fn EVP_MAC_free(mac : *mut super::types:: EVP_MAC));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_get0_description(mac : *const super::types:: EVP_MAC) -> *mut i8);
 #[cfg(feature = "types")]
@@ -403,73 +403,73 @@ windows_link::link!("crypto" "C" fn EVP_MAC_get0_name(mac : *const super::types:
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_get0_provider(mac : *const super::types:: EVP_MAC) -> *mut super::types:: OSSL_PROVIDER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_get_params(mac : *const super::types:: EVP_MAC, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_get_params(mac : *mut super::types:: EVP_MAC, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_gettable_ctx_params(mac : *const super::types:: EVP_MAC) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_gettable_params(mac : *const super::types:: EVP_MAC) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_init(ctx : *const super::types:: EVP_MAC_CTX, key : *const u8, keylen : u64, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_init(ctx : *mut super::types:: EVP_MAC_CTX, key : *const u8, keylen : u64, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_is_a(mac : *const super::types:: EVP_MAC, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_names_do_all(mac : *const super::types:: EVP_MAC, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_names_do_all(mac : *const super::types:: EVP_MAC, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MAC_settable_ctx_params(mac : *const super::types:: EVP_MAC) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_up_ref(mac : *const super::types:: EVP_MAC) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_up_ref(mac : *mut super::types:: EVP_MAC) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MAC_update(ctx : *const super::types:: EVP_MAC_CTX, data : *const u8, datalen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MAC_update(ctx : *mut super::types:: EVP_MAC_CTX, data : *const u8, datalen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_clear_flags(ctx : *const super::types:: EVP_MD_CTX, flags : i32));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_clear_flags(ctx : *mut super::types:: EVP_MD_CTX, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_copy(out : *const super::types:: EVP_MD_CTX, r#in : *const super::types:: EVP_MD_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_copy(out : *mut super::types:: EVP_MD_CTX, r#in : *const super::types:: EVP_MD_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_copy_ex(out : *const super::types:: EVP_MD_CTX, r#in : *const super::types:: EVP_MD_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_copy_ex(out : *mut super::types:: EVP_MD_CTX, r#in : *const super::types:: EVP_MD_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_ctrl(ctx : *const super::types:: EVP_MD_CTX, cmd : i32, p1 : i32, p2 : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_ctrl(ctx : *mut super::types:: EVP_MD_CTX, cmd : i32, p1 : i32, p2 : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_free(ctx : *const super::types:: EVP_MD_CTX));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_free(ctx : *mut super::types:: EVP_MD_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_get0_md(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_get0_md_data(ctx : *const super::types:: EVP_MD_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_get1_md(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: EVP_MD);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_get1_md(ctx : *mut super::types:: EVP_MD_CTX) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_get_params(ctx : *const super::types:: EVP_MD_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_get_params(ctx : *mut super::types:: EVP_MD_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_get_pkey_ctx(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_gettable_params(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_gettable_params(ctx : *mut super::types:: EVP_MD_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_md(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_new() -> *mut super::types:: EVP_MD_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_reset(ctx : *const super::types:: EVP_MD_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_reset(ctx : *mut super::types:: EVP_MD_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_flags(ctx : *const super::types:: EVP_MD_CTX, flags : i32));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_flags(ctx : *mut super::types:: EVP_MD_CTX, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_params(ctx : *const super::types:: EVP_MD_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_params(ctx : *mut super::types:: EVP_MD_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_pkey_ctx(ctx : *const super::types:: EVP_MD_CTX, pctx : *const super::types:: EVP_PKEY_CTX));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_pkey_ctx(ctx : *mut super::types:: EVP_MD_CTX, pctx : *mut super::types:: EVP_PKEY_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_update_fn(ctx : *const super::types:: EVP_MD_CTX, update : *const isize));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_set_update_fn(ctx : *mut super::types:: EVP_MD_CTX, update : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_settable_params(ctx : *const super::types:: EVP_MD_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_settable_params(ctx : *mut super::types:: EVP_MD_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_CTX_test_flags(ctx : *const super::types:: EVP_MD_CTX, flags : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_CTX_update_fn(ctx : *const super::types:: EVP_MD_CTX) -> *mut isize);
-windows_link::link!("crypto" "C" fn EVP_MD_do_all(r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_MD_CTX_update_fn(ctx : *mut super::types:: EVP_MD_CTX) -> *mut isize);
+windows_link::link!("crypto" "C" fn EVP_MD_do_all(r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
-windows_link::link!("crypto" "C" fn EVP_MD_do_all_sorted(r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_MD_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_MD_do_all_sorted(r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_MD);
+windows_link::link!("crypto" "C" fn EVP_MD_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_free(md : *const super::types:: EVP_MD));
+windows_link::link!("crypto" "C" fn EVP_MD_free(md : *mut super::types:: EVP_MD));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_get0_description(md : *const super::types:: EVP_MD) -> *mut i8);
 #[cfg(feature = "types")]
@@ -481,7 +481,7 @@ windows_link::link!("crypto" "C" fn EVP_MD_get_block_size(md : *const super::typ
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_get_flags(md : *const super::types:: EVP_MD) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_get_params(digest : *const super::types:: EVP_MD, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_get_params(digest : *const super::types:: EVP_MD, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_get_pkey_type(md : *const super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
@@ -497,7 +497,7 @@ windows_link::link!("crypto" "C" fn EVP_MD_is_a(md : *const super::types:: EVP_M
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_meth_dup(md : *const super::types:: EVP_MD) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_free(md : *const super::types:: EVP_MD));
+windows_link::link!("crypto" "C" fn EVP_MD_meth_free(md : *mut super::types:: EVP_MD));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_meth_get_app_datasize(md : *const super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
@@ -521,244 +521,244 @@ windows_link::link!("crypto" "C" fn EVP_MD_meth_get_update(md : *const super::ty
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_meth_new(md_type : i32, pkey_type : i32) -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_app_datasize(md : *const super::types:: EVP_MD, datasize : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_app_datasize(md : *mut super::types:: EVP_MD, datasize : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_cleanup(md : *const super::types:: EVP_MD, cleanup : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_cleanup(md : *mut super::types:: EVP_MD, cleanup : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_copy(md : *const super::types:: EVP_MD, copy : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_copy(md : *mut super::types:: EVP_MD, copy : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_ctrl(md : *const super::types:: EVP_MD, ctrl : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_ctrl(md : *mut super::types:: EVP_MD, ctrl : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_final(md : *const super::types:: EVP_MD, r#final : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_final(md : *mut super::types:: EVP_MD, r#final : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_flags(md : *const super::types:: EVP_MD, flags : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_flags(md : *mut super::types:: EVP_MD, flags : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_init(md : *const super::types:: EVP_MD, init : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_init(md : *mut super::types:: EVP_MD, init : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_input_blocksize(md : *const super::types:: EVP_MD, blocksize : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_input_blocksize(md : *mut super::types:: EVP_MD, blocksize : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_result_size(md : *const super::types:: EVP_MD, resultsize : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_result_size(md : *mut super::types:: EVP_MD, resultsize : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_meth_set_update(md : *const super::types:: EVP_MD, update : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_meth_set_update(md : *mut super::types:: EVP_MD, update : *mut isize) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_names_do_all(md : *const super::types:: EVP_MD, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_names_do_all(md : *const super::types:: EVP_MD, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_MD_settable_ctx_params(md : *const super::types:: EVP_MD) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_MD_up_ref(md : *const super::types:: EVP_MD) -> i32);
+windows_link::link!("crypto" "C" fn EVP_MD_up_ref(md : *mut super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_OpenFinal(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_OpenFinal(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_OpenInit(ctx : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: EVP_CIPHER, ek : *const u8, ekl : i32, iv : *const u8, r#priv : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_OpenInit(ctx : *mut super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: EVP_CIPHER, ek : *const u8, ekl : i32, iv : *const u8, r#priv : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_CipherInit(pbe_obj : *const super::types:: ASN1_OBJECT, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, ctx : *const super::types:: EVP_CIPHER_CTX, en_de : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_CipherInit(pbe_obj : *mut super::types:: ASN1_OBJECT, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, ctx : *mut super::types:: EVP_CIPHER_CTX, en_de : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_CipherInit_ex(pbe_obj : *const super::types:: ASN1_OBJECT, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, ctx : *const super::types:: EVP_CIPHER_CTX, en_de : i32, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_CipherInit_ex(pbe_obj : *mut super::types:: ASN1_OBJECT, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, ctx : *mut super::types:: EVP_CIPHER_CTX, en_de : i32, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_alg_add(nid : i32, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, keygen : *const EVP_PBE_KEYGEN) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_alg_add(nid : i32, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, keygen : *mut EVP_PBE_KEYGEN) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_alg_add_type(pbe_type : i32, pbe_nid : i32, cipher_nid : i32, md_nid : i32, keygen : *const EVP_PBE_KEYGEN) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_alg_add_type(pbe_type : i32, pbe_nid : i32, cipher_nid : i32, md_nid : i32, keygen : *mut EVP_PBE_KEYGEN) -> i32);
 windows_link::link!("crypto" "C" fn EVP_PBE_cleanup());
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_find(r#type : i32, pbe_nid : i32, pcnid : *const i32, pmnid : *const i32, pkeygen : *const *const EVP_PBE_KEYGEN) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_find(r#type : i32, pbe_nid : i32, pcnid : *mut i32, pmnid : *mut i32, pkeygen : *mut *mut EVP_PBE_KEYGEN) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_find_ex(r#type : i32, pbe_nid : i32, pcnid : *const i32, pmnid : *const i32, pkeygen : *const *const EVP_PBE_KEYGEN, pkeygen_ex : *const *const EVP_PBE_KEYGEN_EX) -> i32);
-windows_link::link!("crypto" "C" fn EVP_PBE_get(ptype : *const i32, ppbe_nid : *const i32, num : u64) -> i32);
-windows_link::link!("crypto" "C" fn EVP_PBE_scrypt(pass : *const i8, passlen : u64, salt : *const u8, saltlen : u64, n : u64, r : u64, p : u64, maxmem : u64, key : *const u8, keylen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_find_ex(r#type : i32, pbe_nid : i32, pcnid : *mut i32, pmnid : *mut i32, pkeygen : *mut *mut EVP_PBE_KEYGEN, pkeygen_ex : *mut *mut EVP_PBE_KEYGEN_EX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_get(ptype : *mut i32, ppbe_nid : *mut i32, num : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_scrypt(pass : *const i8, passlen : u64, salt : *const u8, saltlen : u64, n : u64, r : u64, p : u64, maxmem : u64, key : *mut u8, keylen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PBE_scrypt_ex(pass : *const i8, passlen : u64, salt : *const u8, saltlen : u64, n : u64, r : u64, p : u64, maxmem : u64, key : *const u8, keylen : u64, ctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PBE_scrypt_ex(pass : *const i8, passlen : u64, salt : *const u8, saltlen : u64, n : u64, r : u64, p : u64, maxmem : u64, key : *mut u8, keylen : u64, ctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl(ctx : *const super::types:: EVP_PKEY_CTX, keytype : i32, optype : i32, cmd : i32, p1 : i32, p2 : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl(ctx : *mut super::types:: EVP_PKEY_CTX, keytype : i32, optype : i32, cmd : i32, p1 : i32, p2 : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl_str(ctx : *const super::types:: EVP_PKEY_CTX, r#type : *const i8, value : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl_str(ctx : *mut super::types:: EVP_PKEY_CTX, r#type : *const i8, value : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl_uint64(ctx : *const super::types:: EVP_PKEY_CTX, keytype : i32, optype : i32, cmd : i32, value : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_ctrl_uint64(ctx : *mut super::types:: EVP_PKEY_CTX, keytype : i32, optype : i32, cmd : i32, value : u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_dup(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_free(ctx : *const super::types:: EVP_PKEY_CTX));
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_free(ctx : *mut super::types:: EVP_PKEY_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_libctx(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: OSSL_LIB_CTX);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_libctx(ctx : *mut super::types:: EVP_PKEY_CTX) -> *mut super::types:: OSSL_LIB_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_peerkey(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_peerkey(ctx : *mut super::types:: EVP_PKEY_CTX) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_pkey(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_pkey(ctx : *mut super::types:: EVP_PKEY_CTX) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_propq(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get0_provider(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: OSSL_PROVIDER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get1_id(ctx : *const super::types:: EVP_PKEY_CTX, id : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get1_id(ctx : *mut super::types:: EVP_PKEY_CTX, id : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get1_id_len(ctx : *const super::types:: EVP_PKEY_CTX, id_len : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get1_id_len(ctx : *mut super::types:: EVP_PKEY_CTX, id_len : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_app_data(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_app_data(ctx : *mut super::types:: EVP_PKEY_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_cb(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut EVP_PKEY_gen_cb);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_cb(ctx : *mut super::types:: EVP_PKEY_CTX) -> *mut EVP_PKEY_gen_cb);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_data(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_group_name(ctx : *const super::types:: EVP_PKEY_CTX, name : *const i8, namelen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_group_name(ctx : *mut super::types:: EVP_PKEY_CTX, name : *mut i8, namelen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_keygen_info(ctx : *const super::types:: EVP_PKEY_CTX, idx : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_keygen_info(ctx : *mut super::types:: EVP_PKEY_CTX, idx : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_operation(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_operation(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_params(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_params(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_signature_md(ctx : *const super::types:: EVP_PKEY_CTX, md : *const *const super::types:: EVP_MD) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_get_signature_md(ctx : *mut super::types:: EVP_PKEY_CTX, md : *mut *mut super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_gettable_params(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_hex2ctrl(ctx : *const super::types:: EVP_PKEY_CTX, cmd : i32, hex : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_hex2ctrl(ctx : *mut super::types:: EVP_PKEY_CTX, cmd : i32, hex : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_is_a(ctx : *const super::types:: EVP_PKEY_CTX, keytype : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_is_a(ctx : *mut super::types:: EVP_PKEY_CTX, keytype : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_md(ctx : *const super::types:: EVP_PKEY_CTX, optype : i32, cmd : i32, md : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_md(ctx : *mut super::types:: EVP_PKEY_CTX, optype : i32, cmd : i32, md : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new(pkey : *const super::types:: EVP_PKEY, e : *const super::types:: ENGINE) -> *mut super::types:: EVP_PKEY_CTX);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new(pkey : *mut super::types:: EVP_PKEY, e : *mut super::types:: ENGINE) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_from_name(libctx : *const super::types:: OSSL_LIB_CTX, name : *const i8, propquery : *const i8) -> *mut super::types:: EVP_PKEY_CTX);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_from_name(libctx : *mut super::types:: OSSL_LIB_CTX, name : *const i8, propquery : *const i8) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_from_pkey(libctx : *const super::types:: OSSL_LIB_CTX, pkey : *const super::types:: EVP_PKEY, propquery : *const i8) -> *mut super::types:: EVP_PKEY_CTX);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_from_pkey(libctx : *mut super::types:: OSSL_LIB_CTX, pkey : *mut super::types:: EVP_PKEY, propquery : *const i8) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_id(id : i32, e : *const super::types:: ENGINE) -> *mut super::types:: EVP_PKEY_CTX);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_new_id(id : i32, e : *mut super::types:: ENGINE) -> *mut super::types:: EVP_PKEY_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set0_keygen_info(ctx : *const super::types:: EVP_PKEY_CTX, dat : *const i32, datlen : i32));
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set0_keygen_info(ctx : *mut super::types:: EVP_PKEY_CTX, dat : *mut i32, datlen : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set1_id(ctx : *const super::types:: EVP_PKEY_CTX, id : *const core::ffi::c_void, len : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set1_id(ctx : *mut super::types:: EVP_PKEY_CTX, id : *const core::ffi::c_void, len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_app_data(ctx : *const super::types:: EVP_PKEY_CTX, data : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_app_data(ctx : *mut super::types:: EVP_PKEY_CTX, data : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_cb(ctx : *const super::types:: EVP_PKEY_CTX, cb : *const EVP_PKEY_gen_cb));
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_cb(ctx : *mut super::types:: EVP_PKEY_CTX, cb : *mut EVP_PKEY_gen_cb));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_data(ctx : *const super::types:: EVP_PKEY_CTX, data : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_data(ctx : *mut super::types:: EVP_PKEY_CTX, data : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_group_name(ctx : *const super::types:: EVP_PKEY_CTX, name : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_group_name(ctx : *mut super::types:: EVP_PKEY_CTX, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_kem_op(ctx : *const super::types:: EVP_PKEY_CTX, op : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_kem_op(ctx : *mut super::types:: EVP_PKEY_CTX, op : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_mac_key(ctx : *const super::types:: EVP_PKEY_CTX, key : *const u8, keylen : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_mac_key(ctx : *mut super::types:: EVP_PKEY_CTX, key : *const u8, keylen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_params(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_params(ctx : *mut super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_signature_md(ctx : *const super::types:: EVP_PKEY_CTX, md : *const super::types:: EVP_MD) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_set_signature_md(ctx : *mut super::types:: EVP_PKEY_CTX, md : *const super::types:: EVP_MD) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_settable_params(ctx : *const super::types:: EVP_PKEY_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_str2ctrl(ctx : *const super::types:: EVP_PKEY_CTX, cmd : i32, str : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_CTX_str2ctrl(ctx : *mut super::types:: EVP_PKEY_CTX, cmd : i32, str : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_add0(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD) -> i32);
 windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_add_alias(to : i32, from : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_copy(dst : *const super::types:: EVP_PKEY_ASN1_METHOD, src : *const super::types:: EVP_PKEY_ASN1_METHOD));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_copy(dst : *mut super::types:: EVP_PKEY_ASN1_METHOD, src : *const super::types:: EVP_PKEY_ASN1_METHOD));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_find(pe : *const *const super::types:: ENGINE, r#type : i32) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_find(pe : *mut *mut super::types:: ENGINE, r#type : i32) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_find_str(pe : *const *const super::types:: ENGINE, str : *const i8, len : i32) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_find_str(pe : *mut *mut super::types:: ENGINE, str : *const i8, len : i32) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_free(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_free(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_get0(idx : i32) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_get0_info(ppkey_id : *const i32, pkey_base_id : *const i32, ppkey_flags : *const i32, pinfo : *const *const i8, ppem_str : *const *const i8, ameth : *const super::types:: EVP_PKEY_ASN1_METHOD) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_get0_info(ppkey_id : *mut i32, pkey_base_id : *mut i32, ppkey_flags : *mut i32, pinfo : *mut *mut i8, ppem_str : *mut *mut i8, ameth : *const super::types:: EVP_PKEY_ASN1_METHOD) -> i32);
 windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_get_count() -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_new(id : i32, flags : i32, pem_str : *const i8, info : *const i8) -> *mut super::types:: EVP_PKEY_ASN1_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_check(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_check(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_ctrl(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_ctrl : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_ctrl(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_ctrl : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_free(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_free : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_free(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_free : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_get_priv_key(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, get_priv_key : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_get_priv_key(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, get_priv_key : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_get_pub_key(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, get_pub_key : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_get_pub_key(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, get_pub_key : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_item(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, item_verify : *const isize, item_sign : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_item(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, item_verify : *mut isize, item_sign : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_param(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, param_decode : *const isize, param_encode : *const isize, param_missing : *const isize, param_copy : *const isize, param_cmp : *const isize, param_print : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_param(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, param_decode : *mut isize, param_encode : *mut isize, param_missing : *mut isize, param_copy : *mut isize, param_cmp : *mut isize, param_print : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_param_check(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_param_check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_param_check(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_param_check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_private(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, priv_decode : *const isize, priv_encode : *const isize, priv_print : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_private(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, priv_decode : *mut isize, priv_encode : *mut isize, priv_print : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_public(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pub_decode : *const isize, pub_encode : *const isize, pub_cmp : *const isize, pub_print : *const isize, pkey_size : *const isize, pkey_bits : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_public(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pub_decode : *mut isize, pub_encode : *mut isize, pub_cmp : *mut isize, pub_print : *mut isize, pkey_size : *mut isize, pkey_bits : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_public_check(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_pub_check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_public_check(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_pub_check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_security_bits(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, pkey_security_bits : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_security_bits(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, pkey_security_bits : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_set_priv_key(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, set_priv_key : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_set_priv_key(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, set_priv_key : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_set_pub_key(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, set_pub_key : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_set_pub_key(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, set_pub_key : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_siginf(ameth : *const super::types:: EVP_PKEY_ASN1_METHOD, siginf_set : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_asn1_set_siginf(ameth : *mut super::types:: EVP_PKEY_ASN1_METHOD, siginf_set : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_assign(pkey : *const super::types:: EVP_PKEY, r#type : i32, key : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_assign(pkey : *mut super::types:: EVP_PKEY, r#type : i32, key : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_can_sign(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_check(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_check(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_cmp(a : *const super::types:: EVP_PKEY, b : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_cmp_parameters(a : *const super::types:: EVP_PKEY, b : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_copy_parameters(to : *const super::types:: EVP_PKEY, from : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_copy_parameters(to : *mut super::types:: EVP_PKEY, from : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decapsulate(ctx : *const super::types:: EVP_PKEY_CTX, unwrapped : *const u8, unwrappedlen : *const u64, wrapped : *const u8, wrappedlen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decapsulate(ctx : *mut super::types:: EVP_PKEY_CTX, unwrapped : *mut u8, unwrappedlen : *mut u64, wrapped : *const u8, wrappedlen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decapsulate_init(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decapsulate_init(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt(ctx : *const super::types:: EVP_PKEY_CTX, out : *const u8, outlen : *const u64, r#in : *const u8, inlen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt(ctx : *mut super::types:: EVP_PKEY_CTX, out : *mut u8, outlen : *mut u64, r#in : *const u8, inlen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_old(dec_key : *const u8, enc_key : *const u8, enc_key_len : i32, private_key : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_decrypt_old(dec_key : *mut u8, enc_key : *const u8, enc_key_len : i32, private_key : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_derive(ctx : *const super::types:: EVP_PKEY_CTX, key : *const u8, keylen : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_derive(ctx : *mut super::types:: EVP_PKEY_CTX, key : *mut u8, keylen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_derive_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_derive_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_derive_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_derive_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_derive_set_peer(ctx : *const super::types:: EVP_PKEY_CTX, peer : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_derive_set_peer(ctx : *mut super::types:: EVP_PKEY_CTX, peer : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_derive_set_peer_ex(ctx : *const super::types:: EVP_PKEY_CTX, peer : *const super::types:: EVP_PKEY, validate_peer : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_derive_set_peer_ex(ctx : *mut super::types:: EVP_PKEY_CTX, peer : *mut super::types:: EVP_PKEY, validate_peer : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_digestsign_supports_digest(pkey : *const super::types:: EVP_PKEY, libctx : *const super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_digestsign_supports_digest(pkey : *mut super::types:: EVP_PKEY, libctx : *mut super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_dup(pkey : *const super::types:: EVP_PKEY) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_dup(pkey : *mut super::types:: EVP_PKEY) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encapsulate(ctx : *const super::types:: EVP_PKEY_CTX, wrappedkey : *const u8, wrappedkeylen : *const u64, genkey : *const u8, genkeylen : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encapsulate(ctx : *mut super::types:: EVP_PKEY_CTX, wrappedkey : *mut u8, wrappedkeylen : *mut u64, genkey : *mut u8, genkeylen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encapsulate_init(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encapsulate_init(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt(ctx : *const super::types:: EVP_PKEY_CTX, out : *const u8, outlen : *const u64, r#in : *const u8, inlen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt(ctx : *mut super::types:: EVP_PKEY_CTX, out : *mut u8, outlen : *mut u64, r#in : *const u8, inlen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_old(enc_key : *const u8, key : *const u8, key_len : i32, pub_key : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_encrypt_old(enc_key : *mut u8, key : *const u8, key_len : i32, pub_key : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_eq(a : *const super::types:: EVP_PKEY, b : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_export(pkey : *const super::types:: EVP_PKEY, selection : i32, export_cb : *const isize, export_cbarg : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_export(pkey : *const super::types:: EVP_PKEY, selection : i32, export_cb : *mut isize, export_cbarg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_free(pkey : *const super::types:: EVP_PKEY));
+windows_link::link!("crypto" "C" fn EVP_PKEY_free(pkey : *mut super::types:: EVP_PKEY));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata(ctx : *const super::types:: EVP_PKEY_CTX, ppkey : *const *const super::types:: EVP_PKEY, selection : i32, param : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata(ctx : *mut super::types:: EVP_PKEY_CTX, ppkey : *mut *mut super::types:: EVP_PKEY, selection : i32, param : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata_settable(ctx : *const super::types:: EVP_PKEY_CTX, selection : i32) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_PKEY_fromdata_settable(ctx : *mut super::types:: EVP_PKEY_CTX, selection : i32) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_generate(ctx : *const super::types:: EVP_PKEY_CTX, ppkey : *const *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_generate(ctx : *mut super::types:: EVP_PKEY_CTX, ppkey : *mut *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get0(pkey : *const super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
@@ -776,35 +776,35 @@ windows_link::link!("crypto" "C" fn EVP_PKEY_get0_description(pkey : *const supe
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get0_engine(pkey : *const super::types:: EVP_PKEY) -> *mut super::types:: ENGINE);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get0_hmac(pkey : *const super::types:: EVP_PKEY, len : *const u64) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get0_hmac(pkey : *const super::types:: EVP_PKEY, len : *mut u64) -> *mut u8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get0_poly1305(pkey : *const super::types:: EVP_PKEY, len : *const u64) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get0_poly1305(pkey : *const super::types:: EVP_PKEY, len : *mut u64) -> *mut u8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get0_provider(key : *const super::types:: EVP_PKEY) -> *mut super::types:: OSSL_PROVIDER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get0_siphash(pkey : *const super::types:: EVP_PKEY, len : *const u64) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get0_siphash(pkey : *const super::types:: EVP_PKEY, len : *mut u64) -> *mut u8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get0_type_name(key : *const super::types:: EVP_PKEY) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get1_DH(pkey : *const super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get1_DH(pkey : *mut super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get1_DSA(pkey : *const super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get1_DSA(pkey : *mut super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get1_EC_KEY(pkey : *const super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get1_EC_KEY(pkey : *mut super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get1_RSA(pkey : *const super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get1_RSA(pkey : *mut super::types:: EVP_PKEY) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get1_encoded_public_key(pkey : *const super::types:: EVP_PKEY, ppub : *const *const u8) -> u64);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get1_encoded_public_key(pkey : *mut super::types:: EVP_PKEY, ppub : *mut *mut u8) -> u64);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_base_id(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_bits(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_bn_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, bn : *const *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_bn_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, bn : *mut *mut super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_default_digest_name(pkey : *const super::types:: EVP_PKEY, mdname : *const i8, mdname_sz : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_default_digest_name(pkey : *mut super::types:: EVP_PKEY, mdname : *mut i8, mdname_sz : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_default_digest_nid(pkey : *const super::types:: EVP_PKEY, pnid : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_default_digest_nid(pkey : *mut super::types:: EVP_PKEY, pnid : *mut i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_ec_point_conv_form(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
@@ -812,267 +812,267 @@ windows_link::link!("crypto" "C" fn EVP_PKEY_get_ex_data(key : *const super::typ
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_field_type(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_group_name(pkey : *const super::types:: EVP_PKEY, name : *const i8, name_sz : u64, gname_len : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_group_name(pkey : *const super::types:: EVP_PKEY, name : *mut i8, name_sz : u64, gname_len : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_id(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_int_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, out : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_int_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, out : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_octet_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, buf : *const u8, max_buf_sz : u64, out_sz : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_octet_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, buf : *mut u8, max_buf_sz : u64, out_sz : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_params(pkey : *const super::types:: EVP_PKEY, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_params(pkey : *const super::types:: EVP_PKEY, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_raw_private_key(pkey : *const super::types:: EVP_PKEY, r#priv : *const u8, len : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_raw_private_key(pkey : *const super::types:: EVP_PKEY, r#priv : *mut u8, len : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_raw_public_key(pkey : *const super::types:: EVP_PKEY, r#pub : *const u8, len : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_raw_public_key(pkey : *const super::types:: EVP_PKEY, r#pub : *mut u8, len : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_security_bits(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_get_size(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_size_t_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, out : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_size_t_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, out : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_get_utf8_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, str : *const i8, max_buf_sz : u64, out_sz : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_get_utf8_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, str : *mut i8, max_buf_sz : u64, out_sz : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_gettable_params(pkey : *const super::types:: EVP_PKEY) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_is_a(pkey : *const super::types:: EVP_PKEY, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_keygen(ctx : *const super::types:: EVP_PKEY_CTX, ppkey : *const *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_keygen(ctx : *mut super::types:: EVP_PKEY_CTX, ppkey : *mut *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_keygen_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_keygen_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_add0(pmeth : *const super::types:: EVP_PKEY_METHOD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_copy(dst : *const super::types:: EVP_PKEY_METHOD, src : *const super::types:: EVP_PKEY_METHOD));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_copy(dst : *mut super::types:: EVP_PKEY_METHOD, src : *const super::types:: EVP_PKEY_METHOD));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_find(r#type : i32) -> *mut super::types:: EVP_PKEY_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_free(pmeth : *const super::types:: EVP_PKEY_METHOD));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_free(pmeth : *mut super::types:: EVP_PKEY_METHOD));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get0(idx : u64) -> *mut super::types:: EVP_PKEY_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get0_info(ppkey_id : *const i32, pflags : *const i32, meth : *const super::types:: EVP_PKEY_METHOD));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get0_info(ppkey_id : *mut i32, pflags : *mut i32, meth : *const super::types:: EVP_PKEY_METHOD));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_cleanup(pmeth : *const super::types:: EVP_PKEY_METHOD, pcleanup : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_cleanup(pmeth : *const super::types:: EVP_PKEY_METHOD, pcleanup : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_copy(pmeth : *const super::types:: EVP_PKEY_METHOD, pcopy : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_copy(pmeth : *const super::types:: EVP_PKEY_METHOD, pcopy : *mut *mut isize));
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_count() -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_ctrl(pmeth : *const super::types:: EVP_PKEY_METHOD, pctrl : *const *const isize, pctrl_str : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_ctrl(pmeth : *const super::types:: EVP_PKEY_METHOD, pctrl : *mut *mut isize, pctrl_str : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_decrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, pdecrypt_init : *const *const isize, pdecrypt : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_decrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, pdecrypt_init : *mut *mut isize, pdecrypt : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_derive(pmeth : *const super::types:: EVP_PKEY_METHOD, pderive_init : *const *const isize, pderive : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_derive(pmeth : *const super::types:: EVP_PKEY_METHOD, pderive_init : *mut *mut isize, pderive : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digest_custom(pmeth : *const super::types:: EVP_PKEY_METHOD, pdigest_custom : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digest_custom(pmeth : *const super::types:: EVP_PKEY_METHOD, pdigest_custom : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digestsign(pmeth : *const super::types:: EVP_PKEY_METHOD, digestsign : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digestsign(pmeth : *const super::types:: EVP_PKEY_METHOD, digestsign : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digestverify(pmeth : *const super::types:: EVP_PKEY_METHOD, digestverify : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_digestverify(pmeth : *const super::types:: EVP_PKEY_METHOD, digestverify : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_encrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, pencrypt_init : *const *const isize, pencryptfn : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_encrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, pencrypt_init : *mut *mut isize, pencryptfn : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_init(pmeth : *const super::types:: EVP_PKEY_METHOD, pinit : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_init(pmeth : *const super::types:: EVP_PKEY_METHOD, pinit : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_keygen(pmeth : *const super::types:: EVP_PKEY_METHOD, pkeygen_init : *const *const isize, pkeygen : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_keygen(pmeth : *const super::types:: EVP_PKEY_METHOD, pkeygen_init : *mut *mut isize, pkeygen : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_param_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_param_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_paramgen(pmeth : *const super::types:: EVP_PKEY_METHOD, pparamgen_init : *const *const isize, pparamgen : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_paramgen(pmeth : *const super::types:: EVP_PKEY_METHOD, pparamgen_init : *mut *mut isize, pparamgen : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_public_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_public_check(pmeth : *const super::types:: EVP_PKEY_METHOD, pcheck : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_sign(pmeth : *const super::types:: EVP_PKEY_METHOD, psign_init : *const *const isize, psign : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_sign(pmeth : *const super::types:: EVP_PKEY_METHOD, psign_init : *mut *mut isize, psign : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_signctx(pmeth : *const super::types:: EVP_PKEY_METHOD, psignctx_init : *const *const isize, psignctx : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_signctx(pmeth : *const super::types:: EVP_PKEY_METHOD, psignctx_init : *mut *mut isize, psignctx : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verify(pmeth : *const super::types:: EVP_PKEY_METHOD, pverify_init : *const *const isize, pverify : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verify(pmeth : *const super::types:: EVP_PKEY_METHOD, pverify_init : *mut *mut isize, pverify : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verify_recover(pmeth : *const super::types:: EVP_PKEY_METHOD, pverify_recover_init : *const *const isize, pverify_recover : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verify_recover(pmeth : *const super::types:: EVP_PKEY_METHOD, pverify_recover_init : *mut *mut isize, pverify_recover : *mut *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verifyctx(pmeth : *const super::types:: EVP_PKEY_METHOD, pverifyctx_init : *const *const isize, pverifyctx : *const *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_get_verifyctx(pmeth : *const super::types:: EVP_PKEY_METHOD, pverifyctx_init : *mut *mut isize, pverifyctx : *mut *mut isize));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_new(id : i32, flags : i32) -> *mut super::types:: EVP_PKEY_METHOD);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_meth_remove(pmeth : *const super::types:: EVP_PKEY_METHOD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_check(pmeth : *const super::types:: EVP_PKEY_METHOD, check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_check(pmeth : *mut super::types:: EVP_PKEY_METHOD, check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_cleanup(pmeth : *const super::types:: EVP_PKEY_METHOD, cleanup : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_cleanup(pmeth : *mut super::types:: EVP_PKEY_METHOD, cleanup : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_copy(pmeth : *const super::types:: EVP_PKEY_METHOD, copy : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_copy(pmeth : *mut super::types:: EVP_PKEY_METHOD, copy : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_ctrl(pmeth : *const super::types:: EVP_PKEY_METHOD, ctrl : *const isize, ctrl_str : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_ctrl(pmeth : *mut super::types:: EVP_PKEY_METHOD, ctrl : *mut isize, ctrl_str : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_decrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, decrypt_init : *const isize, decrypt : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_decrypt(pmeth : *mut super::types:: EVP_PKEY_METHOD, decrypt_init : *mut isize, decrypt : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_derive(pmeth : *const super::types:: EVP_PKEY_METHOD, derive_init : *const isize, derive : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_derive(pmeth : *mut super::types:: EVP_PKEY_METHOD, derive_init : *mut isize, derive : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digest_custom(pmeth : *const super::types:: EVP_PKEY_METHOD, digest_custom : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digest_custom(pmeth : *mut super::types:: EVP_PKEY_METHOD, digest_custom : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digestsign(pmeth : *const super::types:: EVP_PKEY_METHOD, digestsign : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digestsign(pmeth : *mut super::types:: EVP_PKEY_METHOD, digestsign : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digestverify(pmeth : *const super::types:: EVP_PKEY_METHOD, digestverify : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_digestverify(pmeth : *mut super::types:: EVP_PKEY_METHOD, digestverify : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_encrypt(pmeth : *const super::types:: EVP_PKEY_METHOD, encrypt_init : *const isize, encryptfn : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_encrypt(pmeth : *mut super::types:: EVP_PKEY_METHOD, encrypt_init : *mut isize, encryptfn : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_init(pmeth : *const super::types:: EVP_PKEY_METHOD, init : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_init(pmeth : *mut super::types:: EVP_PKEY_METHOD, init : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_keygen(pmeth : *const super::types:: EVP_PKEY_METHOD, keygen_init : *const isize, keygen : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_keygen(pmeth : *mut super::types:: EVP_PKEY_METHOD, keygen_init : *mut isize, keygen : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_param_check(pmeth : *const super::types:: EVP_PKEY_METHOD, check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_param_check(pmeth : *mut super::types:: EVP_PKEY_METHOD, check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_paramgen(pmeth : *const super::types:: EVP_PKEY_METHOD, paramgen_init : *const isize, paramgen : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_paramgen(pmeth : *mut super::types:: EVP_PKEY_METHOD, paramgen_init : *mut isize, paramgen : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_public_check(pmeth : *const super::types:: EVP_PKEY_METHOD, check : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_public_check(pmeth : *mut super::types:: EVP_PKEY_METHOD, check : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_sign(pmeth : *const super::types:: EVP_PKEY_METHOD, sign_init : *const isize, sign : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_sign(pmeth : *mut super::types:: EVP_PKEY_METHOD, sign_init : *mut isize, sign : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_signctx(pmeth : *const super::types:: EVP_PKEY_METHOD, signctx_init : *const isize, signctx : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_signctx(pmeth : *mut super::types:: EVP_PKEY_METHOD, signctx_init : *mut isize, signctx : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verify(pmeth : *const super::types:: EVP_PKEY_METHOD, verify_init : *const isize, verify : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verify(pmeth : *mut super::types:: EVP_PKEY_METHOD, verify_init : *mut isize, verify : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verify_recover(pmeth : *const super::types:: EVP_PKEY_METHOD, verify_recover_init : *const isize, verify_recover : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verify_recover(pmeth : *mut super::types:: EVP_PKEY_METHOD, verify_recover_init : *mut isize, verify_recover : *mut isize));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verifyctx(pmeth : *const super::types:: EVP_PKEY_METHOD, verifyctx_init : *const isize, verifyctx : *const isize));
+windows_link::link!("crypto" "C" fn EVP_PKEY_meth_set_verifyctx(pmeth : *mut super::types:: EVP_PKEY_METHOD, verifyctx_init : *mut isize, verifyctx : *mut isize));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_missing_parameters(pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_new() -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_CMAC_key(e : *const super::types:: ENGINE, r#priv : *const u8, len : u64, cipher : *const super::types:: EVP_CIPHER) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_CMAC_key(e : *mut super::types:: ENGINE, r#priv : *const u8, len : u64, cipher : *const super::types:: EVP_CIPHER) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_mac_key(r#type : i32, e : *const super::types:: ENGINE, key : *const u8, keylen : i32) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_mac_key(r#type : i32, e : *mut super::types:: ENGINE, key : *const u8, keylen : i32) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_private_key(r#type : i32, e : *const super::types:: ENGINE, r#priv : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_private_key(r#type : i32, e : *mut super::types:: ENGINE, r#priv : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_private_key_ex(libctx : *const super::types:: OSSL_LIB_CTX, keytype : *const i8, propq : *const i8, r#priv : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_private_key_ex(libctx : *mut super::types:: OSSL_LIB_CTX, keytype : *const i8, propq : *const i8, r#priv : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_public_key(r#type : i32, e : *const super::types:: ENGINE, r#pub : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_public_key(r#type : i32, e : *mut super::types:: ENGINE, r#pub : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_public_key_ex(libctx : *const super::types:: OSSL_LIB_CTX, keytype : *const i8, propq : *const i8, r#pub : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn EVP_PKEY_new_raw_public_key_ex(libctx : *mut super::types:: OSSL_LIB_CTX, keytype : *const i8, propq : *const i8, r#pub : *const u8, len : u64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_pairwise_check(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_pairwise_check(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_param_check(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_param_check(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_param_check_quick(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_param_check_quick(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_parameters_eq(a : *const super::types:: EVP_PKEY, b : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_paramgen(ctx : *const super::types:: EVP_PKEY_CTX, ppkey : *const *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_paramgen(ctx : *mut super::types:: EVP_PKEY_CTX, ppkey : *mut *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_paramgen_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_paramgen_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_params(out : *const super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_params(out : *mut super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_params_fp(fp : *const super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_params_fp(fp : *mut super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_private(out : *const super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_private(out : *mut super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_private_fp(fp : *const super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_private_fp(fp : *mut super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_public(out : *const super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_public(out : *mut super::types:: BIO, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn EVP_PKEY_print_public_fp(fp : *const super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *const super::types:: ASN1_PCTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_print_public_fp(fp : *mut super::crypto:: _IO_FILE, pkey : *const super::types:: EVP_PKEY, indent : i32, pctx : *mut super::types:: ASN1_PCTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_private_check(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_private_check(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_public_check(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_public_check(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_public_check_quick(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_public_check_quick(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_save_parameters(pkey : *const super::types:: EVP_PKEY, mode : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_save_parameters(pkey : *mut super::types:: EVP_PKEY, mode : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_DH(pkey : *const super::types:: EVP_PKEY, key : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_DH(pkey : *mut super::types:: EVP_PKEY, key : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_DSA(pkey : *const super::types:: EVP_PKEY, key : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_DSA(pkey : *mut super::types:: EVP_PKEY, key : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_EC_KEY(pkey : *const super::types:: EVP_PKEY, key : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_EC_KEY(pkey : *mut super::types:: EVP_PKEY, key : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_RSA(pkey : *const super::types:: EVP_PKEY, key : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_RSA(pkey : *mut super::types:: EVP_PKEY, key : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_encoded_public_key(pkey : *const super::types:: EVP_PKEY, r#pub : *const u8, publen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_encoded_public_key(pkey : *mut super::types:: EVP_PKEY, r#pub : *const u8, publen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set1_engine(pkey : *const super::types:: EVP_PKEY, e : *const super::types:: ENGINE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set1_engine(pkey : *mut super::types:: EVP_PKEY, e : *mut super::types:: ENGINE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_bn_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, bn : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_bn_param(pkey : *mut super::types:: EVP_PKEY, key_name : *const i8, bn : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_ex_data(key : *const super::types:: EVP_PKEY, idx : i32, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_ex_data(key : *mut super::types:: EVP_PKEY, idx : i32, arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_int_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, r#in : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_int_param(pkey : *mut super::types:: EVP_PKEY, key_name : *const i8, r#in : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_octet_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, buf : *const u8, bsize : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_octet_string_param(pkey : *mut super::types:: EVP_PKEY, key_name : *const i8, buf : *const u8, bsize : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_params(pkey : *const super::types:: EVP_PKEY, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_params(pkey : *mut super::types:: EVP_PKEY, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_size_t_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, r#in : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_size_t_param(pkey : *mut super::types:: EVP_PKEY, key_name : *const i8, r#in : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_type(pkey : *const super::types:: EVP_PKEY, r#type : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_type(pkey : *mut super::types:: EVP_PKEY, r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_type_by_keymgmt(pkey : *const super::types:: EVP_PKEY, keymgmt : *const super::types:: EVP_KEYMGMT) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_type_by_keymgmt(pkey : *mut super::types:: EVP_PKEY, keymgmt : *mut super::types:: EVP_KEYMGMT) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_type_str(pkey : *const super::types:: EVP_PKEY, str : *const i8, len : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_type_str(pkey : *mut super::types:: EVP_PKEY, str : *const i8, len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_set_utf8_string_param(pkey : *const super::types:: EVP_PKEY, key_name : *const i8, str : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_set_utf8_string_param(pkey : *mut super::types:: EVP_PKEY, key_name : *const i8, str : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_PKEY_settable_params(pkey : *const super::types:: EVP_PKEY) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_sign(ctx : *const super::types:: EVP_PKEY_CTX, sig : *const u8, siglen : *const u64, tbs : *const u8, tbslen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_sign(ctx : *mut super::types:: EVP_PKEY_CTX, sig : *mut u8, siglen : *mut u64, tbs : *const u8, tbslen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_sign_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_sign_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_sign_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_sign_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_todata(pkey : *const super::types:: EVP_PKEY, selection : i32, params : *const *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_todata(pkey : *const super::types:: EVP_PKEY, selection : i32, params : *mut *mut super::types:: OSSL_PARAM) -> i32);
 windows_link::link!("crypto" "C" fn EVP_PKEY_type(r#type : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_type_names_do_all(pkey : *const super::types:: EVP_PKEY, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_type_names_do_all(pkey : *const super::types:: EVP_PKEY, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_up_ref(pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_up_ref(pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify(ctx : *const super::types:: EVP_PKEY_CTX, sig : *const u8, siglen : u64, tbs : *const u8, tbslen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify(ctx : *mut super::types:: EVP_PKEY_CTX, sig : *const u8, siglen : u64, tbs : *const u8, tbslen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover(ctx : *const super::types:: EVP_PKEY_CTX, rout : *const u8, routlen : *const u64, sig : *const u8, siglen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover(ctx : *mut super::types:: EVP_PKEY_CTX, rout : *mut u8, routlen : *mut u64, sig : *const u8, siglen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover_init(ctx : *const super::types:: EVP_PKEY_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover_init(ctx : *mut super::types:: EVP_PKEY_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover_init_ex(ctx : *const super::types:: EVP_PKEY_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_PKEY_verify_recover_init_ex(ctx : *mut super::types:: EVP_PKEY_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_Q_digest(libctx : *const super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8, data : *const core::ffi::c_void, datalen : u64, md : *const u8, mdlen : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_Q_digest(libctx : *mut super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8, data : *const core::ffi::c_void, datalen : u64, md : *mut u8, mdlen : *mut u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_Q_mac(libctx : *const super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8, subalg : *const i8, params : *const super::types:: OSSL_PARAM, key : *const core::ffi::c_void, keylen : u64, data : *const u8, datalen : u64, out : *const u8, outsize : u64, outlen : *const u64) -> *mut u8);
+windows_link::link!("crypto" "C" fn EVP_Q_mac(libctx : *mut super::types:: OSSL_LIB_CTX, name : *const i8, propq : *const i8, subalg : *const i8, params : *const super::types:: OSSL_PARAM, key : *const core::ffi::c_void, keylen : u64, data : *const u8, datalen : u64, out : *mut u8, outsize : u64, outlen : *mut u64) -> *mut u8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_free(ctx : *const super::types:: EVP_RAND_CTX));
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_free(ctx : *mut super::types:: EVP_RAND_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_get0_rand(ctx : *const super::types:: EVP_RAND_CTX) -> *mut super::types:: EVP_RAND);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_get0_rand(ctx : *mut super::types:: EVP_RAND_CTX) -> *mut super::types:: EVP_RAND);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_get_params(ctx : *const super::types:: EVP_RAND_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_get_params(ctx : *mut super::types:: EVP_RAND_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_gettable_params(ctx : *const super::types:: EVP_RAND_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_gettable_params(ctx : *mut super::types:: EVP_RAND_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_new(rand : *const super::types:: EVP_RAND, parent : *const super::types:: EVP_RAND_CTX) -> *mut super::types:: EVP_RAND_CTX);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_new(rand : *mut super::types:: EVP_RAND, parent : *mut super::types:: EVP_RAND_CTX) -> *mut super::types:: EVP_RAND_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_set_params(ctx : *const super::types:: EVP_RAND_CTX, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_set_params(ctx : *mut super::types:: EVP_RAND_CTX, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_CTX_settable_params(ctx : *const super::types:: EVP_RAND_CTX) -> *mut super::types:: OSSL_PARAM);
+windows_link::link!("crypto" "C" fn EVP_RAND_CTX_settable_params(ctx : *mut super::types:: EVP_RAND_CTX) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_RAND_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_enable_locking(ctx : *const super::types:: EVP_RAND_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_enable_locking(ctx : *mut super::types:: EVP_RAND_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_fetch(libctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_RAND);
+windows_link::link!("crypto" "C" fn EVP_RAND_fetch(libctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_RAND);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_free(rand : *const super::types:: EVP_RAND));
+windows_link::link!("crypto" "C" fn EVP_RAND_free(rand : *mut super::types:: EVP_RAND));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_generate(ctx : *const super::types:: EVP_RAND_CTX, out : *const u8, outlen : u64, strength : u32, prediction_resistance : i32, addin : *const u8, addin_len : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_generate(ctx : *mut super::types:: EVP_RAND_CTX, out : *mut u8, outlen : u64, strength : u32, prediction_resistance : i32, addin : *const u8, addin_len : u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_get0_description(md : *const super::types:: EVP_RAND) -> *mut i8);
 #[cfg(feature = "types")]
@@ -1080,39 +1080,39 @@ windows_link::link!("crypto" "C" fn EVP_RAND_get0_name(rand : *const super::type
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_get0_provider(rand : *const super::types:: EVP_RAND) -> *mut super::types:: OSSL_PROVIDER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_get_params(rand : *const super::types:: EVP_RAND, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_get_params(rand : *mut super::types:: EVP_RAND, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_get_state(ctx : *const super::types:: EVP_RAND_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_get_state(ctx : *mut super::types:: EVP_RAND_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_get_strength(ctx : *const super::types:: EVP_RAND_CTX) -> u32);
+windows_link::link!("crypto" "C" fn EVP_RAND_get_strength(ctx : *mut super::types:: EVP_RAND_CTX) -> u32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_gettable_ctx_params(rand : *const super::types:: EVP_RAND) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_gettable_params(rand : *const super::types:: EVP_RAND) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_instantiate(ctx : *const super::types:: EVP_RAND_CTX, strength : u32, prediction_resistance : i32, pstr : *const u8, pstr_len : u64, params : *const super::types:: OSSL_PARAM) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_instantiate(ctx : *mut super::types:: EVP_RAND_CTX, strength : u32, prediction_resistance : i32, pstr : *const u8, pstr_len : u64, params : *mut super::types:: OSSL_PARAM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_is_a(rand : *const super::types:: EVP_RAND, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_names_do_all(rand : *const super::types:: EVP_RAND, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_names_do_all(rand : *const super::types:: EVP_RAND, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_nonce(ctx : *const super::types:: EVP_RAND_CTX, out : *const u8, outlen : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_nonce(ctx : *mut super::types:: EVP_RAND_CTX, out : *mut u8, outlen : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_reseed(ctx : *const super::types:: EVP_RAND_CTX, prediction_resistance : i32, ent : *const u8, ent_len : u64, addin : *const u8, addin_len : u64) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_reseed(ctx : *mut super::types:: EVP_RAND_CTX, prediction_resistance : i32, ent : *const u8, ent_len : u64, addin : *const u8, addin_len : u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_RAND_settable_ctx_params(rand : *const super::types:: EVP_RAND) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_uninstantiate(ctx : *const super::types:: EVP_RAND_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_uninstantiate(ctx : *mut super::types:: EVP_RAND_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_up_ref(rand : *const super::types:: EVP_RAND) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_up_ref(rand : *mut super::types:: EVP_RAND) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_RAND_verify_zeroization(ctx : *const super::types:: EVP_RAND_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_RAND_verify_zeroization(ctx : *mut super::types:: EVP_RAND_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SIGNATURE_do_all_provided(libctx : *const super::types:: OSSL_LIB_CTX, r#fn : *const isize, data : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn EVP_SIGNATURE_do_all_provided(libctx : *mut super::types:: OSSL_LIB_CTX, r#fn : *mut isize, data : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SIGNATURE_fetch(ctx : *const super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_SIGNATURE);
+windows_link::link!("crypto" "C" fn EVP_SIGNATURE_fetch(ctx : *mut super::types:: OSSL_LIB_CTX, algorithm : *const i8, properties : *const i8) -> *mut super::types:: EVP_SIGNATURE);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SIGNATURE_free(signature : *const super::types:: EVP_SIGNATURE));
+windows_link::link!("crypto" "C" fn EVP_SIGNATURE_free(signature : *mut super::types:: EVP_SIGNATURE));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_SIGNATURE_get0_description(signature : *const super::types:: EVP_SIGNATURE) -> *mut i8);
 #[cfg(feature = "types")]
@@ -1124,23 +1124,23 @@ windows_link::link!("crypto" "C" fn EVP_SIGNATURE_gettable_ctx_params(sig : *con
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_SIGNATURE_is_a(signature : *const super::types:: EVP_SIGNATURE, name : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SIGNATURE_names_do_all(signature : *const super::types:: EVP_SIGNATURE, r#fn : *const isize, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SIGNATURE_names_do_all(signature : *const super::types:: EVP_SIGNATURE, r#fn : *mut isize, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_SIGNATURE_settable_ctx_params(sig : *const super::types:: EVP_SIGNATURE) -> *mut super::types:: OSSL_PARAM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SIGNATURE_up_ref(signature : *const super::types:: EVP_SIGNATURE) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SIGNATURE_up_ref(signature : *mut super::types:: EVP_SIGNATURE) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SealFinal(ctx : *const super::types:: EVP_CIPHER_CTX, out : *const u8, outl : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SealFinal(ctx : *mut super::types:: EVP_CIPHER_CTX, out : *mut u8, outl : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SealInit(ctx : *const super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: EVP_CIPHER, ek : *const *const u8, ekl : *const i32, iv : *const u8, pubk : *const *const super::types:: EVP_PKEY, npubk : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SealInit(ctx : *mut super::types:: EVP_CIPHER_CTX, r#type : *const super::types:: EVP_CIPHER, ek : *mut *mut u8, ekl : *mut i32, iv : *mut u8, pubk : *mut *mut super::types:: EVP_PKEY, npubk : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SignFinal(ctx : *const super::types:: EVP_MD_CTX, md : *const u8, s : *const u32, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SignFinal(ctx : *mut super::types:: EVP_MD_CTX, md : *mut u8, s : *mut u32, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_SignFinal_ex(ctx : *const super::types:: EVP_MD_CTX, md : *const u8, s : *const u32, pkey : *const super::types:: EVP_PKEY, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_SignFinal_ex(ctx : *mut super::types:: EVP_MD_CTX, md : *mut u8, s : *mut u32, pkey : *mut super::types:: EVP_PKEY, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_VerifyFinal(ctx : *const super::types:: EVP_MD_CTX, sigbuf : *const u8, siglen : u32, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn EVP_VerifyFinal(ctx : *mut super::types:: EVP_MD_CTX, sigbuf : *const u8, siglen : u32, pkey : *mut super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_VerifyFinal_ex(ctx : *const super::types:: EVP_MD_CTX, sigbuf : *const u8, siglen : u32, pkey : *const super::types:: EVP_PKEY, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_VerifyFinal_ex(ctx : *mut super::types:: EVP_MD_CTX, sigbuf : *const u8, siglen : u32, pkey : *mut super::types:: EVP_PKEY, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 windows_link::link!("crypto" "C" fn EVP_add_alg_module());
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_add_cipher(cipher : *const super::types:: EVP_CIPHER) -> i32);
@@ -1351,9 +1351,9 @@ windows_link::link!("crypto" "C" fn EVP_chacha20() -> *mut super::types:: EVP_CI
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_chacha20_poly1305() -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_default_properties_enable_fips(libctx : *const super::types:: OSSL_LIB_CTX, enable : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_default_properties_enable_fips(libctx : *mut super::types:: OSSL_LIB_CTX, enable : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_default_properties_is_fips_enabled(libctx : *const super::types:: OSSL_LIB_CTX) -> i32);
+windows_link::link!("crypto" "C" fn EVP_default_properties_is_fips_enabled(libctx : *mut super::types:: OSSL_LIB_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_des_cbc() -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
@@ -1427,8 +1427,8 @@ windows_link::link!("crypto" "C" fn EVP_rc4() -> *mut super::types:: EVP_CIPHER)
 windows_link::link!("crypto" "C" fn EVP_rc4_40() -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_rc4_hmac_md5() -> *mut super::types:: EVP_CIPHER);
-windows_link::link!("crypto" "C" fn EVP_read_pw_string(buf : *const i8, length : i32, prompt : *const i8, verify : i32) -> i32);
-windows_link::link!("crypto" "C" fn EVP_read_pw_string_min(buf : *const i8, minlen : i32, maxlen : i32, prompt : *const i8, verify : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_read_pw_string(buf : *mut i8, length : i32, prompt : *const i8, verify : i32) -> i32);
+windows_link::link!("crypto" "C" fn EVP_read_pw_string_min(buf : *mut i8, minlen : i32, maxlen : i32, prompt : *const i8, verify : i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_ripemd160() -> *mut super::types:: EVP_MD);
 #[cfg(feature = "types")]
@@ -1440,7 +1440,7 @@ windows_link::link!("crypto" "C" fn EVP_seed_ecb() -> *mut super::types:: EVP_CI
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_seed_ofb() -> *mut super::types:: EVP_CIPHER);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn EVP_set_default_properties(libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn EVP_set_default_properties(libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 windows_link::link!("crypto" "C" fn EVP_set_pw_prompt(prompt : *const i8));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn EVP_sha1() -> *mut super::types:: EVP_MD);
@@ -1484,42 +1484,42 @@ windows_link::link!("crypto" "C" fn EVP_sm4_ofb() -> *mut super::types:: EVP_CIP
 windows_link::link!("crypto" "C" fn EVP_whirlpool() -> *mut super::types:: EVP_MD);
 windows_link::link!("crypto" "C" fn PKCS5_PBE_add());
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_PBE_keyivgen(ctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_PBE_keyivgen(ctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_PBE_keyivgen_ex(cctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_PBE_keyivgen_ex(cctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_PBKDF2_HMAC(pass : *const i8, passlen : i32, salt : *const u8, saltlen : i32, iter : i32, digest : *const super::types:: EVP_MD, keylen : i32, out : *const u8) -> i32);
-windows_link::link!("crypto" "C" fn PKCS5_PBKDF2_HMAC_SHA1(pass : *const i8, passlen : i32, salt : *const u8, saltlen : i32, iter : i32, keylen : i32, out : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_PBKDF2_HMAC(pass : *const i8, passlen : i32, salt : *const u8, saltlen : i32, iter : i32, digest : *const super::types:: EVP_MD, keylen : i32, out : *mut u8) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_PBKDF2_HMAC_SHA1(pass : *const i8, passlen : i32, salt : *const u8, saltlen : i32, iter : i32, keylen : i32, out : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_v2_PBE_keyivgen(ctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_v2_PBE_keyivgen(ctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_v2_PBE_keyivgen_ex(ctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_v2_PBE_keyivgen_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, cipher : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_v2_scrypt_keyivgen(ctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, c : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_v2_scrypt_keyivgen(ctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, c : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn PKCS5_v2_scrypt_keyivgen_ex(ctx : *const super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *const super::types:: ASN1_TYPE, c : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn PKCS5_v2_scrypt_keyivgen_ex(ctx : *mut super::types:: EVP_CIPHER_CTX, pass : *const i8, passlen : i32, param : *mut super::types:: ASN1_TYPE, c : *const super::types:: EVP_CIPHER, md : *const super::types:: EVP_MD, en_de : i32, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_AutoPrivateKey(a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_AutoPrivateKey(a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_AutoPrivateKey_ex(a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_AutoPrivateKey_ex(a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_KeyParams(r#type : i32, a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_KeyParams(r#type : i32, a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_KeyParams_bio(r#type : i32, a : *const *const super::types:: EVP_PKEY, r#in : *const super::types:: BIO) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_KeyParams_bio(r#type : i32, a : *mut *mut super::types:: EVP_PKEY, r#in : *mut super::types:: BIO) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_PrivateKey(r#type : i32, a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_PrivateKey(r#type : i32, a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_PrivateKey_ex(r#type : i32, a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64, libctx : *const super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_PrivateKey_ex(r#type : i32, a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64, libctx : *mut super::types:: OSSL_LIB_CTX, propq : *const i8) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn d2i_PublicKey(r#type : i32, a : *const *const super::types:: EVP_PKEY, pp : *const *const u8, length : i64) -> *mut super::types:: EVP_PKEY);
+windows_link::link!("crypto" "C" fn d2i_PublicKey(r#type : i32, a : *mut *mut super::types:: EVP_PKEY, pp : *mut *mut u8, length : i64) -> *mut super::types:: EVP_PKEY);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn i2d_KeyParams(a : *const super::types:: EVP_PKEY, pp : *const *const u8) -> i32);
+windows_link::link!("crypto" "C" fn i2d_KeyParams(a : *const super::types:: EVP_PKEY, pp : *mut *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn i2d_KeyParams_bio(bp : *const super::types:: BIO, pkey : *const super::types:: EVP_PKEY) -> i32);
+windows_link::link!("crypto" "C" fn i2d_KeyParams_bio(bp : *mut super::types:: BIO, pkey : *const super::types:: EVP_PKEY) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn i2d_PrivateKey(a : *const super::types:: EVP_PKEY, pp : *const *const u8) -> i32);
+windows_link::link!("crypto" "C" fn i2d_PrivateKey(a : *const super::types:: EVP_PKEY, pp : *mut *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn i2d_PublicKey(a : *const super::types:: EVP_PKEY, pp : *const *const u8) -> i32);
+windows_link::link!("crypto" "C" fn i2d_PublicKey(a : *const super::types:: EVP_PKEY, pp : *mut *mut u8) -> i32);
 pub const ASN1_PKEY_ALIAS: i32 = 1i32;
 pub const ASN1_PKEY_CTRL_CMS_ENVELOPE: i32 = 7i32;
 pub const ASN1_PKEY_CTRL_CMS_IS_RI_TYPE_SUPPORTED: i32 = 11i32;

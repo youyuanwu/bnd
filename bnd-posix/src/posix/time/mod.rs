@@ -9,47 +9,47 @@
 )]
 
 windows_link::link!("c" "C" fn asctime(__tp : *const tm) -> *mut i8);
-windows_link::link!("c" "C" fn asctime_r(__tp : *const tm, __buf : *const i8) -> *mut i8);
+windows_link::link!("c" "C" fn asctime_r(__tp : *const tm, __buf : *mut i8) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn clock() -> clock_t);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn clock_getcpuclockid(__pid : super::types:: pid_t, __clock_id : *const clockid_t) -> i32);
+windows_link::link!("c" "C" fn clock_getcpuclockid(__pid : super::types:: pid_t, __clock_id : *mut clockid_t) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn clock_getres(__clock_id : clockid_t, __res : *const super::stat:: timespec) -> i32);
+windows_link::link!("c" "C" fn clock_getres(__clock_id : clockid_t, __res : *mut super::stat:: timespec) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn clock_gettime(__clock_id : clockid_t, __tp : *const super::stat:: timespec) -> i32);
+windows_link::link!("c" "C" fn clock_gettime(__clock_id : clockid_t, __tp : *mut super::stat:: timespec) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn clock_nanosleep(__clock_id : clockid_t, __flags : i32, __req : *const super::stat:: timespec, __rem : *const super::stat:: timespec) -> i32);
+windows_link::link!("c" "C" fn clock_nanosleep(__clock_id : clockid_t, __flags : i32, __req : *const super::stat:: timespec, __rem : *mut super::stat:: timespec) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
 windows_link::link!("c" "C" fn clock_settime(__clock_id : clockid_t, __tp : *const super::stat:: timespec) -> i32);
 windows_link::link!("c" "C" fn ctime(__timer : *const i64) -> *mut i8);
-windows_link::link!("c" "C" fn ctime_r(__timer : *const i64, __buf : *const i8) -> *mut i8);
+windows_link::link!("c" "C" fn ctime_r(__timer : *const i64, __buf : *mut i8) -> *mut i8);
 windows_link::link!("c" "C" fn difftime(__time1 : i64, __time0 : i64) -> f64);
 windows_link::link!("c" "C" fn dysize(__year : i32) -> i32);
 windows_link::link!("c" "C" fn gmtime(__timer : *const i64) -> *mut tm);
-windows_link::link!("c" "C" fn gmtime_r(__timer : *const i64, __tp : *const tm) -> *mut tm);
+windows_link::link!("c" "C" fn gmtime_r(__timer : *const i64, __tp : *mut tm) -> *mut tm);
 windows_link::link!("c" "C" fn localtime(__timer : *const i64) -> *mut tm);
-windows_link::link!("c" "C" fn localtime_r(__timer : *const i64, __tp : *const tm) -> *mut tm);
-windows_link::link!("c" "C" fn mktime(__tp : *const tm) -> i64);
+windows_link::link!("c" "C" fn localtime_r(__timer : *const i64, __tp : *mut tm) -> *mut tm);
+windows_link::link!("c" "C" fn mktime(__tp : *mut tm) -> i64);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn nanosleep(__requested_time : *const super::stat:: timespec, __remaining : *const super::stat:: timespec) -> i32);
-windows_link::link!("c" "C" fn strftime(__s : *const i8, __maxsize : u64, __format : *const i8, __tp : *const tm) -> u64);
-windows_link::link!("c" "C" fn strftime_l(__s : *const i8, __maxsize : u64, __format : *const i8, __tp : *const tm, __loc : locale_t) -> u64);
-windows_link::link!("c" "C" fn time(__timer : *const i64) -> i64);
-windows_link::link!("c" "C" fn timegm(__tp : *const tm) -> i64);
-windows_link::link!("c" "C" fn timelocal(__tp : *const tm) -> i64);
+windows_link::link!("c" "C" fn nanosleep(__requested_time : *const super::stat:: timespec, __remaining : *mut super::stat:: timespec) -> i32);
+windows_link::link!("c" "C" fn strftime(__s : *mut i8, __maxsize : u64, __format : *const i8, __tp : *const tm) -> u64);
+windows_link::link!("c" "C" fn strftime_l(__s : *mut i8, __maxsize : u64, __format : *const i8, __tp : *const tm, __loc : locale_t) -> u64);
+windows_link::link!("c" "C" fn time(__timer : *mut i64) -> i64);
+windows_link::link!("c" "C" fn timegm(__tp : *mut tm) -> i64);
+windows_link::link!("c" "C" fn timelocal(__tp : *mut tm) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn timer_create(__clock_id : clockid_t, __evp : *const core::ffi::c_void, __timerid : *const timer_t) -> i32);
+windows_link::link!("c" "C" fn timer_create(__clock_id : clockid_t, __evp : *mut core::ffi::c_void, __timerid : *mut timer_t) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn timer_delete(__timerid : timer_t) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn timer_getoverrun(__timerid : timer_t) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn timer_gettime(__timerid : timer_t, __value : *const itimerspec) -> i32);
+windows_link::link!("c" "C" fn timer_gettime(__timerid : timer_t, __value : *mut itimerspec) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn timer_settime(__timerid : timer_t, __flags : i32, __value : *const itimerspec, __ovalue : *const itimerspec) -> i32);
+windows_link::link!("c" "C" fn timer_settime(__timerid : timer_t, __flags : i32, __value : *const itimerspec, __ovalue : *mut itimerspec) -> i32);
 #[cfg(all(feature = "stat", feature = "types"))]
-windows_link::link!("c" "C" fn timespec_get(__ts : *const super::stat:: timespec, __base : i32) -> i32);
+windows_link::link!("c" "C" fn timespec_get(__ts : *mut super::stat:: timespec, __base : i32) -> i32);
 windows_link::link!("c" "C" fn tzset());
 pub const CLOCK_BOOTTIME: i32 = 7i32;
 pub const CLOCK_BOOTTIME_ALARM: i32 = 9i32;

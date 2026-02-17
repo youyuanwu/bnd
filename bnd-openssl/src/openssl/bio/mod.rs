@@ -10,70 +10,70 @@
 
 windows_link::link!("crypto" "C" fn BIO_ADDRINFO_address(bai : *const BIO_ADDRINFO) -> *mut BIO_ADDR);
 windows_link::link!("crypto" "C" fn BIO_ADDRINFO_family(bai : *const BIO_ADDRINFO) -> i32);
-windows_link::link!("crypto" "C" fn BIO_ADDRINFO_free(bai : *const BIO_ADDRINFO));
+windows_link::link!("crypto" "C" fn BIO_ADDRINFO_free(bai : *mut BIO_ADDRINFO));
 windows_link::link!("crypto" "C" fn BIO_ADDRINFO_next(bai : *const BIO_ADDRINFO) -> *mut BIO_ADDRINFO);
 windows_link::link!("crypto" "C" fn BIO_ADDRINFO_protocol(bai : *const BIO_ADDRINFO) -> i32);
 windows_link::link!("crypto" "C" fn BIO_ADDRINFO_socktype(bai : *const BIO_ADDRINFO) -> i32);
-windows_link::link!("crypto" "C" fn BIO_ADDR_clear(ap : *const BIO_ADDR));
+windows_link::link!("crypto" "C" fn BIO_ADDR_clear(ap : *mut BIO_ADDR));
 windows_link::link!("crypto" "C" fn BIO_ADDR_family(ap : *const BIO_ADDR) -> i32);
-windows_link::link!("crypto" "C" fn BIO_ADDR_free(param0 : *const BIO_ADDR));
+windows_link::link!("crypto" "C" fn BIO_ADDR_free(param0 : *mut BIO_ADDR));
 windows_link::link!("crypto" "C" fn BIO_ADDR_hostname_string(ap : *const BIO_ADDR, numeric : i32) -> *mut i8);
 windows_link::link!("crypto" "C" fn BIO_ADDR_new() -> *mut BIO_ADDR);
 windows_link::link!("crypto" "C" fn BIO_ADDR_path_string(ap : *const BIO_ADDR) -> *mut i8);
-windows_link::link!("crypto" "C" fn BIO_ADDR_rawaddress(ap : *const BIO_ADDR, p : *const core::ffi::c_void, l : *const u64) -> i32);
-windows_link::link!("crypto" "C" fn BIO_ADDR_rawmake(ap : *const BIO_ADDR, family : i32, r#where : *const core::ffi::c_void, wherelen : u64, port : u16) -> i32);
+windows_link::link!("crypto" "C" fn BIO_ADDR_rawaddress(ap : *const BIO_ADDR, p : *mut core::ffi::c_void, l : *mut u64) -> i32);
+windows_link::link!("crypto" "C" fn BIO_ADDR_rawmake(ap : *mut BIO_ADDR, family : i32, r#where : *const core::ffi::c_void, wherelen : u64, port : u16) -> i32);
 windows_link::link!("crypto" "C" fn BIO_ADDR_rawport(ap : *const BIO_ADDR) -> u16);
 windows_link::link!("crypto" "C" fn BIO_ADDR_service_string(ap : *const BIO_ADDR, numeric : i32) -> *mut i8);
-windows_link::link!("crypto" "C" fn BIO_accept(sock : i32, ip_port : *const *const i8) -> i32);
-windows_link::link!("crypto" "C" fn BIO_accept_ex(accept_sock : i32, addr : *const BIO_ADDR, options : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_accept(sock : i32, ip_port : *mut *mut i8) -> i32);
+windows_link::link!("crypto" "C" fn BIO_accept_ex(accept_sock : i32, addr : *mut BIO_ADDR, options : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_asn1_get_prefix(b : *const super::types:: BIO, pprefix : *const *const asn1_ps_func, pprefix_free : *const *const asn1_ps_func) -> i32);
+windows_link::link!("crypto" "C" fn BIO_asn1_get_prefix(b : *mut super::types:: BIO, pprefix : *mut *mut asn1_ps_func, pprefix_free : *mut *mut asn1_ps_func) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_asn1_get_suffix(b : *const super::types:: BIO, psuffix : *const *const asn1_ps_func, psuffix_free : *const *const asn1_ps_func) -> i32);
+windows_link::link!("crypto" "C" fn BIO_asn1_get_suffix(b : *mut super::types:: BIO, psuffix : *mut *mut asn1_ps_func, psuffix_free : *mut *mut asn1_ps_func) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_asn1_set_prefix(b : *const super::types:: BIO, prefix : *const asn1_ps_func, prefix_free : *const asn1_ps_func) -> i32);
+windows_link::link!("crypto" "C" fn BIO_asn1_set_prefix(b : *mut super::types:: BIO, prefix : *mut asn1_ps_func, prefix_free : *mut asn1_ps_func) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_asn1_set_suffix(b : *const super::types:: BIO, suffix : *const asn1_ps_func, suffix_free : *const asn1_ps_func) -> i32);
+windows_link::link!("crypto" "C" fn BIO_asn1_set_suffix(b : *mut super::types:: BIO, suffix : *mut asn1_ps_func, suffix_free : *mut asn1_ps_func) -> i32);
 windows_link::link!("crypto" "C" fn BIO_bind(sock : i32, addr : *const BIO_ADDR, options : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_callback_ctrl(b : *const super::types:: BIO, cmd : i32, fp : *const BIO_info_cb) -> i64);
+windows_link::link!("crypto" "C" fn BIO_callback_ctrl(b : *mut super::types:: BIO, cmd : i32, fp : *mut BIO_info_cb) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_clear_flags(b : *const super::types:: BIO, flags : i32));
+windows_link::link!("crypto" "C" fn BIO_clear_flags(b : *mut super::types:: BIO, flags : i32));
 windows_link::link!("crypto" "C" fn BIO_closesocket(sock : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_connect(sock : i32, addr : *const BIO_ADDR, options : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_copy_next_retry(b : *const super::types:: BIO));
+windows_link::link!("crypto" "C" fn BIO_copy_next_retry(b : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl(bp : *const super::types:: BIO, cmd : i32, larg : i64, parg : *const core::ffi::c_void) -> i64);
+windows_link::link!("crypto" "C" fn BIO_ctrl(bp : *mut super::types:: BIO, cmd : i32, larg : i64, parg : *mut core::ffi::c_void) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl_get_read_request(b : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_ctrl_get_read_request(b : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl_get_write_guarantee(b : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_ctrl_get_write_guarantee(b : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl_pending(b : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_ctrl_pending(b : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl_reset_read_request(b : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_ctrl_reset_read_request(b : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ctrl_wpending(b : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_ctrl_wpending(b : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_debug_callback(bio : *const super::types:: BIO, cmd : i32, argp : *const i8, argi : i32, argl : i64, ret : i64) -> i64);
+windows_link::link!("crypto" "C" fn BIO_debug_callback(bio : *mut super::types:: BIO, cmd : i32, argp : *const i8, argi : i32, argl : i64, ret : i64) -> i64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_debug_callback_ex(bio : *const super::types:: BIO, oper : i32, argp : *const i8, len : u64, argi : i32, argl : i64, ret : i32, processed : *const u64) -> i64);
+windows_link::link!("crypto" "C" fn BIO_debug_callback_ex(bio : *mut super::types:: BIO, oper : i32, argp : *const i8, len : u64, argi : i32, argl : i64, ret : i32, processed : *mut u64) -> i64);
 windows_link::link!("crypto" "C" fn BIO_dgram_non_fatal_error(error : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_do_connect_retry(bio : *const super::types:: BIO, timeout : i32, nap_milliseconds : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_do_connect_retry(bio : *mut super::types:: BIO, timeout : i32, nap_milliseconds : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_dump(b : *const super::types:: BIO, bytes : *const core::ffi::c_void, len : i32) -> i32);
-windows_link::link!("crypto" "C" fn BIO_dump_cb(cb : *const isize, u : *const core::ffi::c_void, s : *const core::ffi::c_void, len : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump(b : *mut super::types:: BIO, bytes : *const core::ffi::c_void, len : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump_cb(cb : *mut isize, u : *mut core::ffi::c_void, s : *const core::ffi::c_void, len : i32) -> i32);
 #[cfg(feature = "crypto")]
-windows_link::link!("crypto" "C" fn BIO_dump_fp(fp : *const super::crypto:: _IO_FILE, s : *const core::ffi::c_void, len : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump_fp(fp : *mut super::crypto:: _IO_FILE, s : *const core::ffi::c_void, len : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_dump_indent(b : *const super::types:: BIO, bytes : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
-windows_link::link!("crypto" "C" fn BIO_dump_indent_cb(cb : *const isize, u : *const core::ffi::c_void, s : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump_indent(b : *mut super::types:: BIO, bytes : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump_indent_cb(cb : *mut isize, u : *mut core::ffi::c_void, s : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
 #[cfg(feature = "crypto")]
-windows_link::link!("crypto" "C" fn BIO_dump_indent_fp(fp : *const super::crypto:: _IO_FILE, s : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_dump_indent_fp(fp : *mut super::crypto:: _IO_FILE, s : *const core::ffi::c_void, len : i32, indent : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_dup_chain(r#in : *const super::types:: BIO) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_dup_chain(r#in : *mut super::types:: BIO) -> *mut super::types:: BIO);
 windows_link::link!("crypto" "C" fn BIO_f_buffer() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_f_linebuffer() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_f_nbio_test() -> *mut BIO_METHOD);
@@ -83,12 +83,12 @@ windows_link::link!("crypto" "C" fn BIO_f_readbuffer() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_fd_non_fatal_error(error : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_fd_should_retry(i : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_find_type(b : *const super::types:: BIO, bio_type : i32) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_find_type(b : *mut super::types:: BIO, bio_type : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_free(a : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_free(a : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_free_all(a : *const super::types:: BIO));
-windows_link::link!("crypto" "C" fn BIO_get_accept_socket(host_port : *const i8, mode : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_free_all(a : *mut super::types:: BIO));
+windows_link::link!("crypto" "C" fn BIO_get_accept_socket(host_port : *mut i8, mode : i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_get_callback(b : *const super::types:: BIO) -> BIO_callback_fn);
 #[cfg(feature = "types")]
@@ -96,35 +96,35 @@ windows_link::link!("crypto" "C" fn BIO_get_callback_arg(b : *const super::types
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_get_callback_ex(b : *const super::types:: BIO) -> BIO_callback_fn_ex);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_data(a : *const super::types:: BIO) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn BIO_get_data(a : *mut super::types:: BIO) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_get_ex_data(bio : *const super::types:: BIO, idx : i32) -> *mut core::ffi::c_void);
-windows_link::link!("crypto" "C" fn BIO_get_host_ip(str : *const i8, ip : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_host_ip(str : *const i8, ip : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_init(a : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_init(a : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_line(bio : *const super::types:: BIO, buf : *const i8, size : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_line(bio : *mut super::types:: BIO, buf : *mut i8, size : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_get_new_index() -> i32);
-windows_link::link!("crypto" "C" fn BIO_get_port(str : *const i8, port_ptr : *const u16) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_port(str : *const i8, port_ptr : *mut u16) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_retry_BIO(bio : *const super::types:: BIO, reason : *const i32) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_get_retry_BIO(bio : *mut super::types:: BIO, reason : *mut i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_retry_reason(bio : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_retry_reason(bio : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_get_shutdown(a : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_get_shutdown(a : *mut super::types:: BIO) -> i32);
 windows_link::link!("crypto" "C" fn BIO_gethostbyname(name : *const i8) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_gets(bp : *const super::types:: BIO, buf : *const i8, size : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_gets(bp : *mut super::types:: BIO, buf : *mut i8, size : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_hex_string(out : *const super::types:: BIO, indent : i32, width : i32, data : *const core::ffi::c_void, datalen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_hex_string(out : *mut super::types:: BIO, indent : i32, width : i32, data : *const core::ffi::c_void, datalen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_indent(b : *const super::types:: BIO, indent : i32, max : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_indent(b : *mut super::types:: BIO, indent : i32, max : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_int_ctrl(bp : *const super::types:: BIO, cmd : i32, larg : i64, iarg : i32) -> i64);
+windows_link::link!("crypto" "C" fn BIO_int_ctrl(bp : *mut super::types:: BIO, cmd : i32, larg : i64, iarg : i32) -> i64);
 windows_link::link!("crypto" "C" fn BIO_listen(sock : i32, addr : *const BIO_ADDR, options : i32) -> i32);
-windows_link::link!("crypto" "C" fn BIO_lookup(host : *const i8, service : *const i8, lookup_type : BIO_lookup_type, family : i32, socktype : i32, res : *const *const BIO_ADDRINFO) -> i32);
-windows_link::link!("crypto" "C" fn BIO_lookup_ex(host : *const i8, service : *const i8, lookup_type : i32, family : i32, socktype : i32, protocol : i32, res : *const *const BIO_ADDRINFO) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_free(biom : *const BIO_METHOD));
+windows_link::link!("crypto" "C" fn BIO_lookup(host : *const i8, service : *const i8, lookup_type : BIO_lookup_type, family : i32, socktype : i32, res : *mut *mut BIO_ADDRINFO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_lookup_ex(host : *const i8, service : *const i8, lookup_type : i32, family : i32, socktype : i32, protocol : i32, res : *mut *mut BIO_ADDRINFO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_free(biom : *mut BIO_METHOD));
 windows_link::link!("crypto" "C" fn BIO_meth_get_callback_ctrl(biom : *const BIO_METHOD) -> *mut isize);
 windows_link::link!("crypto" "C" fn BIO_meth_get_create(bion : *const BIO_METHOD) -> *mut isize);
 windows_link::link!("crypto" "C" fn BIO_meth_get_ctrl(biom : *const BIO_METHOD) -> *mut isize);
@@ -136,16 +136,16 @@ windows_link::link!("crypto" "C" fn BIO_meth_get_read_ex(biom : *const BIO_METHO
 windows_link::link!("crypto" "C" fn BIO_meth_get_write(biom : *const BIO_METHOD) -> *mut isize);
 windows_link::link!("crypto" "C" fn BIO_meth_get_write_ex(biom : *const BIO_METHOD) -> *mut isize);
 windows_link::link!("crypto" "C" fn BIO_meth_new(r#type : i32, name : *const i8) -> *mut BIO_METHOD);
-windows_link::link!("crypto" "C" fn BIO_meth_set_callback_ctrl(biom : *const BIO_METHOD, callback_ctrl : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_create(biom : *const BIO_METHOD, create : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_ctrl(biom : *const BIO_METHOD, ctrl : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_destroy(biom : *const BIO_METHOD, destroy : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_gets(biom : *const BIO_METHOD, ossl_gets : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_puts(biom : *const BIO_METHOD, puts : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_read(biom : *const BIO_METHOD, read : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_read_ex(biom : *const BIO_METHOD, bread : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_write(biom : *const BIO_METHOD, write : *const isize) -> i32);
-windows_link::link!("crypto" "C" fn BIO_meth_set_write_ex(biom : *const BIO_METHOD, bwrite : *const isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_callback_ctrl(biom : *mut BIO_METHOD, callback_ctrl : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_create(biom : *mut BIO_METHOD, create : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_ctrl(biom : *mut BIO_METHOD, ctrl : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_destroy(biom : *mut BIO_METHOD, destroy : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_gets(biom : *mut BIO_METHOD, ossl_gets : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_puts(biom : *mut BIO_METHOD, puts : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_read(biom : *mut BIO_METHOD, read : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_read_ex(biom : *mut BIO_METHOD, bread : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_write(biom : *mut BIO_METHOD, write : *mut isize) -> i32);
+windows_link::link!("crypto" "C" fn BIO_meth_set_write_ex(biom : *mut BIO_METHOD, bwrite : *mut isize) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_method_name(b : *const super::types:: BIO) -> *mut i8);
 #[cfg(feature = "types")]
@@ -155,52 +155,52 @@ windows_link::link!("crypto" "C" fn BIO_new(r#type : *const BIO_METHOD) -> *mut 
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_accept(host_port : *const i8) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_new_bio_pair(bio1 : *const *const super::types:: BIO, writebuf1 : u64, bio2 : *const *const super::types:: BIO, writebuf2 : u64) -> i32);
+windows_link::link!("crypto" "C" fn BIO_new_bio_pair(bio1 : *mut *mut super::types:: BIO, writebuf1 : u64, bio2 : *mut *mut super::types:: BIO, writebuf2 : u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_connect(host_port : *const i8) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_dgram(fd : i32, close_flag : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_new_ex(libctx : *const super::types:: OSSL_LIB_CTX, method : *const BIO_METHOD) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_new_ex(libctx : *mut super::types:: OSSL_LIB_CTX, method : *const BIO_METHOD) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_fd(fd : i32, close_flag : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_file(filename : *const i8, mode : *const i8) -> *mut super::types:: BIO);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn BIO_new_fp(stream : *const super::crypto:: _IO_FILE, close_flag : i32) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_new_fp(stream : *mut super::crypto:: _IO_FILE, close_flag : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_new_from_core_bio(libctx : *const super::types:: OSSL_LIB_CTX, corebio : *const core::ffi::c_void) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_new_from_core_bio(libctx : *mut super::types:: OSSL_LIB_CTX, corebio : *mut core::ffi::c_void) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_mem_buf(buf : *const core::ffi::c_void, len : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_new_socket(sock : i32, close_flag : i32) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_next(b : *const super::types:: BIO) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_next(b : *mut super::types:: BIO) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_nread(bio : *const super::types:: BIO, buf : *const *const i8, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_nread(bio : *mut super::types:: BIO, buf : *mut *mut i8, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_nread0(bio : *const super::types:: BIO, buf : *const *const i8) -> i32);
+windows_link::link!("crypto" "C" fn BIO_nread0(bio : *mut super::types:: BIO, buf : *mut *mut i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_number_read(bio : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_number_read(bio : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_number_written(bio : *const super::types:: BIO) -> u64);
+windows_link::link!("crypto" "C" fn BIO_number_written(bio : *mut super::types:: BIO) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_nwrite(bio : *const super::types:: BIO, buf : *const *const i8, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_nwrite(bio : *mut super::types:: BIO, buf : *mut *mut i8, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_nwrite0(bio : *const super::types:: BIO, buf : *const *const i8) -> i32);
-windows_link::link!("crypto" "C" fn BIO_parse_hostserv(hostserv : *const i8, host : *const *const i8, service : *const *const i8, hostserv_prio : BIO_hostserv_priorities) -> i32);
+windows_link::link!("crypto" "C" fn BIO_nwrite0(bio : *mut super::types:: BIO, buf : *mut *mut i8) -> i32);
+windows_link::link!("crypto" "C" fn BIO_parse_hostserv(hostserv : *const i8, host : *mut *mut i8, service : *mut *mut i8, hostserv_prio : BIO_hostserv_priorities) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_pop(b : *const super::types:: BIO) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_pop(b : *mut super::types:: BIO) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_ptr_ctrl(bp : *const super::types:: BIO, cmd : i32, larg : i64) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn BIO_ptr_ctrl(bp : *mut super::types:: BIO, cmd : i32, larg : i64) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_push(b : *const super::types:: BIO, append : *const super::types:: BIO) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn BIO_push(b : *mut super::types:: BIO, append : *mut super::types:: BIO) -> *mut super::types:: BIO);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_puts(bp : *const super::types:: BIO, buf : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn BIO_puts(bp : *mut super::types:: BIO, buf : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_read(b : *const super::types:: BIO, data : *const core::ffi::c_void, dlen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_read(b : *mut super::types:: BIO, data : *mut core::ffi::c_void, dlen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_read_ex(b : *const super::types:: BIO, data : *const core::ffi::c_void, dlen : u64, readbytes : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn BIO_read_ex(b : *mut super::types:: BIO, data : *mut core::ffi::c_void, dlen : u64, readbytes : *mut u64) -> i32);
 windows_link::link!("crypto" "C" fn BIO_s_accept() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_s_bio() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_s_connect() -> *mut BIO_METHOD);
@@ -214,59 +214,59 @@ windows_link::link!("crypto" "C" fn BIO_s_null() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_s_secmem() -> *mut BIO_METHOD);
 windows_link::link!("crypto" "C" fn BIO_s_socket() -> *mut BIO_METHOD);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_callback(b : *const super::types:: BIO, callback : BIO_callback_fn));
+windows_link::link!("crypto" "C" fn BIO_set_callback(b : *mut super::types:: BIO, callback : BIO_callback_fn));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_callback_arg(b : *const super::types:: BIO, arg : *const i8));
+windows_link::link!("crypto" "C" fn BIO_set_callback_arg(b : *mut super::types:: BIO, arg : *mut i8));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_callback_ex(b : *const super::types:: BIO, callback : BIO_callback_fn_ex));
+windows_link::link!("crypto" "C" fn BIO_set_callback_ex(b : *mut super::types:: BIO, callback : BIO_callback_fn_ex));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_data(a : *const super::types:: BIO, ptr : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn BIO_set_data(a : *mut super::types:: BIO, ptr : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_ex_data(bio : *const super::types:: BIO, idx : i32, data : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn BIO_set_ex_data(bio : *mut super::types:: BIO, idx : i32, data : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_flags(b : *const super::types:: BIO, flags : i32));
+windows_link::link!("crypto" "C" fn BIO_set_flags(b : *mut super::types:: BIO, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_init(a : *const super::types:: BIO, init : i32));
+windows_link::link!("crypto" "C" fn BIO_set_init(a : *mut super::types:: BIO, init : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_next(b : *const super::types:: BIO, next : *const super::types:: BIO));
+windows_link::link!("crypto" "C" fn BIO_set_next(b : *mut super::types:: BIO, next : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_retry_reason(bio : *const super::types:: BIO, reason : i32));
+windows_link::link!("crypto" "C" fn BIO_set_retry_reason(bio : *mut super::types:: BIO, reason : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_set_shutdown(a : *const super::types:: BIO, shut : i32));
+windows_link::link!("crypto" "C" fn BIO_set_shutdown(a : *mut super::types:: BIO, shut : i32));
 windows_link::link!("crypto" "C" fn BIO_set_tcp_ndelay(sock : i32, turn_on : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_sock_error(sock : i32) -> i32);
-windows_link::link!("crypto" "C" fn BIO_sock_info(sock : i32, r#type : BIO_sock_info_type, info : *const BIO_sock_info_u) -> i32);
+windows_link::link!("crypto" "C" fn BIO_sock_info(sock : i32, r#type : BIO_sock_info_type, info : *mut BIO_sock_info_u) -> i32);
 windows_link::link!("crypto" "C" fn BIO_sock_init() -> i32);
 windows_link::link!("crypto" "C" fn BIO_sock_non_fatal_error(error : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_sock_should_retry(i : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_socket(domain : i32, socktype : i32, protocol : i32, options : i32) -> i32);
-windows_link::link!("crypto" "C" fn BIO_socket_ioctl(fd : i32, r#type : i64, arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn BIO_socket_ioctl(fd : i32, r#type : i64, arg : *mut core::ffi::c_void) -> i32);
 windows_link::link!("crypto" "C" fn BIO_socket_nbio(fd : i32, mode : i32) -> i32);
 windows_link::link!("crypto" "C" fn BIO_socket_wait(fd : i32, for_read : i32, max_time : i64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BIO_test_flags(b : *const super::types:: BIO, flags : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_up_ref(a : *const super::types:: BIO) -> i32);
+windows_link::link!("crypto" "C" fn BIO_up_ref(a : *mut super::types:: BIO) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_vfree(a : *const super::types:: BIO));
+windows_link::link!("crypto" "C" fn BIO_vfree(a : *mut super::types:: BIO));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_vprintf(bio : *const super::types:: BIO, format : *const i8, args : *const core::ffi::c_void) -> i32);
-windows_link::link!("crypto" "C" fn BIO_vsnprintf(buf : *const i8, n : u64, format : *const i8, args : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn BIO_vprintf(bio : *mut super::types:: BIO, format : *const i8, args : *mut core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn BIO_vsnprintf(buf : *mut i8, n : u64, format : *const i8, args : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_wait(bio : *const super::types:: BIO, max_time : i64, nap_milliseconds : u32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_wait(bio : *mut super::types:: BIO, max_time : i64, nap_milliseconds : u32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_write(b : *const super::types:: BIO, data : *const core::ffi::c_void, dlen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BIO_write(b : *mut super::types:: BIO, data : *const core::ffi::c_void, dlen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BIO_write_ex(b : *const super::types:: BIO, data : *const core::ffi::c_void, dlen : u64, written : *const u64) -> i32);
+windows_link::link!("crypto" "C" fn BIO_write_ex(b : *mut super::types:: BIO, data : *const core::ffi::c_void, dlen : u64, written : *mut u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn ossl_check_BIO_compfunc_type(cmp : sk_BIO_compfunc) -> *mut isize);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn ossl_check_BIO_copyfunc_type(cpy : sk_BIO_copyfunc) -> *mut isize);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn ossl_check_BIO_freefunc_type(fr : sk_BIO_freefunc) -> *mut isize);
-windows_link::link!("crypto" "C" fn ossl_check_BIO_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn ossl_check_BIO_sk_type(sk : *mut core::ffi::c_void) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn ossl_check_BIO_type(ptr : *const super::types:: BIO) -> *mut super::types:: BIO);
+windows_link::link!("crypto" "C" fn ossl_check_BIO_type(ptr : *mut super::types:: BIO) -> *mut super::types:: BIO);
 windows_link::link!("crypto" "C" fn ossl_check_const_BIO_sk_type(sk : *const core::ffi::c_void) -> *mut core::ffi::c_void);
 pub type BIO_ADDR = isize;
 pub type BIO_ADDRINFO = isize;

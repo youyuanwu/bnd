@@ -444,7 +444,8 @@ traverse = ["dirent.h", "bits/dirent.h"]
    `PtrMut(PtrConst(Named("dirent"), 1), 1)` which puts
    `ELEMENT_TYPE_CMOD_REQD` mid-chain in the blob, crashing
    windows-bindgen's `from_blob_impl`. Fix: always emit `PtrMut`;
-   const-ness tracked via `ConstAttribute` on parameters.
+   mutability preserved via `ParamAttributes::Out` on mutable pointer
+   parameters.
 
 2. **Anonymous enum names**: `enum (unnamed at dirent.h:97:1)` — the
    unnamed enum containing `DT_UNKNOWN`, `DT_FIFO`, etc. generates

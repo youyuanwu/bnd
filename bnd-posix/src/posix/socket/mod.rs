@@ -9,27 +9,27 @@
 )]
 
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn __cmsg_nxthdr(__mhdr : *const msghdr, __cmsg : *const cmsghdr) -> *mut cmsghdr);
+windows_link::link!("c" "C" fn __cmsg_nxthdr(__mhdr : *mut msghdr, __cmsg : *mut cmsghdr) -> *mut cmsghdr);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn accept(__fd : i32, __addr : *const sockaddr, __addr_len : *const super::unistd:: socklen_t) -> i32);
+windows_link::link!("c" "C" fn accept(__fd : i32, __addr : *mut sockaddr, __addr_len : *mut super::unistd:: socklen_t) -> i32);
 #[cfg(all(feature = "types", feature = "unistd"))]
 windows_link::link!("c" "C" fn bind(__fd : i32, __addr : *const sockaddr, __len : super::unistd:: socklen_t) -> i32);
 #[cfg(all(feature = "types", feature = "unistd"))]
 windows_link::link!("c" "C" fn connect(__fd : i32, __addr : *const sockaddr, __len : super::unistd:: socklen_t) -> i32);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn getpeername(__fd : i32, __addr : *const sockaddr, __len : *const super::unistd:: socklen_t) -> i32);
+windows_link::link!("c" "C" fn getpeername(__fd : i32, __addr : *mut sockaddr, __len : *mut super::unistd:: socklen_t) -> i32);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn getsockname(__fd : i32, __addr : *const sockaddr, __len : *const super::unistd:: socklen_t) -> i32);
+windows_link::link!("c" "C" fn getsockname(__fd : i32, __addr : *mut sockaddr, __len : *mut super::unistd:: socklen_t) -> i32);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn getsockopt(__fd : i32, __level : i32, __optname : i32, __optval : *const core::ffi::c_void, __optlen : *const super::unistd:: socklen_t) -> i32);
+windows_link::link!("c" "C" fn getsockopt(__fd : i32, __level : i32, __optname : i32, __optval : *mut core::ffi::c_void, __optlen : *mut super::unistd:: socklen_t) -> i32);
 windows_link::link!("c" "C" fn isfdtype(__fd : i32, __fdtype : i32) -> i32);
 windows_link::link!("c" "C" fn listen(__fd : i32, __n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn recv(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::types:: ssize_t);
+windows_link::link!("c" "C" fn recv(__fd : i32, __buf : *mut core::ffi::c_void, __n : u64, __flags : i32) -> super::types:: ssize_t);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn recvfrom(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32, __addr : *const sockaddr, __addr_len : *const super::unistd:: socklen_t) -> super::types:: ssize_t);
+windows_link::link!("c" "C" fn recvfrom(__fd : i32, __buf : *mut core::ffi::c_void, __n : u64, __flags : i32, __addr : *mut sockaddr, __addr_len : *mut super::unistd:: socklen_t) -> super::types:: ssize_t);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn recvmsg(__fd : i32, __message : *const msghdr, __flags : i32) -> super::types:: ssize_t);
+windows_link::link!("c" "C" fn recvmsg(__fd : i32, __message : *mut msghdr, __flags : i32) -> super::types:: ssize_t);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn send(__fd : i32, __buf : *const core::ffi::c_void, __n : u64, __flags : i32) -> super::types:: ssize_t);
 #[cfg(all(feature = "types", feature = "unistd"))]
@@ -41,7 +41,7 @@ windows_link::link!("c" "C" fn setsockopt(__fd : i32, __level : i32, __optname :
 windows_link::link!("c" "C" fn shutdown(__fd : i32, __how : i32) -> i32);
 windows_link::link!("c" "C" fn sockatmark(__fd : i32) -> i32);
 windows_link::link!("c" "C" fn socket(__domain : i32, __type : i32, __protocol : i32) -> i32);
-windows_link::link!("c" "C" fn socketpair(__domain : i32, __type : i32, __protocol : i32, __fds : *const i32) -> i32);
+windows_link::link!("c" "C" fn socketpair(__domain : i32, __type : i32, __protocol : i32, __fds : *mut i32) -> i32);
 pub const MSG_BATCH: u32 = 262144u32;
 pub const MSG_CMSG_CLOEXEC: u32 = 1073741824u32;
 pub const MSG_CONFIRM: u32 = 2048u32;

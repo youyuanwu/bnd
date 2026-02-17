@@ -15,15 +15,15 @@ windows_link::link!("c" "C" fn fchmod(__fd : i32, __mode : super::types:: __mode
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn fchmodat(__fd : i32, __file : *const i8, __mode : super::types:: __mode_t, __flag : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn fstat(__fd : i32, __buf : *const stat) -> i32);
+windows_link::link!("c" "C" fn fstat(__fd : i32, __buf : *mut stat) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn fstatat(__fd : i32, __file : *const i8, __buf : *const stat, __flag : i32) -> i32);
+windows_link::link!("c" "C" fn fstatat(__fd : i32, __file : *const i8, __buf : *mut stat, __flag : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn futimens(__fd : i32, __times : *const timespec) -> i32);
+windows_link::link!("c" "C" fn futimens(__fd : i32, __times : *mut timespec) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn lchmod(__file : *const i8, __mode : super::types:: __mode_t) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn lstat(__file : *const i8, __buf : *const stat) -> i32);
+windows_link::link!("c" "C" fn lstat(__file : *const i8, __buf : *mut stat) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn mkdir(__path : *const i8, __mode : super::types:: __mode_t) -> i32);
 #[cfg(feature = "types")]
@@ -37,11 +37,11 @@ windows_link::link!("c" "C" fn mknod(__path : *const i8, __mode : super::types::
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn mknodat(__fd : i32, __path : *const i8, __mode : super::types:: __mode_t, __dev : super::types:: __dev_t) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn stat(__file : *const i8, __buf : *const stat) -> i32);
+windows_link::link!("c" "C" fn stat(__file : *const i8, __buf : *mut stat) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("c" "C" fn umask(__mask : super::types:: __mode_t) -> super::types:: __mode_t);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn utimensat(__fd : i32, __path : *const i8, __times : *const timespec, __flags : i32) -> i32);
+windows_link::link!("c" "C" fn utimensat(__fd : i32, __path : *const i8, __times : *mut timespec, __flags : i32) -> i32);
 pub const S_BLKSIZE: i32 = 512i32;
 pub const _BITS_STRUCT_STAT_H: i32 = 1i32;
 pub const _STRUCT_TIMESPEC: i32 = 1i32;

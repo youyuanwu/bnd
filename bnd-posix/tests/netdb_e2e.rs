@@ -104,13 +104,13 @@ fn getaddrinfo_localhost() {
     hints.ai_family = socket::PF_INET;
     hints.ai_socktype = socket::SOCK_STREAM as i32;
 
-    let mut result: *const netdb::addrinfo = core::ptr::null();
+    let mut result: *mut netdb::addrinfo = core::ptr::null_mut();
     let rc = unsafe {
         netdb::getaddrinfo(
             node.as_ptr(),
             core::ptr::null(),
             &hints as *const _,
-            &mut result as *mut _ as *const *const netdb::addrinfo,
+            &mut result as *mut _,
         )
     };
     assert_eq!(rc, 0, "getaddrinfo should succeed for 127.0.0.1");

@@ -11,34 +11,34 @@
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn RAND_OpenSSL() -> *mut super::types:: RAND_METHOD);
 windows_link::link!("crypto" "C" fn RAND_add(buf : *const core::ffi::c_void, num : i32, randomness : f64));
-windows_link::link!("crypto" "C" fn RAND_bytes(buf : *const u8, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn RAND_bytes(buf : *mut u8, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_bytes_ex(ctx : *const super::types:: OSSL_LIB_CTX, buf : *const u8, num : u64, strength : u32) -> i32);
-windows_link::link!("crypto" "C" fn RAND_file_name(file : *const i8, num : u64) -> *mut i8);
+windows_link::link!("crypto" "C" fn RAND_bytes_ex(ctx : *mut super::types:: OSSL_LIB_CTX, buf : *mut u8, num : u64, strength : u32) -> i32);
+windows_link::link!("crypto" "C" fn RAND_file_name(file : *mut i8, num : u64) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_get0_primary(ctx : *const super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
+windows_link::link!("crypto" "C" fn RAND_get0_primary(ctx : *mut super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_get0_private(ctx : *const super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
+windows_link::link!("crypto" "C" fn RAND_get0_private(ctx : *mut super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_get0_public(ctx : *const super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
+windows_link::link!("crypto" "C" fn RAND_get0_public(ctx : *mut super::types:: OSSL_LIB_CTX) -> *mut super::types:: EVP_RAND_CTX);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn RAND_get_rand_method() -> *mut super::types:: RAND_METHOD);
 windows_link::link!("crypto" "C" fn RAND_keep_random_devices_open(keep : i32));
 windows_link::link!("crypto" "C" fn RAND_load_file(file : *const i8, max_bytes : i64) -> i32);
 windows_link::link!("crypto" "C" fn RAND_poll() -> i32);
-windows_link::link!("crypto" "C" fn RAND_priv_bytes(buf : *const u8, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn RAND_priv_bytes(buf : *mut u8, num : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_priv_bytes_ex(ctx : *const super::types:: OSSL_LIB_CTX, buf : *const u8, num : u64, strength : u32) -> i32);
-windows_link::link!("crypto" "C" fn RAND_pseudo_bytes(buf : *const u8, num : i32) -> i32);
+windows_link::link!("crypto" "C" fn RAND_priv_bytes_ex(ctx : *mut super::types:: OSSL_LIB_CTX, buf : *mut u8, num : u64, strength : u32) -> i32);
+windows_link::link!("crypto" "C" fn RAND_pseudo_bytes(buf : *mut u8, num : i32) -> i32);
 windows_link::link!("crypto" "C" fn RAND_seed(buf : *const core::ffi::c_void, num : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_set_DRBG_type(ctx : *const super::types:: OSSL_LIB_CTX, drbg : *const i8, propq : *const i8, cipher : *const i8, digest : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn RAND_set_DRBG_type(ctx : *mut super::types:: OSSL_LIB_CTX, drbg : *const i8, propq : *const i8, cipher : *const i8, digest : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_set_rand_engine(engine : *const super::types:: ENGINE) -> i32);
+windows_link::link!("crypto" "C" fn RAND_set_rand_engine(engine : *mut super::types:: ENGINE) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn RAND_set_rand_method(meth : *const super::types:: RAND_METHOD) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn RAND_set_seed_source_type(ctx : *const super::types:: OSSL_LIB_CTX, seed : *const i8, propq : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn RAND_set_seed_source_type(ctx : *mut super::types:: OSSL_LIB_CTX, seed : *const i8, propq : *const i8) -> i32);
 windows_link::link!("crypto" "C" fn RAND_status() -> i32);
 windows_link::link!("crypto" "C" fn RAND_write_file(file : *const i8) -> i32);
 pub const RAND_DRBG_STRENGTH: i32 = 256i32;

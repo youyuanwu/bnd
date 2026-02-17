@@ -8,29 +8,29 @@
     clippy::all
 )]
 
-windows_link::link!("crypto" "C" fn SHA1(d : *const u8, n : u64, md : *const u8) -> *mut u8);
-windows_link::link!("crypto" "C" fn SHA1_Final(md : *const u8, c : *const SHA_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA1_Init(c : *const SHA_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA1_Transform(c : *const SHA_CTX, data : *const u8));
-windows_link::link!("crypto" "C" fn SHA1_Update(c : *const SHA_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
-windows_link::link!("crypto" "C" fn SHA224(d : *const u8, n : u64, md : *const u8) -> *mut u8);
-windows_link::link!("crypto" "C" fn SHA224_Final(md : *const u8, c : *const SHA256_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA224_Init(c : *const SHA256_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA224_Update(c : *const SHA256_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
-windows_link::link!("crypto" "C" fn SHA256(d : *const u8, n : u64, md : *const u8) -> *mut u8);
-windows_link::link!("crypto" "C" fn SHA256_Final(md : *const u8, c : *const SHA256_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA256_Init(c : *const SHA256_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA256_Transform(c : *const SHA256_CTX, data : *const u8));
-windows_link::link!("crypto" "C" fn SHA256_Update(c : *const SHA256_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
-windows_link::link!("crypto" "C" fn SHA384(d : *const u8, n : u64, md : *const u8) -> *mut u8);
-windows_link::link!("crypto" "C" fn SHA384_Final(md : *const u8, c : *const SHA512_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA384_Init(c : *const SHA512_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA384_Update(c : *const SHA512_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
-windows_link::link!("crypto" "C" fn SHA512(d : *const u8, n : u64, md : *const u8) -> *mut u8);
-windows_link::link!("crypto" "C" fn SHA512_Final(md : *const u8, c : *const SHA512_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA512_Init(c : *const SHA512_CTX) -> i32);
-windows_link::link!("crypto" "C" fn SHA512_Transform(c : *const SHA512_CTX, data : *const u8));
-windows_link::link!("crypto" "C" fn SHA512_Update(c : *const SHA512_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn SHA1(d : *const u8, n : u64, md : *mut u8) -> *mut u8);
+windows_link::link!("crypto" "C" fn SHA1_Final(md : *mut u8, c : *mut SHA_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA1_Init(c : *mut SHA_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA1_Transform(c : *mut SHA_CTX, data : *const u8));
+windows_link::link!("crypto" "C" fn SHA1_Update(c : *mut SHA_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn SHA224(d : *const u8, n : u64, md : *mut u8) -> *mut u8);
+windows_link::link!("crypto" "C" fn SHA224_Final(md : *mut u8, c : *mut SHA256_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA224_Init(c : *mut SHA256_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA224_Update(c : *mut SHA256_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn SHA256(d : *const u8, n : u64, md : *mut u8) -> *mut u8);
+windows_link::link!("crypto" "C" fn SHA256_Final(md : *mut u8, c : *mut SHA256_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA256_Init(c : *mut SHA256_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA256_Transform(c : *mut SHA256_CTX, data : *const u8));
+windows_link::link!("crypto" "C" fn SHA256_Update(c : *mut SHA256_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn SHA384(d : *const u8, n : u64, md : *mut u8) -> *mut u8);
+windows_link::link!("crypto" "C" fn SHA384_Final(md : *mut u8, c : *mut SHA512_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA384_Init(c : *mut SHA512_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA384_Update(c : *mut SHA512_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
+windows_link::link!("crypto" "C" fn SHA512(d : *const u8, n : u64, md : *mut u8) -> *mut u8);
+windows_link::link!("crypto" "C" fn SHA512_Final(md : *mut u8, c : *mut SHA512_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA512_Init(c : *mut SHA512_CTX) -> i32);
+windows_link::link!("crypto" "C" fn SHA512_Transform(c : *mut SHA512_CTX, data : *const u8));
+windows_link::link!("crypto" "C" fn SHA512_Update(c : *mut SHA512_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
 pub const SHA224_DIGEST_LENGTH: i32 = 28i32;
 #[repr(C)]
 #[derive(Clone, Copy, Default)]

@@ -222,6 +222,61 @@ fn roundtrip_function_params() {
     );
 }
 
+/// Verify that pointer mutability from C headers is preserved in the winmd.
+///
+/// `create_widget(const char* name, Rect bounds, Widget* out)`:
+///   - `name` is `const char *` → should be input (no Out flag)
+///   - `out` is `Widget *` (mutable) → should have ParamAttributes::Out
+#[test]
+fn roundtrip_param_mutability() {
+    let index = open_index();
+
+    let apis = index.expect("SimpleTest", "Apis");
+    let create = apis
+        .methods()
+        .find(|m| m.name() == "create_widget")
+        .expect("create_widget not found");
+
+    let params: Vec<_> = create.params().collect();
+
+    // Find 'name' param (const char *) — should NOT have Out
+    let name_param = params
+        .iter()
+        .find(|p| p.name() == "name")
+        .expect("name param");
+    assert!(
+        !name_param
+            .flags()
+            .contains(windows_metadata::ParamAttributes::Out),
+        "'name' (const char *) should not have Out flag"
+    );
+
+    // Find 'out' param (Widget *) — should have Out
+    let out_param = params
+        .iter()
+        .find(|p| p.name() == "out")
+        .expect("out param");
+    assert!(
+        out_param
+            .flags()
+            .contains(windows_metadata::ParamAttributes::Out),
+        "'out' (Widget *) should have Out flag for mutable pointer"
+    );
+
+    // Also check destroy_widget(Widget* w) — mutable pointer
+    let destroy = apis
+        .methods()
+        .find(|m| m.name() == "destroy_widget")
+        .expect("destroy_widget not found");
+    let w_param = destroy.params().find(|p| p.name() == "w").expect("w param");
+    assert!(
+        w_param
+            .flags()
+            .contains(windows_metadata::ParamAttributes::Out),
+        "'w' (Widget *) should have Out flag for mutable pointer"
+    );
+}
+
 #[test]
 fn roundtrip_constants() {
     let index = open_index();

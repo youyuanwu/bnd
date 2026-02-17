@@ -95,7 +95,7 @@ fn inet_pton_ipv4() {
         inet::inet_pton(
             socket::PF_INET,
             addr_str.as_ptr(),
-            &mut addr as *mut _ as *const core::ffi::c_void,
+            &mut addr as *mut _ as *mut core::ffi::c_void,
         )
     };
     assert_eq!(rc, 1, "inet_pton should succeed");

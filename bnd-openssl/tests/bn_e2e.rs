@@ -49,7 +49,7 @@ fn bn_hex_roundtrip() {
 
         // Free the hex string via OPENSSL_free (CRYPTO_free)
         use bnd_openssl::openssl::crypto;
-        crypto::CRYPTO_free(hex_ptr as *const _, c"test".as_ptr(), 0);
+        crypto::CRYPTO_free(hex_ptr as *mut _, c"test".as_ptr(), 0);
         bn::BN_free(b);
     }
 }

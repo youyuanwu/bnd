@@ -9,22 +9,22 @@
 )]
 
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn alphasort(__e1 : *const *const dirent, __e2 : *const *const dirent) -> i32);
-windows_link::link!("c" "C" fn closedir(__dirp : *const DIR) -> i32);
-windows_link::link!("c" "C" fn dirfd(__dirp : *const DIR) -> i32);
+windows_link::link!("c" "C" fn alphasort(__e1 : *mut *mut dirent, __e2 : *mut *mut dirent) -> i32);
+windows_link::link!("c" "C" fn closedir(__dirp : *mut DIR) -> i32);
+windows_link::link!("c" "C" fn dirfd(__dirp : *mut DIR) -> i32);
 windows_link::link!("c" "C" fn fdopendir(__fd : i32) -> *mut DIR);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn getdirentries(__fd : i32, __buf : *const i8, __nbytes : u64, __basep : *const super::types:: __off_t) -> super::types:: __ssize_t);
+windows_link::link!("c" "C" fn getdirentries(__fd : i32, __buf : *mut i8, __nbytes : u64, __basep : *mut super::types:: __off_t) -> super::types:: __ssize_t);
 windows_link::link!("c" "C" fn opendir(__name : *const i8) -> *mut DIR);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn readdir(__dirp : *const DIR) -> *mut dirent);
+windows_link::link!("c" "C" fn readdir(__dirp : *mut DIR) -> *mut dirent);
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn readdir_r(__dirp : *const DIR, __entry : *const dirent, __result : *const *const dirent) -> i32);
-windows_link::link!("c" "C" fn rewinddir(__dirp : *const DIR));
+windows_link::link!("c" "C" fn readdir_r(__dirp : *mut DIR, __entry : *mut dirent, __result : *mut *mut dirent) -> i32);
+windows_link::link!("c" "C" fn rewinddir(__dirp : *mut DIR));
 #[cfg(feature = "types")]
-windows_link::link!("c" "C" fn scandir(__dir : *const i8, __namelist : *const *const *const dirent, __selector : *const isize, __cmp : *const isize) -> i32);
-windows_link::link!("c" "C" fn seekdir(__dirp : *const DIR, __pos : i64));
-windows_link::link!("c" "C" fn telldir(__dirp : *const DIR) -> i64);
+windows_link::link!("c" "C" fn scandir(__dir : *const i8, __namelist : *mut *mut *mut dirent, __selector : *mut isize, __cmp : *mut isize) -> i32);
+windows_link::link!("c" "C" fn seekdir(__dirp : *mut DIR, __pos : i64));
+windows_link::link!("c" "C" fn telldir(__dirp : *mut DIR) -> i64);
 pub type DIR = isize;
 pub const DT_BLK: u32 = 6u32;
 pub const DT_CHR: u32 = 2u32;

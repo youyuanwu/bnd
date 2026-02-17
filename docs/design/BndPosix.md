@@ -141,8 +141,9 @@ in bnd-winmd core (see [bnd-posix.md](systesting/bnd-posix.md) for details):
    Mmap partition (`PROT_READ 0x1`, `MAP_SHARED 0x01` were silently dropped).
 8. **PtrConst mid-chain panic** — `PtrMut(PtrConst(Named, 1), 1)` puts
    `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs, crashing
-   windows-bindgen. Fix: always emit `PtrMut`; const-ness tracked by
-   `ConstAttribute`. Found when adding Dirent partition.
+   windows-bindgen. Fix: always emit `PtrMut`; mutability preserved via
+   `ParamAttributes::Out` on mutable pointer parameters. Found when adding
+   Dirent partition.
 9. **Anonymous enum → constants** — unnamed C enums (e.g. `DT_*` in
    `dirent.h`) generate invalid Rust type names. Fix: detect anonymous
    enums and emit variants as standalone constants.

@@ -39,6 +39,19 @@ blobs**, not `FieldSig` blobs. Confirmed working: `stat.__glibc_reserved: [i64; 
 The [bug doc](bugs/element-type-array-mismatch.md) and the parameter
 decay workaround remain relevant for function parameters only.
 
+### ~~4. Pointer mutability lost for parameters~~ ✅
+
+**Files**: `model.rs`, `emit.rs`
+
+All `T *` parameters were emitted as `*const` because `emit.rs` discarded
+`is_const` and windows-bindgen's `to_const_ptr()` converted every parameter
+without `ParamAttributes::Out`. Fix: `emit_function` now sets
+`ParamAttributes::Out` on mutable pointer params via `CType::is_outer_ptr_mut()`.
+All bnd-posix (217 changed signatures) and bnd-openssl bindings regenerated.
+See [bug doc](bugs/pointer-mutability-lost.md).
+
+**Blocks**: nothing remaining
+
 ---
 
 ## Planned — bnd-posix API Families
@@ -74,7 +87,8 @@ Bugs discovered and fixed:
 - **PtrConst mid-chain panic**: `PtrMut(PtrConst(Named, 1), 1)` from
   `const struct dirent **` put `ELEMENT_TYPE_CMOD_REQD` mid-chain in blobs,
   crashing windows-bindgen `from_blob_impl`. Fix: always emit `PtrMut`;
-  const-ness tracked via `ConstAttribute` on parameters.
+  constness tracked via `ParamAttributes::Out` on mutable pointer parameters
+  (see [pointer-mutability-lost](../bugs/pointer-mutability-lost.md)).
 - **Anonymous enum names**: `enum (unnamed at dirent.h:97:1)` → invalid
   Rust type name. Fix: detect anonymous enums in `collect_enums` and
   emit their variants as standalone `ConstantDef` entries (`DT_*` constants).
@@ -222,6 +236,20 @@ major synchronisation types.
 
 All high-priority candidates (delegate-as-param, void* returns, *mut i32
 returns, opaque union types) are now implemented.
+
+---
+
+## System Library Testing
+
+### ~~14. OpenSSL~~ ✅
+
+8 partitions across 2 shared libraries (`libcrypto`, `libssl`), exercising
+~130 opaque typedefs, callback function-pointer typedefs, multi-library
+partitioning, and ~5200 generated binding lines. 9th partition (err) skipped
+due to LHASH macro issue. 16 roundtrip tests + 28 E2E tests all pass.
+See [design doc](design/systesting/Openssl.md).
+
+**Blocked by**: nothing
 
 ---
 

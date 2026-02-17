@@ -72,7 +72,7 @@ C/C++ Headers
 | Variadic function skipping | `collect_functions()` checks `Entity::is_variadic()` and warns/skips |
 | Array parameter decay | `extract_function()` converts `CType::Array` params → `CType::Ptr` (C semantics; avoids `ELEMENT_TYPE_ARRAY` blob incompatibility with windows-bindgen) |
 | Function deduplication | `collect_functions()` uses `HashSet<String>` to skip duplicates from glibc `__REDIRECT` macros |
-| PtrConst workaround | Always emit `PtrMut` — `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs panics windows-bindgen. Const-ness tracked by `ConstAttribute` on parameters. |
+| PtrConst workaround | Always emit `PtrMut` — `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs panics windows-bindgen. Mutability preserved via `ParamAttributes::Out` on mutable pointer parameters. |
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
 | Round-trip integration tests | Across 4 files |
 | E2E integration tests | Across 4 crates (zlib against real `libz.so`, POSIX file I/O, mmap, dirent, sockets, inet, netdb, signal) |

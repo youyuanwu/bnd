@@ -8,25 +8,25 @@
     clippy::all
 )]
 
-windows_link::link!("c" "C" fn bindresvport(__sockfd : i32, __sock_in : *const sockaddr_in) -> i32);
-windows_link::link!("c" "C" fn bindresvport6(__sockfd : i32, __sock_in : *const sockaddr_in6) -> i32);
+windows_link::link!("c" "C" fn bindresvport(__sockfd : i32, __sock_in : *mut sockaddr_in) -> i32);
+windows_link::link!("c" "C" fn bindresvport6(__sockfd : i32, __sock_in : *mut sockaddr_in6) -> i32);
 windows_link::link!("c" "C" fn htonl(__hostlong : u32) -> u32);
 windows_link::link!("c" "C" fn htons(__hostshort : u16) -> u16);
 windows_link::link!("c" "C" fn inet_addr(__cp : *const i8) -> in_addr_t);
-windows_link::link!("c" "C" fn inet_aton(__cp : *const i8, __inp : *const in_addr) -> i32);
+windows_link::link!("c" "C" fn inet_aton(__cp : *const i8, __inp : *mut in_addr) -> i32);
 windows_link::link!("c" "C" fn inet_lnaof(__in : in_addr) -> in_addr_t);
 windows_link::link!("c" "C" fn inet_makeaddr(__net : in_addr_t, __host : in_addr_t) -> in_addr);
-windows_link::link!("c" "C" fn inet_net_ntop(__af : i32, __cp : *const core::ffi::c_void, __bits : i32, __buf : *const i8, __len : u64) -> *mut i8);
-windows_link::link!("c" "C" fn inet_net_pton(__af : i32, __cp : *const i8, __buf : *const core::ffi::c_void, __len : u64) -> i32);
-windows_link::link!("c" "C" fn inet_neta(__net : in_addr_t, __buf : *const i8, __len : u64) -> *mut i8);
+windows_link::link!("c" "C" fn inet_net_ntop(__af : i32, __cp : *const core::ffi::c_void, __bits : i32, __buf : *mut i8, __len : u64) -> *mut i8);
+windows_link::link!("c" "C" fn inet_net_pton(__af : i32, __cp : *const i8, __buf : *mut core::ffi::c_void, __len : u64) -> i32);
+windows_link::link!("c" "C" fn inet_neta(__net : in_addr_t, __buf : *mut i8, __len : u64) -> *mut i8);
 windows_link::link!("c" "C" fn inet_netof(__in : in_addr) -> in_addr_t);
 windows_link::link!("c" "C" fn inet_network(__cp : *const i8) -> in_addr_t);
-windows_link::link!("c" "C" fn inet_nsap_addr(__cp : *const i8, __buf : *const u8, __len : i32) -> u32);
-windows_link::link!("c" "C" fn inet_nsap_ntoa(__len : i32, __cp : *const u8, __buf : *const i8) -> *mut i8);
+windows_link::link!("c" "C" fn inet_nsap_addr(__cp : *const i8, __buf : *mut u8, __len : i32) -> u32);
+windows_link::link!("c" "C" fn inet_nsap_ntoa(__len : i32, __cp : *const u8, __buf : *mut i8) -> *mut i8);
 windows_link::link!("c" "C" fn inet_ntoa(__in : in_addr) -> *mut i8);
 #[cfg(all(feature = "types", feature = "unistd"))]
-windows_link::link!("c" "C" fn inet_ntop(__af : i32, __cp : *const core::ffi::c_void, __buf : *const i8, __len : super::unistd:: socklen_t) -> *mut i8);
-windows_link::link!("c" "C" fn inet_pton(__af : i32, __cp : *const i8, __buf : *const core::ffi::c_void) -> i32);
+windows_link::link!("c" "C" fn inet_ntop(__af : i32, __cp : *const core::ffi::c_void, __buf : *mut i8, __len : super::unistd:: socklen_t) -> *mut i8);
+windows_link::link!("c" "C" fn inet_pton(__af : i32, __cp : *const i8, __buf : *mut core::ffi::c_void) -> i32);
 windows_link::link!("c" "C" fn ntohl(__netlong : u32) -> u32);
 windows_link::link!("c" "C" fn ntohs(__netshort : u16) -> u16);
 pub const INET6_ADDRSTRLEN: i32 = 46i32;

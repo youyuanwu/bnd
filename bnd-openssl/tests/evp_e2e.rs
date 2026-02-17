@@ -31,7 +31,7 @@ fn evp_sha256_digest() {
         assert!(!ctx.is_null());
 
         let md = evp::EVP_sha256();
-        let ret = evp::EVP_DigestInit_ex(ctx, md, core::ptr::null());
+        let ret = evp::EVP_DigestInit_ex(ctx, md, core::ptr::null_mut());
         assert_eq!(ret, 1, "EVP_DigestInit_ex should return 1");
 
         let data = b"hello";

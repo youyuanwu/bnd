@@ -9,187 +9,187 @@
 )]
 
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_convert(n : *const super::types:: BIGNUM, b : *const super::types:: BN_BLINDING, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_convert(n : *mut super::types:: BIGNUM, b : *mut super::types:: BN_BLINDING, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_convert_ex(n : *const super::types:: BIGNUM, r : *const super::types:: BIGNUM, b : *const super::types:: BN_BLINDING, param3 : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_convert_ex(n : *mut super::types:: BIGNUM, r : *mut super::types:: BIGNUM, b : *mut super::types:: BN_BLINDING, param3 : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_create_param(b : *const super::types:: BN_BLINDING, e : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, bn_mod_exp : *const isize, m_ctx : *const super::types:: BN_MONT_CTX) -> *mut super::types:: BN_BLINDING);
+windows_link::link!("crypto" "C" fn BN_BLINDING_create_param(b : *mut super::types:: BN_BLINDING, e : *const super::types:: BIGNUM, m : *mut super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, bn_mod_exp : *mut isize, m_ctx : *mut super::types:: BN_MONT_CTX) -> *mut super::types:: BN_BLINDING);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_free(b : *const super::types:: BN_BLINDING));
+windows_link::link!("crypto" "C" fn BN_BLINDING_free(b : *mut super::types:: BN_BLINDING));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_BLINDING_get_flags(param0 : *const super::types:: BN_BLINDING) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_invert(n : *const super::types:: BIGNUM, b : *const super::types:: BN_BLINDING, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_invert(n : *mut super::types:: BIGNUM, b : *mut super::types:: BN_BLINDING, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_invert_ex(n : *const super::types:: BIGNUM, r : *const super::types:: BIGNUM, b : *const super::types:: BN_BLINDING, param3 : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_invert_ex(n : *mut super::types:: BIGNUM, r : *const super::types:: BIGNUM, b : *mut super::types:: BN_BLINDING, param3 : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_is_current_thread(b : *const super::types:: BN_BLINDING) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_is_current_thread(b : *mut super::types:: BN_BLINDING) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_lock(b : *const super::types:: BN_BLINDING) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_lock(b : *mut super::types:: BN_BLINDING) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_new(a : *const super::types:: BIGNUM, ai : *const super::types:: BIGNUM, r#mod : *const super::types:: BIGNUM) -> *mut super::types:: BN_BLINDING);
+windows_link::link!("crypto" "C" fn BN_BLINDING_new(a : *const super::types:: BIGNUM, ai : *const super::types:: BIGNUM, r#mod : *mut super::types:: BIGNUM) -> *mut super::types:: BN_BLINDING);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_set_current_thread(b : *const super::types:: BN_BLINDING));
+windows_link::link!("crypto" "C" fn BN_BLINDING_set_current_thread(b : *mut super::types:: BN_BLINDING));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_set_flags(param0 : *const super::types:: BN_BLINDING, param1 : u64));
+windows_link::link!("crypto" "C" fn BN_BLINDING_set_flags(param0 : *mut super::types:: BN_BLINDING, param1 : u64));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_unlock(b : *const super::types:: BN_BLINDING) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_unlock(b : *mut super::types:: BN_BLINDING) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_BLINDING_update(b : *const super::types:: BN_BLINDING, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_BLINDING_update(b : *mut super::types:: BN_BLINDING, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_end(ctx : *const super::types:: BN_CTX));
+windows_link::link!("crypto" "C" fn BN_CTX_end(ctx : *mut super::types:: BN_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_free(c : *const super::types:: BN_CTX));
+windows_link::link!("crypto" "C" fn BN_CTX_free(c : *mut super::types:: BN_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_get(ctx : *const super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_CTX_get(ctx : *mut super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_CTX_new() -> *mut super::types:: BN_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_new_ex(ctx : *const super::types:: OSSL_LIB_CTX) -> *mut super::types:: BN_CTX);
+windows_link::link!("crypto" "C" fn BN_CTX_new_ex(ctx : *mut super::types:: OSSL_LIB_CTX) -> *mut super::types:: BN_CTX);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_CTX_secure_new() -> *mut super::types:: BN_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_secure_new_ex(ctx : *const super::types:: OSSL_LIB_CTX) -> *mut super::types:: BN_CTX);
+windows_link::link!("crypto" "C" fn BN_CTX_secure_new_ex(ctx : *mut super::types:: OSSL_LIB_CTX) -> *mut super::types:: BN_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_CTX_start(ctx : *const super::types:: BN_CTX));
+windows_link::link!("crypto" "C" fn BN_CTX_start(ctx : *mut super::types:: BN_CTX));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GENCB_call(cb : *const super::types:: BN_GENCB, a : i32, b : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_GENCB_call(cb : *mut super::types:: BN_GENCB, a : i32, b : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GENCB_free(cb : *const super::types:: BN_GENCB));
+windows_link::link!("crypto" "C" fn BN_GENCB_free(cb : *mut super::types:: BN_GENCB));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GENCB_get_arg(cb : *const super::types:: BN_GENCB) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn BN_GENCB_get_arg(cb : *mut super::types:: BN_GENCB) -> *mut core::ffi::c_void);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_GENCB_new() -> *mut super::types:: BN_GENCB);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GENCB_set(gencb : *const super::types:: BN_GENCB, callback : *const isize, cb_arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn BN_GENCB_set(gencb : *mut super::types:: BN_GENCB, callback : *mut isize, cb_arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GENCB_set_old(gencb : *const super::types:: BN_GENCB, callback : *const isize, cb_arg : *const core::ffi::c_void));
+windows_link::link!("crypto" "C" fn BN_GENCB_set_old(gencb : *mut super::types:: BN_GENCB, callback : *mut isize, cb_arg : *mut core::ffi::c_void));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_add(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_add(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_arr2poly(p : *const i32, a : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_arr2poly(p : *mut i32, a : *mut super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *mut i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_div(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_div(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_div_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_div_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_exp(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_exp(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_exp_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_exp_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_inv(r : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_inv(r : *mut super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_inv_arr(r : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_inv_arr(r : *mut super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_mul(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_mul(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_mul_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_mul_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_solve_quad(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_solve_quad(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_solve_quad_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_solve_quad_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqr_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqr_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqrt(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqrt(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqrt_arr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_mod_sqrt_arr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *mut i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_GF2m_poly2arr(a : *const super::types:: BIGNUM, p : *const i32, max : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_GF2m_poly2arr(a : *const super::types:: BIGNUM, p : *mut i32, max : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_MONT_CTX_copy(to : *const super::types:: BN_MONT_CTX, from : *const super::types:: BN_MONT_CTX) -> *mut super::types:: BN_MONT_CTX);
+windows_link::link!("crypto" "C" fn BN_MONT_CTX_copy(to : *mut super::types:: BN_MONT_CTX, from : *mut super::types:: BN_MONT_CTX) -> *mut super::types:: BN_MONT_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_MONT_CTX_free(mont : *const super::types:: BN_MONT_CTX));
+windows_link::link!("crypto" "C" fn BN_MONT_CTX_free(mont : *mut super::types:: BN_MONT_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_MONT_CTX_new() -> *mut super::types:: BN_MONT_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_MONT_CTX_set(mont : *const super::types:: BN_MONT_CTX, r#mod : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_MONT_CTX_set(mont : *mut super::types:: BN_MONT_CTX, r#mod : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn BN_MONT_CTX_set_locked(pmont : *const *const super::types:: BN_MONT_CTX, lock : *const super::crypto:: CRYPTO_RWLOCK, r#mod : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> *mut super::types:: BN_MONT_CTX);
+windows_link::link!("crypto" "C" fn BN_MONT_CTX_set_locked(pmont : *mut *mut super::types:: BN_MONT_CTX, lock : *mut super::crypto:: CRYPTO_RWLOCK, r#mod : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> *mut super::types:: BN_MONT_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_RECP_CTX_free(recp : *const super::types:: BN_RECP_CTX));
+windows_link::link!("crypto" "C" fn BN_RECP_CTX_free(recp : *mut super::types:: BN_RECP_CTX));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_RECP_CTX_new() -> *mut super::types:: BN_RECP_CTX);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_RECP_CTX_set(recp : *const super::types:: BN_RECP_CTX, rdiv : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_RECP_CTX_set(recp : *mut super::types:: BN_RECP_CTX, rdiv : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_X931_derive_prime_ex(p : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, xp : *const super::types:: BIGNUM, xp1 : *const super::types:: BIGNUM, xp2 : *const super::types:: BIGNUM, e : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_X931_derive_prime_ex(p : *mut super::types:: BIGNUM, p1 : *mut super::types:: BIGNUM, p2 : *mut super::types:: BIGNUM, xp : *const super::types:: BIGNUM, xp1 : *const super::types:: BIGNUM, xp2 : *const super::types:: BIGNUM, e : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_X931_generate_Xpq(xp : *const super::types:: BIGNUM, xq : *const super::types:: BIGNUM, nbits : i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_X931_generate_Xpq(xp : *mut super::types:: BIGNUM, xq : *mut super::types:: BIGNUM, nbits : i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_X931_generate_prime_ex(p : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, xp1 : *const super::types:: BIGNUM, xp2 : *const super::types:: BIGNUM, xp : *const super::types:: BIGNUM, e : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_X931_generate_prime_ex(p : *mut super::types:: BIGNUM, p1 : *mut super::types:: BIGNUM, p2 : *mut super::types:: BIGNUM, xp1 : *mut super::types:: BIGNUM, xp2 : *mut super::types:: BIGNUM, xp : *const super::types:: BIGNUM, e : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_abs_is_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_add(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_add(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_add_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
+windows_link::link!("crypto" "C" fn BN_add_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_asc2bn(a : *const *const super::types:: BIGNUM, str : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn BN_asc2bn(a : *mut *mut super::types:: BIGNUM, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bin2bn(s : *const u8, len : i32, ret : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_bin2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bn2bin(a : *const super::types:: BIGNUM, to : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn BN_bn2bin(a : *const super::types:: BIGNUM, to : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bn2binpad(a : *const super::types:: BIGNUM, to : *const u8, tolen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_bn2binpad(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_bn2dec(a : *const super::types:: BIGNUM) -> *mut i8);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_bn2hex(a : *const super::types:: BIGNUM) -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bn2lebinpad(a : *const super::types:: BIGNUM, to : *const u8, tolen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_bn2lebinpad(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bn2mpi(a : *const super::types:: BIGNUM, to : *const u8) -> i32);
+windows_link::link!("crypto" "C" fn BN_bn2mpi(a : *const super::types:: BIGNUM, to : *mut u8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bn2nativepad(a : *const super::types:: BIGNUM, to : *const u8, tolen : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_bn2nativepad(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_bntest_rand(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_bntest_rand(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_check_prime(p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_check_prime(p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_clear(a : *const super::types:: BIGNUM));
+windows_link::link!("crypto" "C" fn BN_clear(a : *mut super::types:: BIGNUM));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_clear_bit(a : *const super::types:: BIGNUM, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_clear_bit(a : *mut super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_clear_free(a : *const super::types:: BIGNUM));
+windows_link::link!("crypto" "C" fn BN_clear_free(a : *mut super::types:: BIGNUM));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_cmp(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_consttime_swap(swap : u64, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, nwords : i32));
+windows_link::link!("crypto" "C" fn BN_consttime_swap(swap : u64, a : *mut super::types:: BIGNUM, b : *mut super::types:: BIGNUM, nwords : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_copy(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_copy(a : *mut super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_dec2bn(a : *const *const super::types:: BIGNUM, str : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn BN_dec2bn(a : *mut *mut super::types:: BIGNUM, str : *const i8) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_div(dv : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, d : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_div(dv : *mut super::types:: BIGNUM, rem : *mut super::types:: BIGNUM, m : *const super::types:: BIGNUM, d : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_div_recp(dv : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, recp : *const super::types:: BN_RECP_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_div_recp(dv : *mut super::types:: BIGNUM, rem : *mut super::types:: BIGNUM, m : *const super::types:: BIGNUM, recp : *mut super::types:: BN_RECP_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_div_word(a : *const super::types:: BIGNUM, w : u64) -> u64);
+windows_link::link!("crypto" "C" fn BN_div_word(a : *mut super::types:: BIGNUM, w : u64) -> u64);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_dup(a : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_exp(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_exp(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_free(a : *const super::types:: BIGNUM));
+windows_link::link!("crypto" "C" fn BN_free(a : *mut super::types:: BIGNUM));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_from_montgomery(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, mont : *const super::types:: BN_MONT_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_from_montgomery(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, mont : *mut super::types:: BN_MONT_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_gcd(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_gcd(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_generate_dsa_nonce(out : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM, r#priv : *const super::types:: BIGNUM, message : *const u8, message_len : u64, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_generate_dsa_nonce(out : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM, r#priv : *const super::types:: BIGNUM, message : *const u8, message_len : u64, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_generate_prime(ret : *const super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, callback : *const isize, cb_arg : *const core::ffi::c_void) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_generate_prime(ret : *mut super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, callback : *mut isize, cb_arg : *mut core::ffi::c_void) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_generate_prime_ex(ret : *const super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_generate_prime_ex(ret : *mut super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_generate_prime_ex2(ret : *const super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, cb : *const super::types:: BN_GENCB, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_generate_prime_ex2(ret : *mut super::types:: BIGNUM, bits : i32, safe : i32, add : *const super::types:: BIGNUM, rem : *const super::types:: BIGNUM, cb : *mut super::types:: BN_GENCB, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_get0_nist_prime_192() -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
@@ -204,25 +204,25 @@ windows_link::link!("crypto" "C" fn BN_get0_nist_prime_521() -> *mut super::type
 windows_link::link!("crypto" "C" fn BN_get_flags(b : *const super::types:: BIGNUM, n : i32) -> i32);
 windows_link::link!("crypto" "C" fn BN_get_params(which : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc2409_prime_1024(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc2409_prime_1024(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc2409_prime_768(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc2409_prime_768(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_1536(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_1536(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_2048(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_2048(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_3072(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_3072(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_4096(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_4096(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_6144(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_6144(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_8192(bn : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_get_rfc3526_prime_8192(bn : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_get_word(a : *const super::types:: BIGNUM) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_hex2bn(a : *const *const super::types:: BIGNUM, str : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn BN_hex2bn(a : *mut *mut super::types:: BIGNUM, str : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_is_bit_set(a : *const super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
@@ -232,165 +232,165 @@ windows_link::link!("crypto" "C" fn BN_is_odd(a : *const super::types:: BIGNUM) 
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_is_one(a : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_is_prime(p : *const super::types:: BIGNUM, nchecks : i32, callback : *const isize, ctx : *const super::types:: BN_CTX, cb_arg : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn BN_is_prime(p : *const super::types:: BIGNUM, nchecks : i32, callback : *mut isize, ctx : *mut super::types:: BN_CTX, cb_arg : *mut core::ffi::c_void) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_is_prime_ex(p : *const super::types:: BIGNUM, nchecks : i32, ctx : *const super::types:: BN_CTX, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_is_prime_ex(p : *const super::types:: BIGNUM, nchecks : i32, ctx : *mut super::types:: BN_CTX, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_is_prime_fasttest(p : *const super::types:: BIGNUM, nchecks : i32, callback : *const isize, ctx : *const super::types:: BN_CTX, cb_arg : *const core::ffi::c_void, do_trial_division : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_is_prime_fasttest(p : *const super::types:: BIGNUM, nchecks : i32, callback : *mut isize, ctx : *mut super::types:: BN_CTX, cb_arg : *mut core::ffi::c_void, do_trial_division : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_is_prime_fasttest_ex(p : *const super::types:: BIGNUM, nchecks : i32, ctx : *const super::types:: BN_CTX, do_trial_division : i32, cb : *const super::types:: BN_GENCB) -> i32);
+windows_link::link!("crypto" "C" fn BN_is_prime_fasttest_ex(p : *const super::types:: BIGNUM, nchecks : i32, ctx : *mut super::types:: BN_CTX, do_trial_division : i32, cb : *mut super::types:: BN_GENCB) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_is_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_is_zero(a : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_kronecker(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_kronecker(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_lebin2bn(s : *const u8, len : i32, ret : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_lebin2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_lshift(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_lshift(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_lshift1(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_lshift1(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mask_bits(a : *const super::types:: BIGNUM, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_mask_bits(a : *mut super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_add(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_add(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_add_quick(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_add_quick(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp2_mont(r : *const super::types:: BIGNUM, a1 : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, a2 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, m_ctx : *const super::types:: BN_MONT_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp2_mont(r : *mut super::types:: BIGNUM, a1 : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, a2 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, m_ctx : *mut super::types:: BN_MONT_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_mont(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, m_ctx : *const super::types:: BN_MONT_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_mont(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, m_ctx : *mut super::types:: BN_MONT_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_mont_consttime(rr : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, in_mont : *const super::types:: BN_MONT_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_mont_consttime(rr : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, in_mont : *mut super::types:: BN_MONT_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_mont_consttime_x2(rr1 : *const super::types:: BIGNUM, a1 : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, m1 : *const super::types:: BIGNUM, in_mont1 : *const super::types:: BN_MONT_CTX, rr2 : *const super::types:: BIGNUM, a2 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, m2 : *const super::types:: BIGNUM, in_mont2 : *const super::types:: BN_MONT_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_mont_consttime_x2(rr1 : *mut super::types:: BIGNUM, a1 : *const super::types:: BIGNUM, p1 : *const super::types:: BIGNUM, m1 : *const super::types:: BIGNUM, in_mont1 : *mut super::types:: BN_MONT_CTX, rr2 : *mut super::types:: BIGNUM, a2 : *const super::types:: BIGNUM, p2 : *const super::types:: BIGNUM, m2 : *const super::types:: BIGNUM, in_mont2 : *mut super::types:: BN_MONT_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_mont_word(r : *const super::types:: BIGNUM, a : u64, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX, m_ctx : *const super::types:: BN_MONT_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_mont_word(r : *mut super::types:: BIGNUM, a : u64, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX, m_ctx : *mut super::types:: BN_MONT_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_recp(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_recp(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_exp_simple(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_exp_simple(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_inverse(ret : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_mod_inverse(ret : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_lshift(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_lshift(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_lshift1(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_lshift1(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_lshift1_quick(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_lshift1_quick(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_lshift_quick(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32, m : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_lshift_quick(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32, m : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_mul(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_mul(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_mul_montgomery(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, mont : *const super::types:: BN_MONT_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_mul_montgomery(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, mont : *mut super::types:: BN_MONT_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_mul_reciprocal(r : *const super::types:: BIGNUM, x : *const super::types:: BIGNUM, y : *const super::types:: BIGNUM, recp : *const super::types:: BN_RECP_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_mul_reciprocal(r : *mut super::types:: BIGNUM, x : *const super::types:: BIGNUM, y : *const super::types:: BIGNUM, recp : *mut super::types:: BN_RECP_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_sqr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_sqr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_sqrt(ret : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_mod_sqrt(ret : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_sub(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_sub(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mod_sub_quick(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_mod_sub_quick(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_mod_word(a : *const super::types:: BIGNUM, w : u64) -> u64);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mpi2bn(s : *const u8, len : i32, ret : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_mpi2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mul(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_mul(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_mul_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
+windows_link::link!("crypto" "C" fn BN_mul_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_native2bn(s : *const u8, len : i32, ret : *const super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+windows_link::link!("crypto" "C" fn BN_native2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_new() -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nist_mod_192(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nist_mod_192(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nist_mod_224(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nist_mod_224(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nist_mod_256(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nist_mod_256(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nist_mod_384(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nist_mod_384(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nist_mod_521(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nist_mod_521(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, p : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_nist_mod_func(p : *const super::types:: BIGNUM) -> *mut isize);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_nnmod(r : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, d : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_nnmod(r : *mut super::types:: BIGNUM, m : *const super::types:: BIGNUM, d : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_num_bits(a : *const super::types:: BIGNUM) -> i32);
 windows_link::link!("crypto" "C" fn BN_num_bits_word(l : u64) -> i32);
 windows_link::link!("crypto" "C" fn BN_options() -> *mut i8);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_print(bio : *const super::types:: BIO, a : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_print(bio : *mut super::types:: BIO, a : *const super::types:: BIGNUM) -> i32);
 #[cfg(all(feature = "crypto", feature = "types"))]
-windows_link::link!("crypto" "C" fn BN_print_fp(fp : *const super::crypto:: _IO_FILE, a : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_print_fp(fp : *mut super::crypto:: _IO_FILE, a : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_priv_rand(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_priv_rand(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_priv_rand_ex(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32, strength : u32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_priv_rand_ex(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32, strength : u32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_priv_rand_range(rnd : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_priv_rand_range(rnd : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_priv_rand_range_ex(r : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM, strength : u32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_priv_rand_range_ex(r : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM, strength : u32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_pseudo_rand(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_pseudo_rand(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_pseudo_rand_range(rnd : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_pseudo_rand_range(rnd : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rand(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_rand(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rand_ex(rnd : *const super::types:: BIGNUM, bits : i32, top : i32, bottom : i32, strength : u32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_rand_ex(rnd : *mut super::types:: BIGNUM, bits : i32, top : i32, bottom : i32, strength : u32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rand_range(rnd : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_rand_range(rnd : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rand_range_ex(r : *const super::types:: BIGNUM, range : *const super::types:: BIGNUM, strength : u32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_rand_range_ex(r : *mut super::types:: BIGNUM, range : *const super::types:: BIGNUM, strength : u32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_reciprocal(r : *const super::types:: BIGNUM, m : *const super::types:: BIGNUM, len : i32, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_reciprocal(r : *mut super::types:: BIGNUM, m : *const super::types:: BIGNUM, len : i32, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rshift(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_rshift(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_rshift1(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_rshift1(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_secure_new() -> *mut super::types:: BIGNUM);
 windows_link::link!("crypto" "C" fn BN_security_bits(l : i32, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_set_bit(a : *const super::types:: BIGNUM, n : i32) -> i32);
+windows_link::link!("crypto" "C" fn BN_set_bit(a : *mut super::types:: BIGNUM, n : i32) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_set_flags(b : *const super::types:: BIGNUM, n : i32));
+windows_link::link!("crypto" "C" fn BN_set_flags(b : *mut super::types:: BIGNUM, n : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_set_negative(b : *const super::types:: BIGNUM, n : i32));
+windows_link::link!("crypto" "C" fn BN_set_negative(b : *mut super::types:: BIGNUM, n : i32));
 windows_link::link!("crypto" "C" fn BN_set_params(mul : i32, high : i32, low : i32, mont : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_set_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
+windows_link::link!("crypto" "C" fn BN_set_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_sqr(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_sqr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_sub(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_sub(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_sub_word(a : *const super::types:: BIGNUM, w : u64) -> i32);
+windows_link::link!("crypto" "C" fn BN_sub_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_swap(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM));
+windows_link::link!("crypto" "C" fn BN_swap(a : *mut super::types:: BIGNUM, b : *mut super::types:: BIGNUM));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_to_montgomery(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, mont : *const super::types:: BN_MONT_CTX, ctx : *const super::types:: BN_CTX) -> i32);
+windows_link::link!("crypto" "C" fn BN_to_montgomery(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, mont : *mut super::types:: BN_MONT_CTX, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_uadd(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_uadd(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_ucmp(a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_usub(r : *const super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
+windows_link::link!("crypto" "C" fn BN_usub(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_value_one() -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_with_flags(dest : *const super::types:: BIGNUM, b : *const super::types:: BIGNUM, flags : i32));
+windows_link::link!("crypto" "C" fn BN_with_flags(dest : *mut super::types:: BIGNUM, b : *const super::types:: BIGNUM, flags : i32));
 #[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn BN_zero_ex(a : *const super::types:: BIGNUM));
+windows_link::link!("crypto" "C" fn BN_zero_ex(a : *mut super::types:: BIGNUM));
 pub const BN_BLINDING_NO_RECREATE: i32 = 2i32;
 pub const BN_BLINDING_NO_UPDATE: i32 = 1i32;
 pub const BN_BYTES: i32 = 8i32;

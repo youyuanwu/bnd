@@ -26,7 +26,7 @@ fn stat_file_size() {
     unsafe { unistd::close(fd) };
 
     let mut st = stat::stat::default();
-    let rc = unsafe { stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
+    let rc = unsafe { stat::stat(path.as_ptr(), &mut st) };
     assert_eq!(rc, 0, "stat failed");
     assert_eq!(st.st_size, 10);
 
@@ -41,7 +41,7 @@ fn stat_is_regular_file() {
     unsafe { unistd::close(fd) };
 
     let mut st = stat::stat::default();
-    let rc = unsafe { stat::stat(path.as_ptr(), &mut st as *mut _ as *const _) };
+    let rc = unsafe { stat::stat(path.as_ptr(), &mut st) };
     assert_eq!(rc, 0);
     assert_eq!(
         st.st_mode & 0o170000,
