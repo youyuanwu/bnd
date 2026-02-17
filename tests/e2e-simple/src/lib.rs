@@ -114,6 +114,24 @@ mod tests {
     }
 
     #[test]
+    fn test_anonymous_nested_struct_array() {
+        // QueueMapping has anonymous struct fields with 2D array dimensions [4][3].
+        // Each element struct has two u16 fields (4 bytes).
+        assert_eq!(std::mem::size_of::<QueueMapping_rx_queues>(), 4);
+        assert_eq!(std::mem::size_of::<QueueMapping_tx_queues>(), 4);
+        // Total: 2 fields × 4 × 3 elements × 4 bytes = 96
+        assert_eq!(std::mem::size_of::<QueueMapping>(), 96);
+
+        let mut qm = QueueMapping::default();
+        qm.rx_queues[0][0].base = 100;
+        qm.rx_queues[0][0].count = 4;
+        qm.tx_queues[3][2].base = 200;
+        qm.tx_queues[3][2].count = 8;
+        assert_eq!(qm.rx_queues[0][0].base, 100);
+        assert_eq!(qm.tx_queues[3][2].count, 8);
+    }
+
+    #[test]
     fn test_delegate_type_exists() {
         // Verify CompareFunc delegate compiles and has the right signature.
         unsafe extern "system" fn cmp(

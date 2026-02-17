@@ -23,7 +23,9 @@ pub type CompareFunc = Option<
 >;
 pub const DEFAULT_HEIGHT: i32 = 600i32;
 pub const DEFAULT_WIDTH: i32 = 800i32;
+pub const MAX_POOLS: i32 = 4i32;
 pub const MAX_WIDGETS: i32 = 256i32;
+pub const NUM_CLASSES: i32 = 3i32;
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]
 pub struct NetAddr {
@@ -46,6 +48,29 @@ impl Default for NetAddr_addr {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
     }
+}
+#[repr(C, packed(2))]
+#[derive(Clone, Copy)]
+pub struct QueueMapping {
+    pub rx_queues: [[QueueMapping_rx_queues; 3]; 4],
+    pub tx_queues: [[QueueMapping_tx_queues; 3]; 4],
+}
+impl Default for QueueMapping {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+#[repr(C, packed(2))]
+#[derive(Clone, Copy, Default)]
+pub struct QueueMapping_rx_queues {
+    pub base: u16,
+    pub count: u16,
+}
+#[repr(C, packed(2))]
+#[derive(Clone, Copy, Default)]
+pub struct QueueMapping_tx_queues {
+    pub base: u16,
+    pub count: u16,
 }
 #[repr(C, packed(4))]
 #[derive(Clone, Copy, Default)]

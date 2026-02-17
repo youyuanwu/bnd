@@ -398,12 +398,10 @@ fn extract_struct_from_entity(
         // Check for anonymous record type (unnamed struct/union used as a field type).
         // Clang gives these names like "union (unnamed at file.h:37:5)" which can't
         // be resolved. We extract them as separate TypeDefs with synthetic names.
+        // This also handles arrays of anonymous records (e.g. `struct { ... } f[N][M]`).
         let ctype =
             match try_extract_anonymous_field(&field_type, name, &field_name, &mut nested_types) {
-                Some(synthetic_name) => CType::Named {
-                    name: synthetic_name,
-                    resolved: None,
-                },
+                Some(ct) => ct,
                 None => map_clang_type(&field_type)
                     .with_context(|| format!("unsupported type for field '{}'", field_name))?,
             };
@@ -446,19 +444,34 @@ fn extract_struct_from_entity(
 /// (e.g. `union { int a; float b; } field;`), clang gives it a non-portable
 /// name like `"union (unnamed at file.h:37:5)"`. This function detects that
 /// case, recursively extracts the anonymous record as a separate `StructDef`
-/// with a synthetic name `ParentName_FieldName`, and returns the synthetic
-/// name so the caller can reference it.
+/// with a synthetic name `ParentName_FieldName`, and returns a `CType`
+/// referencing the synthetic name.
+///
+/// Also handles arrays of anonymous records (e.g.
+/// `struct { uint16_t x; } field[N][M]`), peeling off `ConstantArray`
+/// layers and wrapping the result back in `CType::Array`.
 fn try_extract_anonymous_field(
     field_type: &ClangType,
     parent_name: &str,
     field_name: &str,
     nested_types: &mut Vec<StructDef>,
-) -> Option<String> {
-    let canonical = field_type.get_canonical_type();
-    if canonical.get_kind() != TypeKind::Record {
+) -> Option<CType> {
+    // Peel off ConstantArray layers, collecting (element_type, length) pairs.
+    let mut array_dims = Vec::new();
+    let mut inner = field_type.get_canonical_type();
+    while inner.get_kind() == TypeKind::ConstantArray {
+        let len = inner.get_size().unwrap_or(0);
+        inner = inner
+            .get_element_type()
+            .expect("array has element type")
+            .get_canonical_type();
+        array_dims.push(len);
+    }
+
+    if inner.get_kind() != TypeKind::Record {
         return None;
     }
-    let decl = canonical.get_declaration()?;
+    let decl = inner.get_declaration()?;
     if !decl.is_anonymous() {
         return None;
     }
@@ -476,7 +489,19 @@ fn try_extract_anonymous_field(
             );
             nested_types.push(nested);
             nested_types.append(&mut more); // handle deeply nested anonymous types
-            Some(synthetic_name)
+
+            // Build the CType, wrapping in Array layers (innermost first).
+            let mut ctype = CType::Named {
+                name: synthetic_name,
+                resolved: None,
+            };
+            for len in array_dims.into_iter().rev() {
+                ctype = CType::Array {
+                    element: Box::new(ctype),
+                    len,
+                };
+            }
+            Some(ctype)
         }
         Err(e) => {
             warn!(
@@ -552,9 +577,10 @@ fn extract_function(decl: &Declaration) -> Result<FunctionDef> {
         } else {
             CType::Void
         };
-        // C array parameters decay to pointers (e.g. `const struct timespec t[2]` → `*timespec`).
-        // We must do this here because ELEMENT_TYPE_ARRAY blobs in method signatures can confuse
-        // windows-bindgen's reader which doesn't consume all ArrayShape fields.
+        // C array parameters decay to pointers (C11 §6.7.6.3p7):
+        // `const struct timespec t[2]` is `const struct timespec *t` at the ABI level.
+        // Preserving the array type would generate pass-by-value semantics in Rust,
+        // which is incorrect for FFI.
         let ty = match ty {
             CType::Array { element, .. } => CType::Ptr {
                 pointee: element,

@@ -350,3 +350,35 @@ fn roundtrip_pinvoke() {
         "DLL name should be 'simple'"
     );
 }
+
+#[test]
+fn roundtrip_anonymous_nested_struct_array() {
+    let index = open_index();
+
+    // QueueMapping_rx_queues and QueueMapping_tx_queues are synthetic types
+    // for the anonymous structs inside QueueMapping (array element types).
+    let rx = index.expect("SimpleTest", "QueueMapping_rx_queues");
+    let rx_fields: Vec<String> = rx.fields().map(|f| f.name().to_string()).collect();
+    assert_eq!(rx_fields, vec!["base", "count"]);
+
+    let tx = index.expect("SimpleTest", "QueueMapping_tx_queues");
+    let tx_fields: Vec<String> = tx.fields().map(|f| f.name().to_string()).collect();
+    assert_eq!(tx_fields, vec!["base", "count"]);
+
+    // QueueMapping should have 2 fields referencing the synthetic types
+    let qm = index.expect("SimpleTest", "QueueMapping");
+    let qm_fields: Vec<String> = qm.fields().map(|f| f.name().to_string()).collect();
+    assert_eq!(qm_fields, vec!["rx_queues", "tx_queues"]);
+
+    // Both should be sequential layout (structs, not unions)
+    assert!(
+        !rx.flags()
+            .contains(windows_metadata::TypeAttributes::ExplicitLayout),
+        "QueueMapping_rx_queues should not be a union"
+    );
+    assert!(
+        !qm.flags()
+            .contains(windows_metadata::TypeAttributes::ExplicitLayout),
+        "QueueMapping should not be a union"
+    );
+}

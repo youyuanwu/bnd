@@ -47,6 +47,21 @@ int create_widget(const char* name, Rect bounds, Widget* out);
 void destroy_widget(Widget* w);
 int widget_count(void);
 
+// Struct with anonymous nested struct fields and array dimensions
+#define MAX_POOLS 4
+#define NUM_CLASSES 3
+
+typedef struct {
+    struct {
+        unsigned short base;
+        unsigned short count;
+    } rx_queues[MAX_POOLS][NUM_CLASSES];
+    struct {
+        unsigned short base;
+        unsigned short count;
+    } tx_queues[MAX_POOLS][NUM_CLASSES];
+} QueueMapping;
+
 // #define constants
 #define MAX_WIDGETS 256
 #define DEFAULT_WIDTH 800
