@@ -111,16 +111,6 @@ pub const __SI_HAVE_SIGSYS: i32 = 1i32;
 pub const __SI_MAX_SIZE: i32 = 128i32;
 pub type __sighandler_t = Option<unsafe extern "system" fn(param0: i32)>;
 pub const __siginfo_t_defined: i32 = 1i32;
-#[repr(C, packed(8))]
-#[derive(Clone, Copy)]
-pub struct __sigset_t {
-    pub __val: [u64; 16],
-}
-impl Default for __sigset_t {
-    fn default() -> Self {
-        unsafe { core::mem::zeroed() }
-    }
-}
 pub const __sigstack_defined: i32 = 1i32;
 #[repr(C)]
 #[derive(Clone, Copy)]

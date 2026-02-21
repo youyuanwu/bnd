@@ -65,7 +65,7 @@ fn sigaction_struct_size() {
 fn sigset_struct_size() {
     // __sigset_t is 128 bytes (1024 bits / 8)
     assert_eq!(
-        std::mem::size_of::<signal::__sigset_t>(),
+        std::mem::size_of::<pthread::__sigset_t>(),
         128,
         "__sigset_t should be 128 bytes"
     );

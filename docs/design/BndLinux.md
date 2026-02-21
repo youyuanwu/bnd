@@ -312,18 +312,16 @@ pre-define `linux/mount.h`'s include guard, preventing its inclusion.
 This ensures `sys/mount.h`'s own `struct mount_attr` definition is
 visible and only the enum-based `MS_*` constants are extracted.
 
-### 10. Non-deterministic cross-WinMD type resolution
+### 10. Non-deterministic cross-WinMD type resolution (resolved)
 
-`__sigset_t` is defined in both `posix.signal` and `posix.pthread`
-partitions of `bnd-posix.winmd`. When bnd-winmd seeds its TypeRegistry
-from the external winmd via `[[type_import]]`, HashMap iteration order
-determines which partition's definition is used. This causes
-non-deterministic output for functions that reference `__sigset_t`
-(e.g., `epoll_pwait`, `signalfd`).
+`__sigset_t` was originally defined in both `posix.signal` and
+`posix.pthread` partitions of `bnd-posix.winmd`. This was fixed by
+extending bnd-winmd's dedup pass to cover structs (not just typedefs),
+so only the first-writer-wins partition keeps the struct definition.
 
-Both paths (`posix::signal::__sigset_t` and `posix::pthread::__sigset_t`)
-are functionally identical at runtime. The up-to-date freshness test in
-`bnd-linux-gen` normalizes this variance during comparison.
+Additionally, `seed_registry_from_winmd` now resolves duplicate type
+names across external winmd namespaces deterministically by keeping the
+lexicographically smallest namespace.
 
 ### 11. Kernel UAPI headers (`linux/io_uring.h`)
 

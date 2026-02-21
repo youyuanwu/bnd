@@ -8,7 +8,7 @@
     clippy::all
 )]
 
-windows_link::link!("c" "C" fn signalfd(__fd : i32, __mask : *const bnd_posix::posix::signal:: __sigset_t, __flags : i32) -> i32);
+windows_link::link!("c" "C" fn signalfd(__fd : i32, __mask : *const bnd_posix::posix::pthread:: __sigset_t, __flags : i32) -> i32);
 pub const SFD_CLOEXEC: u32 = 524288u32;
 pub const SFD_NONBLOCK: u32 = 2048u32;
 pub const _SYS_SIGNALFD_H: i32 = 1i32;

@@ -11,8 +11,8 @@
 windows_link::link!("c" "C" fn epoll_create(__size : i32) -> i32);
 windows_link::link!("c" "C" fn epoll_create1(__flags : i32) -> i32);
 windows_link::link!("c" "C" fn epoll_ctl(__epfd : i32, __op : i32, __fd : i32, __event : *mut epoll_event) -> i32);
-windows_link::link!("c" "C" fn epoll_pwait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32, __ss : *const bnd_posix::posix::signal:: __sigset_t) -> i32);
-windows_link::link!("c" "C" fn epoll_pwait2(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : *const bnd_posix::posix::stat:: timespec, __ss : *const bnd_posix::posix::signal:: __sigset_t) -> i32);
+windows_link::link!("c" "C" fn epoll_pwait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32, __ss : *const bnd_posix::posix::pthread:: __sigset_t) -> i32);
+windows_link::link!("c" "C" fn epoll_pwait2(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : *const bnd_posix::posix::stat:: timespec, __ss : *const bnd_posix::posix::pthread:: __sigset_t) -> i32);
 windows_link::link!("c" "C" fn epoll_wait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32) -> i32);
 pub const EPOLLERR: u32 = 8u32;
 pub const EPOLLET: u32 = 2147483648u32;

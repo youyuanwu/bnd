@@ -139,9 +139,10 @@ Challenges:
   the struct is defined in `bits/types.h` via macro. Fix: add `bits/types.h`
   to the traverse list (pulls in ~60 internal `__` typedefs, harmless).
 - **First-writer-wins registry**: `build_type_registry` uses first-writer-wins
-  for typedefs — the types partition comes first in the TOML, so it registers
-  `uid_t` etc. before other partitions see them. The dedup pass
-  (`partition.typedefs.retain(…)`) then strips duplicates from later partitions.
+  for typedefs and structs — the types partition comes first in the TOML, so it
+  registers `uid_t` etc. before other partitions see them. The dedup pass
+  (`partition.typedefs.retain(…)` and `partition.structs.retain(…)`) then strips
+  duplicates from later partitions.
 - **Cross-partition `#[cfg]` gates**: windows-bindgen auto-generates
   `#[cfg(feature = "types")]` on references in other modules (39 in unistd,
   32 in signal, 20 in stat, 16 in socket, etc.).

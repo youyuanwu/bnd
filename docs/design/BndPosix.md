@@ -97,9 +97,9 @@ cargo run -p bnd-posix-gen
 Multiple partitions reference overlapping system types (`off_t`, `mode_t`,
 `uid_t`, etc.). A dedicated **types** partition (`posix.types`) owns these
 shared typedefs. During generation, bnd-winmd deduplicates: the types
-partition is processed first (first-writer-wins for typedefs), and later
-partitions' duplicate copies are removed. Function signatures in other
-partitions use cross-partition TypeRefs (e.g. `super::types::__uid_t`).
+partition is processed first (first-writer-wins for typedefs and structs),
+and later partitions' duplicate copies are removed. Function signatures in
+other partitions use cross-partition TypeRefs (e.g. `super::types::__uid_t`).
 
 ## Partition Config
 
@@ -175,10 +175,11 @@ in bnd-winmd core (see [bnd-posix.md](systesting/bnd-posix.md) for details):
 16. **Deep include graph** — `signal.h` pulls 10 sub-headers across
     `bits/` and `bits/types/`; each missing traverse path causes
     windows-bindgen to panic with "type not found".
-17. **Typedef deduplication** — shared POSIX types (`uid_t`, `pid_t`,
-    `mode_t`, etc.) appear in multiple headers. A dedicated `posix.types`
-    partition owns them; the type registry uses first-writer-wins for
-    typedefs, and the dedup pass removes duplicates from later partitions.
+17. **Typedef and struct deduplication** — shared POSIX types (`uid_t`, `pid_t`,
+    `mode_t`, `__sigset_t`, etc.) appear in multiple headers. A dedicated
+    `posix.types` partition owns shared typedefs; the type registry uses
+    first-writer-wins, and the dedup pass removes duplicate typedefs and
+    structs from later partitions.
 18. **`_IO_FILE` struct traversal** — `struct _IO_FILE` is defined in
     `bits/types/struct_FILE.h` with ~30 internal fields. Several fields
     reference glibc-private incomplete types (`_IO_marker`, `_IO_codecvt`,
@@ -297,8 +298,10 @@ Common patterns:
 #### Partition ordering
 
 The **types** partition must remain first — it owns shared POSIX typedefs via
-first-writer-wins deduplication. New partitions can go in any order after it,
-but by convention they are appended at the end.
+first-writer-wins deduplication. Structs that appear in multiple partitions
+(e.g. `__sigset_t` in both signal and pthread) are also deduplicated — only
+the first partition to register the name keeps the definition. New partitions
+can go in any order after types, but by convention they are appended at the end.
 
 ### 3. Run the generator
 

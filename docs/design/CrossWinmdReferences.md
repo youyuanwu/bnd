@@ -287,10 +287,10 @@ All phases completed. See commits on the `dev` branch.
 4. ✅ **Emit TypeRef for imported types** — `ctype_to_wintype()` already does
    this when a name is in the registry. No emit.rs changes needed.
 
-5. ✅ **Typedef dedup is a safety net** — `generate_from_config` already
-   deduplicates typedefs by checking if the canonical namespace matches
-   the local partition namespace. Pre-seeded types have their original
-   namespace (e.g. `posix.time`), which never matches any openssl
+5. ✅ **Typedef and struct dedup is a safety net** — `generate_from_config`
+   deduplicates typedefs and structs by checking if the canonical namespace
+   matches the local partition namespace. Pre-seeded types have their
+   original namespace (e.g. `posix.time`), which never matches any openssl
    partition — so any accidentally-extracted local copies are
    automatically dropped. No dedup code changes needed.
 

@@ -25,7 +25,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use tracing::info;
+use tracing::{info, warn};
 
 pub mod config;
 pub mod emit;
@@ -121,17 +121,39 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
         seed_registry_from_winmd(&mut registry, &winmd_path, &ti.namespace);
     }
 
-    // Deduplicate typedefs: when the same typedef appears in multiple
-    // partitions (e.g. `uid_t` in signal, stat, unistd, AND a shared types
-    // partition), keep it only in the partition the registry maps it to.
-    // The registry uses first-writer-wins for typedefs, so the types
-    // partition should come first in the TOML to claim shared names.
-    // Other partitions drop their local copy; any function/struct that
-    // references the type will use a cross-partition TypeRef instead.
+    // Deduplicate typedefs and structs: when the same type appears in
+    // multiple partitions (e.g. `uid_t` or `__sigset_t` in signal, pthread,
+    // stat, etc.), keep it only in the partition the registry maps it to.
+    // The registry uses first-writer-wins, so the partition listed first in
+    // the TOML claims shared names. Other partitions drop their local copy;
+    // any function/struct that references the type will use a cross-partition
+    // TypeRef instead.
     for partition in &mut partitions {
         partition.typedefs.retain(|td| {
             let canonical_ns = registry.namespace_for(&td.name, &partition.namespace);
-            canonical_ns == partition.namespace
+            let dominated = canonical_ns != partition.namespace;
+            if dominated {
+                warn!(
+                    name = td.name,
+                    canonical = canonical_ns,
+                    duplicate = partition.namespace,
+                    "dropping duplicate typedef (canonical partition wins)"
+                );
+            }
+            !dominated
+        });
+        partition.structs.retain(|sd| {
+            let canonical_ns = registry.namespace_for(&sd.name, &partition.namespace);
+            let dominated = canonical_ns != partition.namespace;
+            if dominated {
+                warn!(
+                    name = sd.name,
+                    canonical = canonical_ns,
+                    duplicate = partition.namespace,
+                    "dropping duplicate struct (canonical partition wins)"
+                );
+            }
+            !dominated
         });
     }
 
@@ -178,9 +200,16 @@ fn seed_registry_from_winmd(
             continue;
         }
         // Only insert if not already registered (local types win).
+        // When two external namespaces define the same type name (e.g.
+        // __sigset_t in posix.signal and posix.pthread), keep the
+        // lexicographically smallest namespace for determinism.
         if !registry.contains(name) {
             registry.register(name, ns);
             count += 1;
+        } else if registry.namespace_for(name, "").as_str() < ns {
+            // Already have a smaller namespace — keep it.
+        } else {
+            registry.register(name, ns);
         }
     }
     info!(

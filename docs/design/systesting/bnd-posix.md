@@ -948,7 +948,7 @@ via cross-partition `TypeRef` instead of duplicating definitions.
 | Problem | Root cause | Fix |
 |---|---|---|
 | `type not found: posix.types.__fsid_t` | `__fsid_t` struct lives in `bits/types.h`, not `sys/types.h` | Added `bits/types.h` to traverse list |
-| Last-writer-wins fragility | Original registry used HashMap insert (last writer wins) | Redesigned to first-writer-wins for typedefs |
+| Last-writer-wins fragility | Original registry used HashMap insert (last writer wins) | Redesigned to first-writer-wins for typedefs and structs |
 | ~60 internal `__` typedefs pulled in | `bits/types.h` defines many `__*` types | Harmless — internal types, no API pollution |
 
 ### E2E Tests
@@ -961,8 +961,8 @@ existing E2E tests in other partitions that consume these types.
 
 1. ✅ Added partition 1 (types) to `bnd-posix.toml` with `posix.types` namespace
 2. ✅ Added `sys/types.h` header and `bits/types.h` traverse path
-3. ✅ Implemented first-writer-wins typedef dedup in `build_type_registry`
-4. ✅ Added dedup retain pass in `generate_from_config`
+3. ✅ Implemented first-writer-wins typedef and struct dedup in `build_type_registry`
+4. ✅ Added dedup retain pass in `generate_from_config` (typedefs and structs)
 5. ✅ Generation succeeded — 95 typedefs, 1 struct, 0 functions, 3 constants
 6. ✅ Compilation clean — all cross-partition `#[cfg]` gates resolve
 7. ✅ Added `types` feature to `bnd-posix/Cargo.toml` default list

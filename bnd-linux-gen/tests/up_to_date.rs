@@ -50,18 +50,10 @@ fn generated_sources_are_up_to_date() {
     );
 
     // Compare each file's content.
-    // Use a normalization pass to handle non-deterministic cross-WinMD type
-    // resolution: __sigset_t is defined in both posix.signal and posix.pthread,
-    // and the TypeRegistry import order from the external winmd is
-    // non-deterministic. Both paths are functionally identical.
-    let normalize = |s: String| -> String {
-        s.replace("posix::pthread:: __sigset_t", "posix::signal:: __sigset_t")
-    };
-
     let mut diffs = Vec::new();
     for rel_path in &checked_in_files {
-        let expected = normalize(std::fs::read_to_string(checked_in.join(rel_path)).unwrap());
-        let actual = normalize(std::fs::read_to_string(generated_dir.join(rel_path)).unwrap());
+        let expected = std::fs::read_to_string(checked_in.join(rel_path)).unwrap();
+        let actual = std::fs::read_to_string(generated_dir.join(rel_path)).unwrap();
         if expected != actual {
             diffs.push(rel_path.display().to_string());
         }
