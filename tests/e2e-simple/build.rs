@@ -5,7 +5,8 @@ fn main() {
 
     // Step 1: Generate winmd from the C header
     let winmd_path = out_dir.join("simple_test.winmd");
-    bnd_winmd::run(&fixtures.join("simple.toml"), Some(&winmd_path)).expect("bnd-winmd failed");
+    bnd_winmd::run(&fixtures.join("simple/simple.toml"), Some(&winmd_path))
+        .expect("bnd-winmd failed");
 
     // Step 2: Generate Rust bindings into src/bindings.rs
     let bindings_path = manifest_dir.join("src/bindings.rs");

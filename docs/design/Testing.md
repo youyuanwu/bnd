@@ -11,7 +11,9 @@ Prove the full pipeline works: **C header → bnd-winmd (winmd) → windows-bind
 
 ```
 tests/fixtures/
-├── simple.h / simple.toml   ← single-partition (e2e-simple)
+├── simple/                  ← single-partition (e2e-simple)
+│   ├── simple.h
+│   └── simple.toml
 └── multi/                   ← multi-partition  (e2e-multi)
     ├── types.h, widget.h
     └── multi.toml
@@ -142,8 +144,13 @@ resolution path.
 
 ```
 tests/fixtures/
-├── simple.h       ← single-partition (unchanged)
-├── simple.toml
+├── simple/        ← single-partition (unchanged)
+│   ├── simple.h
+│   └── simple.toml
+├── unresolved/    ← validation error testing
+│   ├── unresolved.h
+│   ├── unresolved_dep.h
+│   └── unresolved.toml
 └── multi/         ← multi-partition
     ├── types.h
     ├── widget.h

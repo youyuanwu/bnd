@@ -135,6 +135,11 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
         });
     }
 
+    // Validate that all referenced types are resolvable before emitting.
+    // This catches missing traverse headers early with actionable diagnostics
+    // instead of a cryptic windows-bindgen "type not found" panic later.
+    validate_type_references(&partitions, &registry)?;
+
     // Emit winmd
     let winmd_bytes = emit::emit_winmd(&cfg.output.name, &partitions, &registry)?;
 
@@ -184,4 +189,143 @@ fn seed_registry_from_winmd(
         imported = count,
         "pre-seeded type registry from external winmd"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Type-reference validation
+// ---------------------------------------------------------------------------
+
+/// A single unresolved type reference with context about where it was found.
+struct UnresolvedRef {
+    type_name: String,
+    partition: String,
+    context: String,
+}
+
+/// Walk all CType trees in every partition and verify that each
+/// `Named { resolved: None }` type is present in the registry.
+///
+/// Types with `resolved: Some(_)` are fine — they fall back to the canonical
+/// primitive at emit time. Only `resolved: None` (records, enums, anonymous
+/// nested types) must be registered.
+fn validate_type_references(
+    partitions: &[model::Partition],
+    registry: &model::TypeRegistry,
+) -> Result<()> {
+    let mut unresolved: Vec<UnresolvedRef> = Vec::new();
+
+    for partition in partitions {
+        let ns = &partition.namespace;
+
+        for s in &partition.structs {
+            for field in &s.fields {
+                collect_unresolved(
+                    &field.ty,
+                    registry,
+                    ns,
+                    &format!("field `{}` of struct `{}`", field.name, s.name),
+                    &mut unresolved,
+                );
+            }
+        }
+
+        for f in &partition.functions {
+            collect_unresolved(
+                &f.return_type,
+                registry,
+                ns,
+                &format!("return type of function `{}`", f.name),
+                &mut unresolved,
+            );
+            for param in &f.params {
+                collect_unresolved(
+                    &param.ty,
+                    registry,
+                    ns,
+                    &format!("param `{}` of function `{}`", param.name, f.name),
+                    &mut unresolved,
+                );
+            }
+        }
+
+        for td in &partition.typedefs {
+            collect_unresolved(
+                &td.underlying_type,
+                registry,
+                ns,
+                &format!("typedef `{}`", td.name),
+                &mut unresolved,
+            );
+        }
+    }
+
+    if unresolved.is_empty() {
+        return Ok(());
+    }
+
+    // Deduplicate by type name for a concise summary, but keep the first
+    // usage context for each name.
+    let mut seen = std::collections::HashSet::new();
+    let mut unique: Vec<&UnresolvedRef> = Vec::new();
+    for r in &unresolved {
+        if seen.insert(&r.type_name) {
+            unique.push(r);
+        }
+    }
+
+    let mut msg = format!(
+        "{} unresolved type reference(s) found — these will cause \
+         windows-bindgen to fail with \"type not found\".\n\
+         Hint: add the header that defines each type to the partition's \
+         `traverse` list, or add a `[[type_import]]` for an external winmd.\n",
+        unique.len()
+    );
+    for r in &unique {
+        msg.push_str(&format!(
+            "\n  • `{}` — referenced in {} (partition `{}`)",
+            r.type_name, r.context, r.partition,
+        ));
+    }
+
+    anyhow::bail!("{msg}");
+}
+
+/// Recursively walk a CType and collect any `Named { resolved: None }` that
+/// is not in the registry.
+fn collect_unresolved(
+    ctype: &model::CType,
+    registry: &model::TypeRegistry,
+    partition_ns: &str,
+    context: &str,
+    out: &mut Vec<UnresolvedRef>,
+) {
+    match ctype {
+        model::CType::Named { name, resolved } => {
+            if resolved.is_none() && !registry.contains(name) {
+                out.push(UnresolvedRef {
+                    type_name: name.clone(),
+                    partition: partition_ns.to_string(),
+                    context: context.to_string(),
+                });
+            }
+        }
+        model::CType::Ptr { pointee, .. } => {
+            collect_unresolved(pointee, registry, partition_ns, context, out);
+        }
+        model::CType::Array { element, .. } => {
+            collect_unresolved(element, registry, partition_ns, context, out);
+        }
+        model::CType::FnPtr {
+            return_type,
+            params,
+            ..
+        } => {
+            collect_unresolved(return_type, registry, partition_ns, context, out);
+            for p in params {
+                collect_unresolved(p, registry, partition_ns, context, out);
+            }
+        }
+        // Primitives, Void, etc. — nothing to check.
+        _ => {}
+    }
 }

@@ -78,6 +78,7 @@ C/C++ Headers
 | E2E integration tests | Multiple crates (zlib against real `libz.so`, 16 POSIX API families via bnd-posix, OpenSSL libssl+libcrypto via bnd-openssl) |
 | Package-mode code generation | `bnd-posix-gen` and `bnd-openssl-gen` drive bnd-winmd + `windows-bindgen --package` to generate checked-in source trees with feature-gated sub-modules |
 | Cross-WinMD type imports | `[[type_import]]` in TOML pre-seeds TypeRegistry from external winmd; `--reference` flag tells windows-bindgen to emit external crate paths. See [CrossWinmdReferences.md](CrossWinmdReferences.md) |
+| Pre-emit type-reference validation | `validate_type_references()` walks all CType trees before emit, catches `Named { resolved: None }` types missing from TypeRegistry. Reports actionable errors with type name, context (function param / struct field), and partition. |
 
 ### What Is NOT Yet Implemented
 
@@ -103,16 +104,18 @@ bnd-winmd/
 │   ├── extract.rs           # clang Entity/Type → model
 │   └── emit.rs              # model → windows-metadata writer calls
 └── tests/
-    ├── roundtrip_simple.rs   # simple.h fixture
-    ├── roundtrip_multi.rs    # multi-partition fixture
-    ├── roundtrip_posixfile.rs # bnd-posix fixture
-    ├── roundtrip_zlib.rs     # zlib system header
-    └── roundtrip_openssl.rs  # openssl multi-library + cross-winmd refs
+    ├── roundtrip_simple.rs       # simple.h fixture
+    ├── roundtrip_multi.rs        # multi-partition fixture
+    ├── roundtrip_posixfile.rs     # bnd-posix fixture
+    ├── roundtrip_zlib.rs          # zlib system header
+    ├── roundtrip_openssl.rs       # openssl multi-library + cross-winmd refs
+    └── roundtrip_validation.rs    # pre-emit type-reference validation
 
 tests/
 ├── fixtures/
-│   ├── simple.h / simple.toml
+│   ├── simple/ (simple.h, simple.toml)
 │   ├── multi/ (graphics.h, audio.h, multi.toml)
+│   ├── unresolved/ (unresolved.h, unresolved_dep.h, unresolved.toml)
 │   ├── bnd-posix/ (bnd-posix.toml — POSIX headers)
 │   └── zlib/ (zlib.toml — references system headers)
 ├── simple-impl/              # Native C lib for e2e-simple

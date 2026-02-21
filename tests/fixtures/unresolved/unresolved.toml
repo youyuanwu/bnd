@@ -1,0 +1,12 @@
+[output]
+name = "unresolved"
+file = "unresolved.winmd"
+
+[[partition]]
+namespace = "test.unresolved"
+library = "test"
+headers = ["unresolved.h"]
+# Only traverse unresolved.h — NOT unresolved_dep.h.
+# DefinedElsewhere is complete (clang sees it) but not in any traverse,
+# so it won't be in the TypeRegistry.
+traverse = ["unresolved.h"]
