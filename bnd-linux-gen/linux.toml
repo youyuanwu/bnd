@@ -1,0 +1,91 @@
+include_paths = ["/usr/include/x86_64-linux-gnu", "/usr/include"]
+
+[output]
+name = "linux"
+file = "bnd-linux.winmd"
+
+# Import POSIX types used by Linux API signatures (sigset_t, timespec,
+# itimerspec, clockid_t, off_t, etc.) from bnd-posix instead of
+# re-extracting them from glibc headers.
+[[type_import]]
+winmd = "../bnd-posix/winmd/bnd-posix.winmd"
+namespace = "posix"
+
+# Partition 1: epoll — epoll_create1/epoll_ctl/epoll_wait + EPOLL* constants
+# epoll_data_t is a union inside the packed epoll_event struct.
+[[partition]]
+namespace = "linux.epoll"
+library = "c"
+headers = ["sys/epoll.h"]
+traverse = [
+    "sys/epoll.h",
+    "bits/epoll.h",
+]
+
+# Partition 2: eventfd — eventfd/eventfd_read/eventfd_write + EFD_* constants
+[[partition]]
+namespace = "linux.eventfd"
+library = "c"
+headers = ["sys/eventfd.h"]
+traverse = [
+    "sys/eventfd.h",
+    "bits/eventfd.h",
+]
+
+# Partition 3: timerfd — timerfd_create/timerfd_settime/timerfd_gettime + TFD_* constants
+# Uses clockid_t and struct itimerspec from posix.time (cross-WinMD ref).
+[[partition]]
+namespace = "linux.timerfd"
+library = "c"
+headers = ["sys/timerfd.h"]
+traverse = [
+    "sys/timerfd.h",
+    "bits/timerfd.h",
+]
+
+# Partition 4: signalfd — signalfd() + struct signalfd_siginfo + SFD_* constants
+# Uses sigset_t from posix.signal (cross-WinMD ref).
+[[partition]]
+namespace = "linux.signalfd"
+library = "c"
+headers = ["sys/signalfd.h"]
+traverse = [
+    "sys/signalfd.h",
+    "bits/signalfd.h",
+]
+
+# Partition 5: inotify — inotify_init1/inotify_add_watch/inotify_rm_watch + IN_* constants
+# struct inotify_event has a flexible array member (char name[]) — known limitation.
+[[partition]]
+namespace = "linux.inotify"
+library = "c"
+headers = ["sys/inotify.h"]
+traverse = ["sys/inotify.h"]
+
+# Partition 6: sendfile — sendfile() zero-copy file transfer
+# Uses off_t from posix.types (cross-WinMD ref).
+[[partition]]
+namespace = "linux.sendfile"
+library = "c"
+headers = ["sys/sendfile.h"]
+traverse = ["sys/sendfile.h"]
+
+# Partition 7: xattr — extended attribute operations (setxattr/getxattr/listxattr/removexattr)
+[[partition]]
+namespace = "linux.xattr"
+library = "c"
+headers = ["sys/xattr.h"]
+traverse = ["sys/xattr.h"]
+
+# Partition 8: mount — mount/umount + MS_* flags + new-style fsopen/fsmount API
+# -D_LINUX_MOUNT_H prevents linux/mount.h from being included, which allows
+# sys/mount.h's own struct mount_attr definition (guarded by #ifndef
+# MOUNT_ATTR_SIZE_VER0) to be visible. Without this, linux/mount.h defines
+# MOUNT_ATTR_SIZE_VER0 first, hiding the struct and introducing duplicate
+# MS_* constants with non-deterministic types.
+[[partition]]
+namespace = "linux.mount"
+library = "c"
+headers = ["sys/mount.h"]
+traverse = ["sys/mount.h"]
+clang_args = ["-D_LINUX_MOUNT_H"]

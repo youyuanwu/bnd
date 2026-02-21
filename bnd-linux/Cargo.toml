@@ -1,0 +1,29 @@
+[package]
+name = "bnd-linux"
+version = "0.0.1"
+edition.workspace = true
+description = "Rust FFI bindings for Linux-specific system APIs (epoll, eventfd, timerfd, etc.)"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+readme = "README.md"
+
+[dependencies]
+bnd-posix = { path = "../bnd-posix", features = ["signal", "stat", "time", "types"] }
+windows-link.workspace = true
+
+[dev-dependencies]
+libc = "0.2"
+
+[features]
+default = ["epoll", "eventfd", "inotify", "mount", "sendfile", "signalfd", "timerfd", "xattr"]
+Foundation = []
+# generated features
+epoll = ["Foundation"]
+eventfd = ["Foundation"]
+inotify = ["Foundation"]
+mount = ["Foundation"]
+sendfile = ["Foundation"]
+signalfd = ["Foundation"]
+timerfd = ["Foundation"]
+xattr = ["Foundation"]
