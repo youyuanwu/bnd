@@ -60,3 +60,8 @@ typedef _Bool bool;
 // Function that uses the bool typedef to verify it still works after
 // the typedef is suppressed.
 bool widget_is_visible(const Widget* w);
+
+// __int128 typedefs — must be silently skipped (no WinMD 128-bit type).
+// These must not cause a build error or produce `pub type __s128 = isize;`.
+typedef __int128 __s128;
+typedef unsigned __int128 __u128;

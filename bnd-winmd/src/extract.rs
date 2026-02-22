@@ -588,7 +588,7 @@ fn extract_typedef_from_entity(entity: &Entity, name: &str) -> Result<TypedefDef
     let underlying = entity
         .get_typedef_underlying_type()
         .context("typedef has no underlying type")?;
-    let ctype = map_clang_type(&underlying).unwrap_or(CType::Void);
+    let ctype = map_clang_type(&underlying)?;
     trace!(name = %name, ty = ?ctype, "typedef underlying type");
 
     Ok(TypedefDef {
@@ -618,6 +618,16 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
         TypeKind::ULongLong => Ok(CType::U64),
         TypeKind::Float => Ok(CType::F32),
         TypeKind::Double => Ok(CType::F64),
+
+        // __int128 / unsigned __int128: no WinMD ELEMENT_TYPE for 128-bit
+        // integers and windows-bindgen cannot emit i128/u128. Bail so the
+        // caller can skip the containing type with a warning.
+        TypeKind::Int128 => {
+            anyhow::bail!("__int128 not supported (no WinMD 128-bit integer type)")
+        }
+        TypeKind::UInt128 => {
+            anyhow::bail!("unsigned __int128 not supported (no WinMD 128-bit integer type)")
+        }
 
         TypeKind::Pointer => {
             let pointee = ty

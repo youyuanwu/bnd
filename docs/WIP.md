@@ -276,6 +276,17 @@ is warn-and-skip, same as variadic functions. Note: `htons`/`htonl` are
 **not** affected — glibc exports them as real symbols despite the inline
 definition in the header.
 
+### 10. `__int128` / `unsigned __int128` not supported
+
+WinMD metadata (ECMA-335 `ELEMENT_TYPE_*`) has no 128-bit integer type,
+and `windows-bindgen` cannot emit `i128`/`u128`. The kernel headers
+define `typedef __signed__ __int128 __s128` and `typedef unsigned __int128
+__u128` in `linux/types.h`, but these are rarely used in kernel APIs.
+
+bnd-winmd now returns an error for `TypeKind::Int128` / `TypeKind::UInt128`,
+which causes the containing typedef, struct field, or function to be
+skipped with a warning. Previously these silently fell through to `isize`.
+
 ---
 
 ## Not Yet Implemented (lower priority)
