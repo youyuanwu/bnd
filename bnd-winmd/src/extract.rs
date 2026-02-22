@@ -691,12 +691,15 @@ fn map_clang_type(ty: &ClangType) -> Result<CType> {
                             is_const: false,
                         });
                     }
-                    // Keep the name for cross-partition TypeRef resolution,
-                    // but also resolve the canonical type as fallback for
-                    // system typedefs that won't be in any partition.
+                    // Resolve the canonical type — if it's unsupported (e.g.
+                    // __int128), bail so any typedef chain referencing it is
+                    // also skipped (e.g. `typedef __s128 s128`).
                     let canonical = ty.get_canonical_type();
-                    let resolved = map_clang_type(&canonical).ok().map(Box::new);
-                    return Ok(CType::Named { name, resolved });
+                    let resolved = map_clang_type(&canonical).map(Box::new)?;
+                    return Ok(CType::Named {
+                        name,
+                        resolved: Some(resolved),
+                    });
                 }
             }
             // Unnamed or unresolvable typedef — resolve to canonical primitive

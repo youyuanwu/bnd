@@ -276,16 +276,27 @@ is warn-and-skip, same as variadic functions. Note: `htons`/`htonl` are
 **not** affected — glibc exports them as real symbols despite the inline
 definition in the header.
 
-### 10. `__int128` / `unsigned __int128` not supported
+### 10. ~~`typedef _Bool bool` recursive alias~~ ✅
+
+`typedef _Bool bool;` (from `linux/types.h` or `stdbool.h`) produced
+`pub type bool = bool;` — a recursive type alias that fails to compile.
+Fixed: `collect_typedefs()` now skips any typedef whose name matches a
+Rust primitive type name (`bool`, `i8`, `u8`, `i16`, `u16`, `i32`, `u32`,
+`i64`, `u64`, `f32`, `f64`, `isize`, `usize`).
+
+### 11. `__int128` / `unsigned __int128` not supported
 
 WinMD metadata (ECMA-335 `ELEMENT_TYPE_*`) has no 128-bit integer type,
 and `windows-bindgen` cannot emit `i128`/`u128`. The kernel headers
 define `typedef __signed__ __int128 __s128` and `typedef unsigned __int128
 __u128` in `linux/types.h`, but these are rarely used in kernel APIs.
 
-bnd-winmd now returns an error for `TypeKind::Int128` / `TypeKind::UInt128`,
+bnd-winmd returns an error for `TypeKind::Int128` / `TypeKind::UInt128`,
 which causes the containing typedef, struct field, or function to be
-skipped with a warning. Previously these silently fell through to `isize`.
+skipped with a warning. Typedef chains through 128-bit types are also
+skipped recursively (e.g. `typedef __s128 s128` is skipped because
+`__s128`'s canonical type is `__int128`). Previously these silently fell
+through to `isize`.
 
 ---
 

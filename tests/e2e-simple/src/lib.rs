@@ -159,9 +159,8 @@ mod tests {
     fn test_int128_typedefs_skipped() {
         // `typedef __int128 __s128;` and `typedef unsigned __int128 __u128;`
         // in simple.h must be silently skipped — WinMD has no 128-bit integer
-        // type. If they leaked through they'd produce `pub type __s128 = isize;`
-        // which is wrong. Verify they don't exist in the generated bindings by
-        // checking the bindings source doesn't contain them.
+        // type. Typedef chains through them (`typedef __s128 s128;`) must also
+        // be skipped recursively. Verify none appear in the generated bindings.
         let bindings = include_str!("bindings.rs");
         assert!(
             !bindings.contains("__s128"),
@@ -170,6 +169,14 @@ mod tests {
         assert!(
             !bindings.contains("__u128"),
             "__u128 should not appear in generated bindings"
+        );
+        assert!(
+            !bindings.contains("pub type s128"),
+            "s128 (chained typedef) should not appear in generated bindings"
+        );
+        assert!(
+            !bindings.contains("pub type u128"),
+            "u128 (chained typedef) should not appear in generated bindings"
         );
     }
 }

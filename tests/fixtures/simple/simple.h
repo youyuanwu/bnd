@@ -69,5 +69,8 @@ bool widget_is_visible(const Widget* w);
 
 // __int128 typedefs — must be silently skipped (no WinMD 128-bit type).
 // These must not cause a build error or produce `pub type __s128 = isize;`.
+// Typedef chains through __int128 must also be skipped recursively.
 typedef __int128 __s128;
 typedef unsigned __int128 __u128;
+typedef __s128 s128;
+typedef __u128 u128;

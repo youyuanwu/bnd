@@ -57,8 +57,8 @@ C/C++ Headers
 | Intermediate model types | `model.rs` — `StructDef`, `EnumDef`, `FunctionDef`, `TypedefDef`, `ConstantDef`, `CType`, `TypeRegistry` |
 | Clang extraction (`clang` crate + sonar) | `extract.rs` — `collect_*` helpers for uniform extraction, custom typedef/struct discovery to work around sonar limitations |
 | Partition filtering by source location | `should_emit_by_location()` checks `Entity::get_location()` against traverse file list |
-| Type mapping (clang `TypeKind` → `CType`) | Void, Bool, char types, int/uint (all widths), float/double, Pointer, ConstantArray, IncompleteArray, Elaborated, Typedef, Record, Enum, FunctionPrototype. Incomplete records → Void. |
-| System typedef resolution | `CType::Named { resolved }` carries clang's canonical type; emit falls back to it for unregistered typedefs. `va_list` → `*mut c_void` at extraction. |
+| Type mapping (clang `TypeKind` → `CType`) | Void, Bool, char types, int/uint (all widths), float/double, Pointer, ConstantArray, IncompleteArray, Elaborated, Typedef, Record, Enum, FunctionPrototype. Incomplete records → Void. Int128/UInt128 → error (skipped with warning). |
+| System typedef resolution | `CType::Named { resolved }` carries clang's canonical type; emit falls back to it for unregistered typedefs. `va_list` → `*mut c_void` at extraction. Typedefs shadowing Rust primitives (`bool`, `i32`, etc.) are skipped. |
 | WinMD emission | `emit.rs` — enums, structs, unions, typedefs, delegates, functions (P/Invoke), constants |
 | Union support | `StructDef.is_union` flag. `ExplicitLayout` + `FieldLayout(offset=0)` for unions, `SequentialLayout` for structs. Supplemental pass detects `UnionDecl`. |
 | Anonymous nested types | `try_extract_anonymous_field()` detects `Entity::is_anonymous()` on canonical type declarations. Recursive extraction with synthetic names (`ParentName_FieldName`). |
