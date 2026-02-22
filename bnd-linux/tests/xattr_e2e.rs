@@ -1,8 +1,8 @@
 use bnd_linux::linux::xattr;
 use std::ffi::CString;
 
-fn with_tmpfile(f: impl FnOnce(&CString)) {
-    let path = CString::new("/tmp/bnd_xattr_test").unwrap();
+fn with_tmpfile(suffix: &str, f: impl FnOnce(&CString)) {
+    let path = CString::new(format!("/tmp/bnd_xattr_test_{suffix}")).unwrap();
     unsafe {
         let fd = libc::open(
             path.as_ptr(),
@@ -18,7 +18,7 @@ fn with_tmpfile(f: impl FnOnce(&CString)) {
 
 #[test]
 fn setxattr_getxattr_roundtrip() {
-    with_tmpfile(|path| {
+    with_tmpfile("roundtrip", |path| {
         let name = c"user.test";
         let value = b"hello";
 
@@ -49,7 +49,7 @@ fn setxattr_getxattr_roundtrip() {
 
 #[test]
 fn listxattr_contains_attr() {
-    with_tmpfile(|path| {
+    with_tmpfile("list", |path| {
         let name = c"user.myattr";
         let value = b"val";
 
@@ -79,7 +79,7 @@ fn listxattr_contains_attr() {
 
 #[test]
 fn removexattr_removes_attr() {
-    with_tmpfile(|path| {
+    with_tmpfile("remove", |path| {
         let name = c"user.removeme";
         let value = b"gone";
 
