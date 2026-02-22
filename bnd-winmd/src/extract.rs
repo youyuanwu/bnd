@@ -20,14 +20,20 @@ pub fn extract_partition(
     partition: &PartitionConfig,
     base_dir: &Path,
     include_paths: &[PathBuf],
+    global_clang_args: &[String],
     namespace_overrides: &std::collections::HashMap<String, String>,
 ) -> Result<Partition> {
     let _ = namespace_overrides; // reserved for future per-API namespace overrides
     let header_path = partition.wrapper_header(base_dir, include_paths);
     debug!(header = %header_path.display(), namespace = %partition.namespace, "parsing partition");
 
-    // Build clang arguments: user-specified args + -I flags from include_paths
-    let mut all_args: Vec<String> = partition.clang_args.clone();
+    // Build clang arguments: global args + per-partition args + -I flags
+    let mut all_args: Vec<String> = global_clang_args.to_vec();
+    for arg in &partition.clang_args {
+        if !all_args.contains(arg) {
+            all_args.push(arg.clone());
+        }
+    }
     for inc in include_paths {
         let flag = format!("-I{}", inc.display());
         if !all_args.contains(&flag) {

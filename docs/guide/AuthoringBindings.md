@@ -44,6 +44,9 @@ Create `bnd-winmd.toml` in your crate root:
 # Optional: extra include search paths
 # include_paths = ["/usr/include/x86_64-linux-gnu"]
 
+# Optional: clang arguments applied to all partitions
+# clang_args = ["-DFOO=1"]
+
 [output]
 name = "zstd"
 file = "zstd.winmd"
@@ -63,6 +66,8 @@ traverse = ["zstd.h"]
 | `library` | Shared library for `#[link(name = "...")]` |
 | `headers` | Headers to `#include` (parsed by clang) |
 | `traverse` | Headers whose declarations are **extracted**. Others provide types only |
+| `include_paths` | (top-level) Extra include search paths, also injected as `-I` flags |
+| `clang_args` | (top-level) Extra clang arguments for all partitions (e.g. `-DFOO`, `-Wno-...`) |
 
 ### Multiple partitions
 
@@ -80,6 +85,24 @@ namespace = "zstd.dict"
 library = "zstd"
 headers = ["zstd.h", "zdict.h"]
 traverse = ["zdict.h"]
+```
+
+### Per-partition clang arguments
+
+Individual partitions can specify extra clang flags via `clang_args`.
+These are appended after the top-level `clang_args`:
+
+```toml
+# Global: applied to all partitions
+clang_args = ["-D_GNU_SOURCE"]
+
+[[partition]]
+namespace = "linux.mount"
+library = "c"
+headers = ["sys/mount.h"]
+traverse = ["sys/mount.h"]
+# Partition-specific: appended after global args
+clang_args = ["-D_LINUX_MOUNT_H"]
 ```
 
 ### Cross-library type imports

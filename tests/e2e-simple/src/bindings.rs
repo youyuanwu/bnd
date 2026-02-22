@@ -24,6 +24,7 @@ pub type CompareFunc = Option<
 >;
 pub const DEFAULT_HEIGHT: i32 = 600i32;
 pub const DEFAULT_WIDTH: i32 = 800i32;
+pub const MAX_DEPTH: i32 = 42i32;
 pub const MAX_WIDGETS: i32 = 256i32;
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]

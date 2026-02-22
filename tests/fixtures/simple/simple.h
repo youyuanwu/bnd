@@ -52,6 +52,12 @@ int widget_count(void);
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
 
+// Conditional constant controlled by global clang_args in simple.toml.
+// Tests that top-level clang_args = ["-DCUSTOM_DEPTH=42"] is applied.
+#ifdef CUSTOM_DEPTH
+#define MAX_DEPTH 42
+#endif
+
 // Typedef that shadows a Rust primitive — must be suppressed to avoid
 // `pub type bool = bool;` (recursive type alias).
 #include <stdbool.h>

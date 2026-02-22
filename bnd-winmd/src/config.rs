@@ -13,6 +13,11 @@ pub struct Config {
     /// file's parent directory).  Also injected as `-I` flags for clang.
     #[serde(default)]
     pub include_paths: Vec<PathBuf>,
+    /// Extra clang arguments applied to **all** partitions (e.g. `-DFOO`,
+    /// `-Wno-pragma-once-outside-header`).  Per-partition `clang_args` are
+    /// appended after these.
+    #[serde(default)]
+    pub clang_args: Vec<String>,
     #[serde(default)]
     pub partition: Vec<PartitionConfig>,
     #[serde(default)]

@@ -1,6 +1,6 @@
 [package]
 name = "bnd-winmd"
-version = "0.0.2"
+version = "0.0.3"
 edition.workspace = true
 description = "Generate winmd from c headers"
 authors.workspace = true

@@ -13,6 +13,14 @@ mod tests {
     }
 
     #[test]
+    fn test_global_clang_args() {
+        // MAX_DEPTH is defined via `#ifdef CUSTOM_DEPTH` in simple.h,
+        // which is only active when `-DCUSTOM_DEPTH=42` is passed to clang.
+        // This flag comes from the top-level `clang_args` in simple.toml.
+        assert_eq!(MAX_DEPTH, 42);
+    }
+
+    #[test]
     fn test_enum_values() {
         assert_eq!(COLOR_RED, 0u32);
         assert_eq!(COLOR_GREEN, 1u32);

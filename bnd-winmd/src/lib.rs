@@ -103,6 +103,7 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
             partition_cfg,
             base_dir,
             &cfg.include_paths,
+            &cfg.clang_args,
             &cfg.namespace_overrides,
         )?;
         partitions.push(partition);

@@ -1,3 +1,5 @@
+clang_args = ["-DCUSTOM_DEPTH=42"]
+
 [output]
 name = "SimpleTest"
 file = "simple_test.winmd"
