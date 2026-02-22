@@ -128,4 +128,22 @@ mod tests {
         }
         let _f: CompareFunc = Some(cmp);
     }
+
+    #[test]
+    fn test_bool_typedef_not_recursive() {
+        // `typedef _Bool bool;` in simple.h must be suppressed — if it
+        // leaked through, the generated code would contain the recursive
+        // `pub type bool = bool;` and fail to compile.
+        //
+        // Verify the function that uses `bool` return type compiles and works.
+        unsafe {
+            let w = Widget {
+                name: c"test".as_ptr().cast_mut(),
+                values: [0; 4],
+                color: COLOR_RED,
+            };
+            assert!(widget_is_visible(&w as *const Widget));
+            assert!(!widget_is_visible(std::ptr::null()));
+        }
+    }
 }

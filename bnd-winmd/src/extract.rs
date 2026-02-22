@@ -258,6 +258,13 @@ fn collect_typedefs(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) ->
             trace!(name = %name, "skipping struct/enum passthrough typedef");
             continue;
         }
+        // Skip typedefs whose name collides with a Rust primitive (e.g.
+        // `typedef _Bool bool;` from linux/types.h would produce the
+        // recursive `pub type bool = bool;`).
+        if is_primitive_name(&name) {
+            trace!(name = %name, "skipping typedef that shadows a Rust primitive");
+            continue;
+        }
         match extract_typedef_from_entity(entity, &name) {
             Ok(td) => {
                 debug!(name = %td.name, "extracted typedef");
@@ -788,6 +795,28 @@ fn is_struct_passthrough(underlying: &ClangType, typedef_name: &str) -> bool {
         }
     }
     false
+}
+
+/// Returns `true` if `name` is a Rust primitive type name.  Typedefs with
+/// these names (e.g. `typedef _Bool bool;`) would produce a recursive type
+/// alias like `pub type bool = bool;`.
+fn is_primitive_name(name: &str) -> bool {
+    matches!(
+        name,
+        "bool"
+            | "i8"
+            | "u8"
+            | "i16"
+            | "u16"
+            | "i32"
+            | "u32"
+            | "i64"
+            | "u64"
+            | "f32"
+            | "f64"
+            | "isize"
+            | "usize"
+    )
 }
 
 // ---------------------------------------------------------------------------

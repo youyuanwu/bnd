@@ -66,3 +66,10 @@ pub unsafe extern "C" fn destroy_widget(w: *mut Widget) {
 pub extern "C" fn widget_count() -> i32 {
     WIDGET_COUNT.load(Ordering::Relaxed)
 }
+
+#[unsafe(no_mangle)]
+/// # Safety
+/// `w` must be a valid, non-null pointer to a `Widget`.
+pub unsafe extern "C" fn widget_is_visible(w: *const Widget) -> bool {
+    !w.is_null()
+}

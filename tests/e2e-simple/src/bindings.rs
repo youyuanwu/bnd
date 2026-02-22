@@ -11,6 +11,7 @@
 windows_link::link!("simple" "C" fn create_widget(name : *const i8, bounds : Rect, out : *mut Widget) -> i32);
 windows_link::link!("simple" "C" fn destroy_widget(w : *mut Widget));
 windows_link::link!("simple" "C" fn widget_count() -> i32);
+windows_link::link!("simple" "C" fn widget_is_visible(w : *const Widget) -> bool);
 pub const COLOR_BLUE: u32 = 2u32;
 pub const COLOR_GREEN: u32 = 1u32;
 pub const COLOR_RED: u32 = 0u32;

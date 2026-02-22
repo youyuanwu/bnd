@@ -51,3 +51,12 @@ int widget_count(void);
 #define MAX_WIDGETS 256
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
+
+// Typedef that shadows a Rust primitive — must be suppressed to avoid
+// `pub type bool = bool;` (recursive type alias).
+#include <stdbool.h>
+typedef _Bool bool;
+
+// Function that uses the bool typedef to verify it still works after
+// the typedef is suppressed.
+bool widget_is_visible(const Widget* w);
