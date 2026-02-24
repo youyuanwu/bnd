@@ -25,7 +25,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use tracing::{info, warn};
+use tracing::{debug, info, warn};
 
 pub mod config;
 pub mod emit;
@@ -107,6 +107,22 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
             &cfg.namespace_overrides,
         )?;
         partitions.push(partition);
+    }
+
+    // Merge user-injected types into partitions. Injected types fill in
+    // extraction gaps (bitfield enums, anonymous enums, etc.) but never
+    // override types that were successfully extracted.
+    for inj in &cfg.inject_type {
+        let partition = partitions.iter_mut().find(|p| p.namespace == inj.namespace);
+        let Some(partition) = partition else {
+            warn!(
+                namespace = %inj.namespace,
+                name = %inj.name,
+                "inject_type: no matching partition, skipping"
+            );
+            continue;
+        };
+        merge_injected_type(partition, inj)?;
     }
 
     // Build global type registry
@@ -219,6 +235,124 @@ fn seed_registry_from_winmd(
         imported = count,
         "pre-seeded type registry from external winmd"
     );
+}
+
+// ---------------------------------------------------------------------------
+// Injected type merging
+// ---------------------------------------------------------------------------
+
+/// Merge a single user-injected type into the partition model.
+/// If an extracted type with the same name already exists, the injection
+/// is silently skipped (extracted types win).
+fn merge_injected_type(
+    partition: &mut model::Partition,
+    inj: &config::InjectTypeConfig,
+) -> Result<()> {
+    use config::InjectTypeKind;
+
+    match inj.kind {
+        InjectTypeKind::Enum => {
+            if partition.enums.iter().any(|e| e.name == inj.name) {
+                debug!(name = %inj.name, "inject_type: enum already extracted, skipping");
+                return Ok(());
+            }
+            let underlying = parse_underlying(inj.underlying.as_deref(), &inj.name)?;
+            let variants = inj
+                .variants
+                .iter()
+                .map(|v| model::EnumVariant {
+                    name: v.name.clone(),
+                    signed_value: v.value,
+                    unsigned_value: v.value as u64,
+                })
+                .collect();
+            info!(name = %inj.name, "injected enum into partition {}", partition.namespace);
+            partition.enums.push(model::EnumDef {
+                name: inj.name.clone(),
+                underlying_type: underlying,
+                variants,
+            });
+        }
+        InjectTypeKind::Typedef => {
+            if partition.typedefs.iter().any(|t| t.name == inj.name) {
+                debug!(name = %inj.name, "inject_type: typedef already extracted, skipping");
+                return Ok(());
+            }
+            let underlying = parse_underlying(inj.underlying.as_deref(), &inj.name)?;
+            info!(name = %inj.name, "injected typedef into partition {}", partition.namespace);
+            partition.typedefs.push(model::TypedefDef {
+                name: inj.name.clone(),
+                underlying_type: underlying,
+            });
+        }
+        InjectTypeKind::Struct => {
+            if partition.structs.iter().any(|s| s.name == inj.name) {
+                debug!(name = %inj.name, "inject_type: struct already extracted, skipping");
+                return Ok(());
+            }
+            let size = inj.size.ok_or_else(|| {
+                anyhow::anyhow!("inject_type: struct `{}` requires `size` field", inj.name)
+            })?;
+            let align = inj.align.ok_or_else(|| {
+                anyhow::anyhow!("inject_type: struct `{}` requires `align` field", inj.name)
+            })?;
+            // Pick an element type whose natural alignment matches the
+            // requested align so that windows-bindgen's `packed(align)`
+            // attribute preserves the correct alignment.
+            let (elem_ty, elem_size) = match align {
+                8 => (model::CType::U64, 8usize),
+                4 => (model::CType::U32, 4usize),
+                2 => (model::CType::U16, 2usize),
+                _ => (model::CType::U8, 1usize),
+            };
+            anyhow::ensure!(
+                size % elem_size == 0,
+                "inject_type: struct `{}` size ({}) must be a multiple of align ({})",
+                inj.name,
+                size,
+                align,
+            );
+            let fields = vec![model::FieldDef {
+                name: "_reserved".to_string(),
+                ty: model::CType::Array {
+                    element: Box::new(elem_ty),
+                    len: size / elem_size,
+                },
+                bitfield_width: None,
+                bitfield_offset: None,
+            }];
+            info!(name = %inj.name, size, align, "injected struct into partition {}", partition.namespace);
+            partition.structs.push(model::StructDef {
+                name: inj.name.clone(),
+                size,
+                align,
+                fields,
+                is_union: false,
+            });
+        }
+    }
+    Ok(())
+}
+
+/// Parse an `underlying` string (e.g. `"u8"`, `"i32"`) into a `CType`.
+fn parse_underlying(underlying: Option<&str>, type_name: &str) -> Result<model::CType> {
+    let s = underlying.ok_or_else(|| {
+        anyhow::anyhow!("inject_type: `{}` requires `underlying` field", type_name)
+    })?;
+    match s {
+        "i8" => Ok(model::CType::I8),
+        "u8" => Ok(model::CType::U8),
+        "i16" => Ok(model::CType::I16),
+        "u16" => Ok(model::CType::U16),
+        "i32" => Ok(model::CType::I32),
+        "u32" => Ok(model::CType::U32),
+        "i64" => Ok(model::CType::I64),
+        "u64" => Ok(model::CType::U64),
+        other => anyhow::bail!(
+            "inject_type: unsupported underlying type `{other}` for `{type_name}` \
+             (expected i8, u8, i16, u16, i32, u32, i64, u64)"
+        ),
+    }
 }
 
 // ---------------------------------------------------------------------------

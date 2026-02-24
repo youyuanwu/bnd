@@ -9,3 +9,43 @@ namespace = "SimpleTest"
 library = "simple"
 headers = ["simple.h"]
 traverse = ["simple.h"]
+
+# --- Injected types (test inject_type feature) ---
+
+# Injected enum with variants
+[[inject_type]]
+namespace = "SimpleTest"
+name = "Priority"
+kind = "enum"
+underlying = "u32"
+variants = [
+  { name = "PRIORITY_LOW", value = 0 },
+  { name = "PRIORITY_MEDIUM", value = 1 },
+  { name = "PRIORITY_HIGH", value = 2 },
+]
+
+# Injected typedef
+[[inject_type]]
+namespace = "SimpleTest"
+name = "handle_t"
+kind = "typedef"
+underlying = "u64"
+
+# Injected opaque struct
+[[inject_type]]
+namespace = "SimpleTest"
+name = "OpaqueCtx"
+kind = "struct"
+size = 32
+align = 8
+
+# Conflict test: Color is already extracted from simple.h — injection
+# should be silently skipped and the extracted version used.
+[[inject_type]]
+namespace = "SimpleTest"
+name = "Color"
+kind = "enum"
+underlying = "u8"
+variants = [
+  { name = "COLOR_INJECTED", value = 99 },
+]

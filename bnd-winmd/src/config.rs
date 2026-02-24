@@ -24,6 +24,11 @@ pub struct Config {
     pub namespace_overrides: HashMap<String, String>,
     #[serde(default)]
     pub type_import: Vec<TypeImportConfig>,
+    /// User-declared types that bypass clang extraction. Used for types
+    /// that bnd-winmd cannot extract (bitfield enums, anonymous enums in
+    /// structs, etc.). Merged into partitions before validation/emission.
+    #[serde(default)]
+    pub inject_type: Vec<InjectTypeConfig>,
 }
 
 /// Output file settings.
@@ -138,6 +143,58 @@ pub struct TypeImportConfig {
     /// Root namespace filter — only types under this namespace tree are
     /// imported into the registry.
     pub namespace: String,
+}
+
+/// User-declared type injection.
+///
+/// Allows declaring types that clang cannot extract (bitfield enums,
+/// anonymous enums in structs, etc.) directly in the TOML config.
+///
+/// ```toml
+/// [[inject_type]]
+/// namespace = "rko.fs_context"
+/// name = "fs_value_type"
+/// kind = "enum"
+/// underlying = "u8"
+/// variants = [
+///   { name = "fs_value_is_undefined", value = 0 },
+///   { name = "fs_value_is_flag", value = 1 },
+/// ]
+/// ```
+#[derive(Debug, Deserialize)]
+pub struct InjectTypeConfig {
+    /// Target partition namespace (must match an existing `[[partition]]`).
+    pub namespace: String,
+    /// Type name as it appears in C code.
+    pub name: String,
+    /// Type kind: `enum`, `typedef`, or `struct`.
+    pub kind: InjectTypeKind,
+    /// Underlying integer type for enums and typedefs (e.g. `u8`, `i32`).
+    #[serde(default)]
+    pub underlying: Option<String>,
+    /// Enum variants (enum kind only).
+    #[serde(default)]
+    pub variants: Vec<InjectVariant>,
+    /// Struct size in bytes (struct kind only).
+    #[serde(default)]
+    pub size: Option<usize>,
+    /// Struct alignment in bytes (struct kind only).
+    #[serde(default)]
+    pub align: Option<usize>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum InjectTypeKind {
+    Enum,
+    Typedef,
+    Struct,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct InjectVariant {
+    pub name: String,
+    pub value: i64,
 }
 
 /// Load and parse a `bnd-winmd.toml` configuration file.

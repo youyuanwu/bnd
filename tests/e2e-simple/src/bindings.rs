@@ -49,6 +49,20 @@ impl Default for NetAddr_addr {
         unsafe { core::mem::zeroed() }
     }
 }
+#[repr(C, packed(8))]
+#[derive(Clone, Copy)]
+pub struct OpaqueCtx {
+    pub _reserved: [u64; 4],
+}
+impl Default for OpaqueCtx {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+pub const PRIORITY_HIGH: u32 = 2u32;
+pub const PRIORITY_LOW: u32 = 0u32;
+pub const PRIORITY_MEDIUM: u32 = 1u32;
+pub type Priority = u32;
 #[repr(C, packed(4))]
 #[derive(Clone, Copy, Default)]
 pub struct Rect {
@@ -81,3 +95,4 @@ impl Default for Widget {
         unsafe { core::mem::zeroed() }
     }
 }
+pub type handle_t = u64;

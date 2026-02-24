@@ -179,4 +179,45 @@ mod tests {
             "u128 (chained typedef) should not appear in generated bindings"
         );
     }
+
+    // -----------------------------------------------------------------------
+    // Injected types (from [[inject_type]] in simple.toml)
+    // -----------------------------------------------------------------------
+
+    #[test]
+    fn test_injected_enum() {
+        // Priority enum injected via TOML, not extracted from C headers.
+        assert_eq!(PRIORITY_LOW, 0u32);
+        assert_eq!(PRIORITY_MEDIUM, 1u32);
+        assert_eq!(PRIORITY_HIGH, 2u32);
+    }
+
+    #[test]
+    fn test_injected_typedef() {
+        // handle_t injected as a u64 typedef.
+        let _h: handle_t = 42u64;
+        assert_eq!(std::mem::size_of::<handle_t>(), 8);
+    }
+
+    #[test]
+    fn test_injected_opaque_struct() {
+        // OpaqueCtx injected as an opaque struct with size=32, align=8.
+        assert_eq!(std::mem::size_of::<OpaqueCtx>(), 32);
+        assert_eq!(std::mem::align_of::<OpaqueCtx>(), 8);
+    }
+
+    #[test]
+    fn test_injected_conflict_extracted_wins() {
+        // Color is both extracted from simple.h (3 variants: RED=0, GREEN=1, BLUE=2)
+        // and injected in TOML (1 variant: INJECTED=99). Extracted should win.
+        assert_eq!(COLOR_RED, 0u32);
+        assert_eq!(COLOR_GREEN, 1u32);
+        assert_eq!(COLOR_BLUE, 2u32);
+        // COLOR_INJECTED should NOT exist in bindings.
+        let bindings = include_str!("bindings.rs");
+        assert!(
+            !bindings.contains("COLOR_INJECTED"),
+            "injected Color should be skipped when extracted version exists"
+        );
+    }
 }
