@@ -220,4 +220,29 @@ mod tests {
             "injected Color should be skipped when extracted version exists"
         );
     }
+
+    #[test]
+    fn test_c11_anonymous_union_member() {
+        // HasAnonUnion has a C11 anonymous union (no field name):
+        //   struct { int before; union { int x; float y; }; int after; }
+        // The union must not be dropped — struct size and field offsets
+        // must match the C layout.
+        assert_eq!(std::mem::size_of::<HasAnonUnion>(), 12);
+        assert_eq!(
+            std::mem::offset_of!(HasAnonUnion, before),
+            0,
+            "before should be at offset 0"
+        );
+        assert_eq!(
+            std::mem::offset_of!(HasAnonUnion, after),
+            8,
+            "after should be at offset 8 (not 4)"
+        );
+
+        // The anonymous union is extracted as HasAnonUnion__anon_0.
+        assert_eq!(std::mem::size_of::<HasAnonUnion__anon_0>(), 4);
+        let mut h = HasAnonUnion::default();
+        h.HasAnonUnion__anon_0.x = 42;
+        assert_eq!(unsafe { h.HasAnonUnion__anon_0.y }, f32::from_bits(42));
+    }
 }

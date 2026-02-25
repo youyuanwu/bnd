@@ -74,3 +74,11 @@ typedef __int128 __s128;
 typedef unsigned __int128 __u128;
 typedef __s128 s128;
 typedef __u128 u128;
+
+// C11 anonymous union member (no field name) — the union's fields
+// should be accessible and the struct should have correct size/offsets.
+typedef struct {
+    int before;
+    union { int x; float y; };
+    int after;
+} HasAnonUnion;

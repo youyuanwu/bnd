@@ -287,10 +287,24 @@ pub struct sigcontext {
     pub trapno: super::types::__uint64_t,
     pub oldmask: super::types::__uint64_t,
     pub cr2: super::types::__uint64_t,
+    pub sigcontext__anon_0: sigcontext__anon_0,
     pub __reserved1: [super::types::__uint64_t; 8],
 }
 #[cfg(feature = "types")]
 impl Default for sigcontext {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+#[repr(C, packed(8))]
+#[cfg(feature = "types")]
+#[derive(Clone, Copy)]
+pub union sigcontext__anon_0 {
+    pub fpstate: *mut _fpstate,
+    pub __fpstate_word: super::types::__uint64_t,
+}
+#[cfg(feature = "types")]
+impl Default for sigcontext__anon_0 {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
     }

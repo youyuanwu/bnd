@@ -401,10 +401,82 @@ fn extract_struct_from_entity(
 
     let mut fields = Vec::new();
     let mut nested_types = Vec::new();
-    for child in entity.get_children() {
-        if child.get_kind() != EntityKind::FieldDecl {
-            continue;
+    let mut anon_counter = 0u32;
+    let children: Vec<_> = entity.get_children();
+
+    // Collect entity IDs of anonymous record decls that have an explicit
+    // named FieldDecl (e.g. `union { ... } addr;`). These are handled by
+    // the existing try_extract_anonymous_field path on the FieldDecl, so
+    // we must NOT also extract them via the C11 anonymous member path.
+    let named_anon_decls: HashSet<_> = children
+        .iter()
+        .filter(|c| c.get_kind() == EntityKind::FieldDecl && c.get_name().is_some())
+        .filter_map(|c| {
+            let ft = c.get_type()?.get_canonical_type();
+            if ft.get_kind() != TypeKind::Record {
+                return None;
+            }
+            let decl = ft.get_declaration()?;
+            if decl.is_anonymous() {
+                Some(decl.get_usr())
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect();
+
+    for child in &children {
+        match child.get_kind() {
+            EntityKind::FieldDecl => {}
+            // C11 anonymous struct/union member (no field name, no tag).
+            // These appear as bare UnionDecl/StructDecl children rather
+            // than FieldDecl children with an anonymous record type.
+            EntityKind::UnionDecl | EntityKind::StructDecl
+                if child.is_anonymous()
+                    && !child
+                        .get_usr()
+                        .is_none_or(|usr| named_anon_decls.contains(&usr)) =>
+            {
+                let is_nested_union = child.get_kind() == EntityKind::UnionDecl;
+                let synthetic_name = format!("{name}__anon_{anon_counter}");
+                anon_counter += 1;
+                match extract_struct_from_entity(child, &synthetic_name, is_nested_union) {
+                    Ok((nested, mut more)) => {
+                        let kind = if is_nested_union { "union" } else { "struct" };
+                        debug!(
+                            parent = %name,
+                            synthetic = %synthetic_name,
+                            "extracted C11 anonymous {kind} member"
+                        );
+                        let ctype = CType::Named {
+                            name: synthetic_name.clone(),
+                            resolved: None,
+                        };
+                        fields.push(FieldDef {
+                            name: synthetic_name,
+                            ty: ctype,
+                            bitfield_width: None,
+                            bitfield_offset: None,
+                        });
+                        nested_types.push(nested);
+                        nested_types.append(&mut more);
+                    }
+                    Err(e) => {
+                        warn!(
+                            parent = %name,
+                            err = %e,
+                            "failed to extract C11 anonymous member"
+                        );
+                    }
+                }
+                continue;
+            }
+            _ => {
+                continue;
+            }
         }
+
         let field_name = child.get_name().unwrap_or_default();
         let field_type = child.get_type().context("field has no type")?;
 
