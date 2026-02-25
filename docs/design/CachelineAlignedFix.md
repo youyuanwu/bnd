@@ -4,94 +4,40 @@
 
 Some Linux kernel structs use `____cacheline_aligned` which expands to
 `__attribute__((aligned(64)))`. This pads the struct to the next
-multiple of 64 bytes. For example, `inode_operations` has 200 bytes of
-fields but `sizeof` is 256 (next 64-byte boundary).
+multiple of 64 bytes. bnd-winmd extracts the correct `size` and `align`
+from clang, but windows-bindgen computes struct size from fields alone
+and ignores `ClassSize` — the trailing padding bytes are lost.
 
-bnd-winmd extracts the correct `size=256, align=64` from clang and
-writes them into WinMD's `ClassLayout` table. However, windows-bindgen:
+## Fix
 
-1. Reads `packing_size=64` → emits `#[repr(C, packed(64))]`
-2. Computes struct size from fields alone (200 bytes)
-3. Ignores `ClassSize` (256) — the trailing 56 padding bytes are lost
+In `extract_struct_inner()`, after collecting all fields, compare
+clang's `sizeof(struct)` against what `repr(C)` layout would produce
+from fields alone. If clang's size exceeds the natural field-based
+size, append a `_padding: [u8; N]` field for the difference.
 
-The generated Rust struct is 200 bytes instead of 256, causing memory
-corruption when embedded in larger aggregates.
+### Detection Logic
 
-## Fix: Trailing Padding Field
+1. Find `last_field_end` = max(offset + sizeof) across all `FieldDecl`
+   children (using `get_offset_of_field()` in bits / 8)
+2. Find `max_field_align` = max natural alignment across all fields
+3. Compute `natural_size` = round_up(last_field_end, max_field_align)
+4. If `clang_size > natural_size`: append `_padding: [u8; clang_size - last_field_end]`
 
-When `StructDef.size` exceeds the sum of field sizes, append a
-`_padding` field to make up the difference. This works within the
-existing pipeline — no windows-bindgen changes needed.
-
-### Where
-
-In `bnd-winmd/src/extract.rs`, in `extract_struct_inner()`, after
-collecting all fields and before returning the `StructDef`.
-
-### Logic
-
-```
-field_size = sum of each field's contribution to struct layout
-             (use clang's sizeof for each field type)
-padding    = struct.size - field_size
-
-if padding > 0:
-    fields.push(FieldDef {
-        name: "_padding",
-        ty: CType::Array { element: U8, len: padding },
-        bitfield_width: None,
-        bitfield_offset: None,
-    })
-```
-
-The exact `field_size` calculation doesn't need to replicate C struct
-layout rules (alignment gaps between fields). clang already accounts
-for inter-field padding in its `sizeof(struct)`. The only padding we
-need to add is the *trailing* padding that comes from the alignment
-attribute, which is `sizeof(struct) - offsetof(last_field) - sizeof(last_field)`.
-
-A simpler approach: use `clang_Cursor_getOffsetOfField()` on the last
-field to compute the occupied range, then pad the remainder:
-
-```
-last_field_end = (offset_of_last_field_bits / 8) + sizeof(last_field)
-trailing_pad   = struct.size - last_field_end
-
-if trailing_pad > 0:
-    append _padding: [u8; trailing_pad]
-```
-
-### Why This Works
-
-- `packed(64)` caps alignment at 64 but doesn't affect size
-- The `[u8; 56]` padding field adds 56 bytes, bringing total to 256
-- windows-bindgen sees 256 bytes of fields, emits correct size
-- No upstream changes required
+This avoids false positives on normal structs where trailing padding
+comes from natural alignment (e.g. `Widget` with pointer fields has
+natural 8-byte alignment padding that `packed(8)` handles correctly).
 
 ### Alignment Caveat
 
-`packed(64)` caps alignment — it doesn't raise it above the natural
-field alignment (8, from pointer fields). The generated struct gets
-align=8, not align=64. For most uses (struct-in-struct embedding),
-this is fine because the kernel doesn't require 64-byte alignment of
-the *container* — it requires the struct's *size* to be a multiple of
-64 so that adjacent structs don't overlap. If true 64-byte alignment
-is needed, a downstream `#[repr(align(64))]` wrapper is required.
+`packed(N)` caps alignment — it doesn't raise it above the natural
+field alignment. A struct with align=64 but max field align=8 gets
+Rust align=8, not 64. This is acceptable: the fix ensures correct
+**size**, which prevents overlap in struct-of-structs. True 64-byte
+alignment requires a downstream `#[repr(align(64))]` wrapper.
 
-### Edge Cases
+## Tests
 
-- **No trailing padding** (most structs) — no field added, no change
-- **Union types** — unions use `ExplicitLayout`; all fields overlap at
-  offset 0, so `size == max(field_sizes)` with possible alignment
-  padding. Same logic applies.
-- **Bitfields** — bitfield widths don't map cleanly to byte sizes.
-  Use clang's `sizeof(struct)` as ground truth rather than summing
-  field sizes manually.
-
-## Test Plan
-
-Add a test struct to `simple.h` with `__attribute__((aligned(64)))`:
-
+`tests/fixtures/simple/simple.h`:
 ```c
 struct CacheAligned {
     int x;
@@ -99,8 +45,4 @@ struct CacheAligned {
 } __attribute__((aligned(64)));
 ```
 
-This gives `sizeof = 64` (8 bytes of fields padded to 64). Verify:
-
-```rust
-assert_eq!(size_of::<CacheAligned>(), 64);
-```
+`e2e-simple::test_cacheline_aligned_struct` verifies `size_of == 64`.

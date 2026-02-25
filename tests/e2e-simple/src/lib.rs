@@ -245,4 +245,11 @@ mod tests {
         h.HasAnonUnion__anon_0.x = 42;
         assert_eq!(unsafe { h.HasAnonUnion__anon_0.y }, f32::from_bits(42));
     }
+
+    #[test]
+    fn test_cacheline_aligned_struct() {
+        // CacheAligned has __attribute__((aligned(64))), so sizeof == 64
+        // even though it only has 8 bytes of fields (x: i32, y: i32).
+        assert_eq!(std::mem::size_of::<CacheAligned>(), 64);
+    }
 }

@@ -513,6 +513,68 @@ fn extract_struct_from_entity(
         });
     }
 
+    // Append trailing padding if clang's sizeof exceeds what repr(C)
+    // layout would produce from the fields alone. This handles
+    // `__attribute__((aligned(N)))` which rounds the struct size up
+    // beyond the natural field-based padding that windows-bindgen
+    // computes from packed(N).
+    //
+    // windows-bindgen computes size from fields, rounding up to the
+    // maximum field alignment (not the struct's declared alignment).
+    // We approximate this by rounding last_field_end up to the largest
+    // individual field's natural alignment.
+    if size > 0 && !fields.is_empty() && !is_union {
+        let mut last_field_end: usize = 0;
+        let mut max_field_align: usize = 1;
+        for child in &children {
+            if child.get_kind() != EntityKind::FieldDecl {
+                continue;
+            }
+            if let Ok(offset_bits) = child.get_offset_of_field() {
+                let offset_bytes = offset_bits / 8;
+                let field_ty = child.get_type();
+                let field_size = field_ty
+                    .as_ref()
+                    .and_then(|t| t.get_sizeof().ok())
+                    .unwrap_or(0);
+                let field_align = field_ty
+                    .as_ref()
+                    .and_then(|t| t.get_alignof().ok())
+                    .unwrap_or(1);
+                let end = offset_bytes + field_size;
+                if end > last_field_end {
+                    last_field_end = end;
+                }
+                if field_align > max_field_align {
+                    max_field_align = field_align;
+                }
+            }
+        }
+        if last_field_end > 0 && max_field_align > 0 {
+            let natural_size = (last_field_end + max_field_align - 1) & !(max_field_align - 1);
+            if size > natural_size {
+                let trailing_pad = size - last_field_end;
+                debug!(
+                    name = %name,
+                    struct_size = size,
+                    natural_size,
+                    last_field_end,
+                    trailing_pad,
+                    "appending trailing padding for alignment attribute"
+                );
+                fields.push(FieldDef {
+                    name: "_padding".to_string(),
+                    ty: CType::Array {
+                        element: Box::new(CType::U8),
+                        len: trailing_pad,
+                    },
+                    bitfield_width: None,
+                    bitfield_offset: None,
+                });
+            }
+        }
+    }
+
     Ok((
         StructDef {
             name: name.to_string(),

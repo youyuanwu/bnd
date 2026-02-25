@@ -82,3 +82,10 @@ typedef struct {
     union { int x; float y; };
     int after;
 } HasAnonUnion;
+
+// Struct with alignment attribute — trailing padding must be preserved.
+// sizeof(CacheAligned) == 64 (8 bytes of fields padded to 64).
+struct CacheAligned {
+    int x;
+    int y;
+} __attribute__((aligned(64)));

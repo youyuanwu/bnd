@@ -15,6 +15,18 @@ windows_link::link!("simple" "C" fn widget_is_visible(w : *const Widget) -> bool
 pub const COLOR_BLUE: u32 = 2u32;
 pub const COLOR_GREEN: u32 = 1u32;
 pub const COLOR_RED: u32 = 0u32;
+#[repr(C, packed(64))]
+#[derive(Clone, Copy)]
+pub struct CacheAligned {
+    pub x: i32,
+    pub y: i32,
+    pub _padding: [u8; 56],
+}
+impl Default for CacheAligned {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
 pub type Color = u32;
 pub type CompareFunc = Option<
     unsafe extern "system" fn(
