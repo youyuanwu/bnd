@@ -93,8 +93,9 @@ impl PartitionConfig {
 
             let mut content = String::new();
             for h in &self.headers {
-                let abs = resolve_header(h, base_dir, include_paths);
-                content.push_str(&format!("#include \"{}\"\n", abs.display()));
+                // Use angle-bracket includes so clang resolves headers
+                // via -I search paths, same as single-header partitions.
+                content.push_str(&format!("#include <{}>\n", h.display()));
             }
             std::fs::write(&wrapper_path, &content).expect("write wrapper file");
             wrapper_path

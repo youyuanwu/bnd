@@ -27,12 +27,18 @@ pub fn extract_partition(
     let header_path = partition.wrapper_header(base_dir, include_paths);
     debug!(header = %header_path.display(), namespace = %partition.namespace, "parsing partition");
 
-    // Build clang arguments: global args + per-partition args + -I flags
+    // Build clang arguments: global args + per-partition args + -I flags.
+    // Include base_dir so that wrapper files (in /tmp/) can find headers
+    // via angle-bracket includes relative to the TOML config directory.
     let mut all_args: Vec<String> = global_clang_args.to_vec();
     for arg in &partition.clang_args {
         if !all_args.contains(arg) {
             all_args.push(arg.clone());
         }
+    }
+    let base_flag = format!("-I{}", base_dir.display());
+    if !all_args.contains(&base_flag) {
+        all_args.push(base_flag);
     }
     for inc in include_paths {
         let flag = format!("-I{}", inc.display());
