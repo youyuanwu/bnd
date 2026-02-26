@@ -162,13 +162,18 @@ fn collect_structs(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -> 
     structs
 }
 
-/// Collect enums via sonar.
+/// Collect enums via sonar, then run a supplemental pass for EnumDecl
+/// entities that sonar missed (e.g. enums with forward declarations that
+/// poison sonar's `seen` set).
 fn collect_enums(
     entities: &[Entity],
     in_scope: &impl Fn(&Entity) -> bool,
 ) -> (Vec<EnumDef>, Vec<ConstantDef>) {
     let mut enums = Vec::new();
     let mut anon_constants = Vec::new();
+    let mut seen = HashSet::new();
+
+    // Primary: sonar-discovered enums
     for decl in sonar::find_enums(entities.to_vec()) {
         if !in_scope(&decl.entity) {
             continue;
@@ -201,6 +206,7 @@ fn collect_enums(
             }
             continue;
         }
+        seen.insert(decl.name.clone());
         match extract_enum(&decl) {
             Ok(en) => {
                 debug!(name = %en.name, variants = en.variants.len(), "extracted enum");
@@ -209,6 +215,34 @@ fn collect_enums(
             Err(e) => warn!(name = %decl.name, err = %e, "skipping enum"),
         }
     }
+
+    // Supplemental: EnumDecl entities with full definitions that sonar
+    // missed. This catches enums whose forward declaration poisoned
+    // sonar's `seen` set (see SonarForwardDeclSkipsEnum.md).
+    for entity in entities {
+        if entity.get_kind() != EntityKind::EnumDecl {
+            continue;
+        }
+        if !in_scope(entity) || !entity.is_definition() {
+            continue;
+        }
+        let name = match entity.get_name() {
+            Some(n) if !n.is_empty() && !n.contains("(unnamed") => n,
+            _ => continue,
+        };
+        if seen.contains(&name) {
+            continue;
+        }
+        seen.insert(name.clone());
+        match extract_enum_from_entity(entity, &name) {
+            Ok(en) => {
+                debug!(name = %en.name, variants = en.variants.len(), "extracted enum (supplemental)");
+                enums.push(en);
+            }
+            Err(e) => warn!(name = %name, err = %e, "skipping enum"),
+        }
+    }
+
     (enums, anon_constants)
 }
 
@@ -753,28 +787,32 @@ fn try_extract_anonymous_field(
 // ---------------------------------------------------------------------------
 
 fn extract_enum(decl: &Declaration) -> Result<EnumDef> {
-    let underlying = decl
-        .entity
+    extract_enum_from_entity(&decl.entity, &decl.name)
+}
+
+/// Extract an enum directly from a clang Entity (used by the supplemental pass).
+fn extract_enum_from_entity(entity: &Entity, name: &str) -> Result<EnumDef> {
+    let underlying = entity
         .get_enum_underlying_type()
         .context("enum has no underlying type")?;
-    let underlying_ctype = map_clang_type(&underlying).unwrap_or(CType::I32); // fallback to i32
+    let underlying_ctype = map_clang_type(&underlying).unwrap_or(CType::I32);
 
     let mut variants = Vec::new();
-    for child in decl.entity.get_children() {
+    for child in entity.get_children() {
         if child.get_kind() != EntityKind::EnumConstantDecl {
             continue;
         }
-        let name = child.get_name().unwrap_or_default();
+        let vname = child.get_name().unwrap_or_default();
         let (signed, unsigned) = child.get_enum_constant_value().unwrap_or((0, 0));
         variants.push(EnumVariant {
-            name,
+            name: vname,
             signed_value: signed,
             unsigned_value: unsigned,
         });
     }
 
     Ok(EnumDef {
-        name: decl.name.clone(),
+        name: name.to_string(),
         underlying_type: underlying_ctype,
         variants,
     })
