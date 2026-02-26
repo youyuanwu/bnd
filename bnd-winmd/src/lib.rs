@@ -79,6 +79,20 @@ pub fn generate(config_path: &Path) -> Result<Vec<u8>> {
     generate_from_config(&cfg, base_dir)
 }
 
+/// Validate a config by running extraction, type-reference checks,
+/// and winmd generation without writing the output file. Returns
+/// Ok(()) if all checks pass. Pipeline logs provide partition stats.
+pub fn validate(config_path: &Path) -> Result<()> {
+    let cfg = config::load_config(config_path)
+        .with_context(|| format!("loading config from {}", config_path.display()))?;
+
+    let base_dir = config_path.parent().unwrap_or_else(|| Path::new("."));
+
+    let _bytes = generate_from_config(&cfg, base_dir)?;
+    info!("validation passed");
+    Ok(())
+}
+
 /// Generate WinMD bytes from an already-loaded [`config::Config`].
 ///
 /// `base_dir` is the directory relative to which header paths in the config
@@ -109,6 +123,22 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
         partitions.push(partition);
     }
 
+    // Feature #1: Warn when a partition extracts nothing — catches
+    // misconfigured headers/traverse paths immediately.
+    for p in &partitions {
+        if p.structs.is_empty()
+            && p.enums.is_empty()
+            && p.functions.is_empty()
+            && p.typedefs.is_empty()
+            && p.constants.is_empty()
+        {
+            warn!(
+                namespace = %p.namespace,
+                "partition extracted 0 types — check headers and traverse paths"
+            );
+        }
+    }
+
     // Merge user-injected types into partitions. Injected types fill in
     // extraction gaps (bitfield enums, anonymous enums, etc.) but never
     // override types that were successfully extracted.
@@ -128,15 +158,27 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
     // Build global type registry
     let mut registry = extract::build_type_registry(&partitions, &cfg.namespace_overrides);
 
+    let injected_count = cfg.inject_type.len();
+
     // Pre-seed the registry with types from external winmd files
     // (cross-winmd references). This must happen after build_type_registry
     // so that locally-extracted types take priority (first-writer-wins in
     // the registry), but imported types fill in names that are referenced
     // by function signatures but not extracted locally.
+    let imported_before = registry.types.len();
     for ti in &cfg.type_import {
         let winmd_path = config::resolve_header(&ti.winmd, base_dir, &cfg.include_paths);
         seed_registry_from_winmd(&mut registry, &winmd_path, &ti.namespace);
     }
+    let imported_count = registry.types.len() - imported_before;
+
+    info!(
+        types = registry.types.len(),
+        partitions = cfg.partition.len(),
+        injected = injected_count,
+        imported = imported_count,
+        "type registry built"
+    );
 
     // Deduplicate typedefs and structs: when the same type appears in
     // multiple partitions (e.g. `uid_t` or `__sigset_t` in signal, pthread,
@@ -145,11 +187,13 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
     // the TOML claims shared names. Other partitions drop their local copy;
     // any function/struct that references the type will use a cross-partition
     // TypeRef instead.
+    let mut dedup_count = 0usize;
     for partition in &mut partitions {
         partition.typedefs.retain(|td| {
             let canonical_ns = registry.namespace_for(&td.name, &partition.namespace);
             let dominated = canonical_ns != partition.namespace;
             if dominated {
+                dedup_count += 1;
                 warn!(
                     name = td.name,
                     canonical = canonical_ns,
@@ -163,6 +207,7 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
             let canonical_ns = registry.namespace_for(&sd.name, &partition.namespace);
             let dominated = canonical_ns != partition.namespace;
             if dominated {
+                dedup_count += 1;
                 warn!(
                     name = sd.name,
                     canonical = canonical_ns,
@@ -172,6 +217,12 @@ pub fn generate_from_config(cfg: &config::Config, base_dir: &Path) -> Result<Vec
             }
             !dominated
         });
+    }
+    if dedup_count > 0 {
+        info!(
+            dropped = dedup_count,
+            "deduplicated types across partitions (set RUST_LOG=warn for details)"
+        );
     }
 
     // Validate that all referenced types are resolvable before emitting.

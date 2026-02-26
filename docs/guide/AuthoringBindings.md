@@ -216,14 +216,16 @@ All function bindings are `unsafe` — they call directly into the C library.
   defines each missing type to `traverse` (or add a `[[type_import]]` for
   types from an external library).
 - Use `RUST_LOG=bnd_winmd=debug` to see what is extracted/skipped.
+- Use `bnd-winmd --dry-run config.toml` to validate config without
+  writing output — prints partition stats and checks all type refs.
 
 ## Common issues
 
 | Problem | Fix |
 |---|---|
 | "N unresolved type reference(s) found" | Add the header defining each type to `traverse`, or add a `[[type_import]]` for types from an external winmd |
+| "partition extracted 0 types" | Check `headers` and `traverse` paths in the partition config |
 | Variadic function warnings | Expected — variadic functions are auto-skipped |
-| Struct with inline anonymous union | May need manual workaround |
 | Wrong library linked | Check `library` in partition and `build.rs` link directives |
 
 ## Prerequisites

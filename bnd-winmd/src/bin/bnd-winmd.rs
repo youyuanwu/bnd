@@ -16,6 +16,10 @@ struct Cli {
     /// Output file path (overrides config).
     #[arg(short, long)]
     output: Option<PathBuf>,
+
+    /// Validate config and print stats without writing output.
+    #[arg(long)]
+    dry_run: bool,
 }
 
 fn main() -> Result<()> {
@@ -27,6 +31,10 @@ fn main() -> Result<()> {
         .init();
 
     let cli = Cli::parse();
-    bnd_winmd::run(&cli.config, cli.output.as_deref())?;
+    if cli.dry_run {
+        bnd_winmd::validate(&cli.config)?;
+    } else {
+        bnd_winmd::run(&cli.config, cli.output.as_deref())?;
+    }
     Ok(())
 }
