@@ -12,6 +12,10 @@ windows_link::link!("simple" "C" fn create_widget(name : *const i8, bounds : Rec
 windows_link::link!("simple" "C" fn destroy_widget(w : *mut Widget));
 windows_link::link!("simple" "C" fn widget_count() -> i32);
 windows_link::link!("simple" "C" fn widget_is_visible(w : *const Widget) -> bool);
+pub const BF_KIND_FLAG: u32 = 1u32;
+pub const BF_KIND_NONE: u32 = 0u32;
+pub const BF_KIND_VALUE: u32 = 2u32;
+pub type BitfieldKind = u32;
 pub const COLOR_BLUE: u32 = 2u32;
 pub const COLOR_GREEN: u32 = 1u32;
 pub const COLOR_RED: u32 = 0u32;
@@ -126,6 +130,18 @@ pub struct Widget {
     pub color: Color,
 }
 impl Default for Widget {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+#[repr(C, packed(8))]
+#[derive(Clone, Copy)]
+pub struct WithBitfield {
+    pub name: *mut i8,
+    pub _bitfield_0: u32,
+    pub data: i32,
+}
+impl Default for WithBitfield {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
     }

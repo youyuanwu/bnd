@@ -510,13 +510,21 @@ fn extract_struct_from_entity(
             None
         };
 
-        trace!(field = %field_name, ty = ?ctype, "  field");
+        trace!(field = %field_name, ty = ?ctype, bitfield_width, bitfield_offset, "  field");
         fields.push(FieldDef {
             name: field_name,
             ty: ctype,
             bitfield_width,
             bitfield_offset,
         });
+    }
+
+    // Flatten bitfield fields: replace each bitfield group with a single
+    // integer field sized to cover the group's total bit span. Adjacent
+    // bitfields that pack into the same storage unit (determined by
+    // bitfield_offset continuity) are merged into one field.
+    if !is_union {
+        fields = flatten_bitfields(fields, name);
     }
 
     // Append trailing padding if clang's sizeof exceeds what repr(C)
@@ -591,6 +599,103 @@ fn extract_struct_from_entity(
         },
         nested_types,
     ))
+}
+
+/// Flatten bitfield fields into correctly-sized integer fields.
+///
+/// Adjacent bitfields are grouped by checking whether each field's
+/// `bitfield_offset` is contiguous with the previous one (offset ==
+/// prev_offset + prev_width). Each group is replaced by a single
+/// integer field sized to cover the group's total bit span.
+///
+/// Non-bitfield fields pass through unchanged.
+fn flatten_bitfields(fields: Vec<FieldDef>, struct_name: &str) -> Vec<FieldDef> {
+    if !fields.iter().any(|f| f.bitfield_width.is_some()) {
+        return fields;
+    }
+
+    let mut result: Vec<FieldDef> = Vec::new();
+    // Accumulator for the current group of adjacent bitfields.
+    let mut group: Vec<&FieldDef> = Vec::new();
+    let mut group_index = 0u32;
+
+    let flush_group = |group: &mut Vec<&FieldDef>,
+                       result: &mut Vec<FieldDef>,
+                       group_index: &mut u32,
+                       struct_name: &str| {
+        if group.is_empty() {
+            return;
+        }
+        let first = group[0];
+        let group_start = first.bitfield_offset.unwrap_or(0);
+        let last = group[group.len() - 1];
+        let group_end = last.bitfield_offset.unwrap_or(0) + last.bitfield_width.unwrap_or(0);
+        let total_bits = group_end - group_start;
+
+        let (name, ty) = if group.len() == 1 {
+            // Solo bitfield: keep original name, replace type.
+            (first.name.clone(), smallest_int_for_bits(total_bits))
+        } else {
+            // Merged group: synthetic name, covering type.
+            let names: Vec<&str> = group.iter().map(|f| f.name.as_str()).collect();
+            debug!(
+                struct_name = %struct_name,
+                fields = ?names,
+                total_bits,
+                "merged adjacent bitfield group"
+            );
+            (
+                format!("_bitfield_{}", *group_index),
+                smallest_int_for_bits(total_bits),
+            )
+        };
+        *group_index += 1;
+
+        result.push(FieldDef {
+            name,
+            ty,
+            bitfield_width: None,
+            bitfield_offset: None,
+        });
+        group.clear();
+    };
+
+    for field in &fields {
+        if let (Some(offset), Some(width)) = (field.bitfield_offset, field.bitfield_width) {
+            // Check if this field is contiguous with the current group.
+            if let Some(last) = group.last() {
+                let prev_end = last.bitfield_offset.unwrap_or(0) + last.bitfield_width.unwrap_or(0);
+                if offset != prev_end {
+                    // Gap — flush the current group and start a new one.
+                    flush_group(&mut group, &mut result, &mut group_index, struct_name);
+                }
+            }
+            let _ = (offset, width); // used above via field
+            group.push(field);
+        } else {
+            // Non-bitfield: flush any pending group, then pass through.
+            flush_group(&mut group, &mut result, &mut group_index, struct_name);
+            result.push(FieldDef {
+                name: field.name.clone(),
+                ty: field.ty.clone(),
+                bitfield_width: None,
+                bitfield_offset: None,
+            });
+        }
+    }
+    // Flush any trailing group.
+    flush_group(&mut group, &mut result, &mut group_index, struct_name);
+    result
+}
+
+/// Return the smallest unsigned integer CType that can hold `bits` bits.
+fn smallest_int_for_bits(bits: usize) -> CType {
+    match bits {
+        0..=8 => CType::U8,
+        9..=16 => CType::U16,
+        17..=32 => CType::U32,
+        _ => CType::U64,
+    }
 }
 
 /// Try to extract an anonymous record field type as a synthetic named type.

@@ -89,3 +89,18 @@ struct CacheAligned {
     int x;
     int y;
 } __attribute__((aligned(64)));
+
+// Enum used in a bitfield — tests whether sonar discovers the enum
+// and whether the struct layout is correct despite bitfield packing.
+enum BitfieldKind {
+    BF_KIND_NONE  = 0,
+    BF_KIND_FLAG  = 1,
+    BF_KIND_VALUE = 2,
+};
+
+struct WithBitfield {
+    const char *name;
+    enum BitfieldKind kind:8;
+    unsigned int flags:24;
+    int data;
+};

@@ -247,6 +247,20 @@ mod tests {
     }
 
     #[test]
+    fn test_bitfield_enum_extracted() {
+        // BitfieldKind enum (used in a bitfield context) must be discovered
+        // by sonar and emitted with the correct variants.
+        assert_eq!(BF_KIND_NONE, 0u32);
+        assert_eq!(BF_KIND_FLAG, 1u32);
+        assert_eq!(BF_KIND_VALUE, 2u32);
+
+        // WithBitfield has `kind:8` + `flags:24` which pack into a single
+        // u32 via bitfield flattening. Struct size must match C (16 bytes).
+        assert_eq!(std::mem::size_of::<WithBitfield>(), 16);
+        assert_eq!(std::mem::align_of::<WithBitfield>(), 8); // pointer alignment
+    }
+
+    #[test]
     fn test_cacheline_aligned_struct() {
         // CacheAligned has __attribute__((aligned(64))), so sizeof == 64
         // even though it only has 8 bytes of fields (x: i32, y: i32).
