@@ -107,6 +107,7 @@ fn collect_structs(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -> 
     // Primary: sonar-discovered structs (via typedef patterns)
     for decl in sonar::find_structs(entities.to_vec()) {
         if !in_scope(&decl.entity) {
+            trace_out_of_scope(&decl.entity, "struct");
             continue;
         }
         seen.insert(decl.name.clone());
@@ -134,6 +135,7 @@ fn collect_structs(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -> 
             _ => continue,
         };
         if !in_scope(entity) {
+            trace_out_of_scope(entity, "struct");
             continue;
         }
         let name = match entity.get_name() {
@@ -176,6 +178,7 @@ fn collect_enums(
     // Primary: sonar-discovered enums
     for decl in sonar::find_enums(entities.to_vec()) {
         if !in_scope(&decl.entity) {
+            trace_out_of_scope(&decl.entity, "enum");
             continue;
         }
         // Detect anonymous enums (e.g. `enum { DT_UNKNOWN = 0, ... }`).
@@ -224,6 +227,11 @@ fn collect_enums(
             continue;
         }
         if !in_scope(entity) || !entity.is_definition() {
+            if !entity.is_definition() {
+                // forward decl — silent, not interesting
+            } else {
+                trace_out_of_scope(entity, "enum");
+            }
             continue;
         }
         let name = match entity.get_name() {
@@ -252,6 +260,7 @@ fn collect_functions(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) -
     let mut seen = HashSet::new();
     for decl in sonar::find_functions(entities.to_vec()) {
         if !in_scope(&decl.entity) {
+            trace_out_of_scope(&decl.entity, "function");
             continue;
         }
         // Skip variadic functions — P/Invoke metadata cannot represent `...`
@@ -286,6 +295,7 @@ fn collect_typedefs(entities: &[Entity], in_scope: &impl Fn(&Entity) -> bool) ->
             continue;
         }
         if !in_scope(entity) {
+            trace_out_of_scope(entity, "typedef");
             continue;
         }
         let name = match entity.get_name() {
@@ -1127,6 +1137,18 @@ fn is_primitive_name(name: &str) -> bool {
 
 fn should_emit(entity: &Entity, traverse_files: &[PathBuf], base_dir: &Path) -> bool {
     should_emit_by_location(entity, traverse_files, base_dir)
+}
+
+/// Emit a trace log when an entity is skipped because it falls outside the
+/// traverse scope. Helps diagnose missing types when authoring partitions.
+fn trace_out_of_scope(entity: &Entity, kind: &str) {
+    let file = entity
+        .get_location()
+        .and_then(|loc| loc.get_file_location().file)
+        .map(|f| f.get_path().display().to_string())
+        .unwrap_or_else(|| "<unknown>".into());
+    let name = entity.get_name().unwrap_or_else(|| "<unnamed>".into());
+    trace!(kind, name = %name, file = %file, "skipping out-of-scope type");
 }
 
 fn should_emit_by_location(entity: &Entity, traverse_files: &[PathBuf], _base_dir: &Path) -> bool {

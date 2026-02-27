@@ -57,8 +57,29 @@ were dropped, with a hint to see details at `warn` level:
 INFO  deduplicated types across partitions  dropped=3 (set RUST_LOG=warn for details)
 ```
 
-Individual drops remain at `warn` level:
+
+## 5. Out-of-Scope Type Trace
+
+**Status:** Implemented
+
+At `trace` level, logs every struct, enum, function, and typedef that
+is parsed from a header but excluded because it doesn't belong to a
+`traverse` file. Useful for diagnosing missing types — if an expected
+type isn't extracted, run with `RUST_LOG=bnd_winmd=trace` and search
+for it:
 
 ```
-WARN  dropping duplicate struct (canonical partition wins)  name=__sigset_t canonical=posix.pthread duplicate=posix.signal
+TRACE  skipping out-of-scope type  kind="enum" name="fs_value_type" file="/usr/include/linux/fs_context.h"
 ```
+
+This reveals whether the type was seen by clang (in a parsed header)
+but excluded by the traverse filter, or whether it wasn't parsed at
+all (header not in `headers` list).
+
+```sh
+RUST_LOG=bnd_winmd=trace bnd-winmd config.toml 2>&1 | grep "out-of-scope" | grep "my_type"
+```
+
+Forward declarations are not traced (they are silently skipped before
+the scope check).
+

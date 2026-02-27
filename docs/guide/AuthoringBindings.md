@@ -216,6 +216,11 @@ All function bindings are `unsafe` — they call directly into the C library.
   defines each missing type to `traverse` (or add a `[[type_import]]` for
   types from an external library).
 - Use `RUST_LOG=bnd_winmd=debug` to see what is extracted/skipped.
+- Use `RUST_LOG=bnd_winmd=trace` to see every type that was parsed but
+  excluded by the traverse filter — search for `out-of-scope`:
+  ```sh
+  RUST_LOG=bnd_winmd=trace bnd-winmd config.toml 2>&1 | grep "out-of-scope" | grep "my_type"
+  ```
 - Use `bnd-winmd --dry-run config.toml` to validate config without
   writing output — prints partition stats and checks all type refs.
 
