@@ -105,7 +105,15 @@ struct WithBitfield {
     int data;
 };
 
-// Anonymous struct used as array element — tests that bnd extracts
+// Anonymous struct used as 2D array element — tests multi-dimensional peeling.
+// sizeof == 4 * 8 * 4 (tc_rxq) + 4 (count) == 132
+struct WithAnon2DArrayField {
+    struct {
+        unsigned short base;
+        unsigned short nb_queue;
+    } tc_rxq[4][8];
+    int count;
+};
 // the anonymous type and wraps the field in CType::Array correctly.
 // sizeof == 4 * (2+2 padding + 4) + 4 + 4 padding == 40
 struct WithAnonArrayField {

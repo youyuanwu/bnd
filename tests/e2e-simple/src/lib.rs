@@ -247,6 +247,27 @@ mod tests {
     }
 
     #[test]
+    #[ignore = "requires windows-bindgen fork with nested ArrayFixed support; upstream emits [[T; 8]; 1] (wrong outer dim)"]
+    #[allow(unconditional_panic)]
+    #[allow(clippy::out_of_bounds_indexing)]
+    fn test_anon_struct_2d_array_field() {
+        // `struct { ... } tc_rxq[4][8]` — anonymous struct as 2D array element.
+        // Extracted as WithAnon2DArrayField_tc_rxq, field emitted as [[T; 8]; 4].
+        // Requires the local windows-bindgen fork — upstream does not handle
+        // nested ArrayFixed and silently produces the wrong outer dimension.
+        assert_eq!(std::mem::size_of::<WithAnon2DArrayField_tc_rxq>(), 4);
+        assert_eq!(
+            std::mem::size_of::<WithAnon2DArrayField>(),
+            132, // 4 * 8 * 4 (tc_rxq) + 4 (count) = 132
+        );
+        let mut s = WithAnon2DArrayField::default();
+        s.tc_rxq[0][0].base = 1;
+        s.tc_rxq[3][7].nb_queue = 255;
+        assert_eq!(s.tc_rxq[0][0].base, 1);
+        assert_eq!(s.tc_rxq[3][7].nb_queue, 255);
+    }
+
+    #[test]
     fn test_anon_struct_array_field() {
         // `struct { ... } entries[4]` — anonymous struct used as array element.
         // The element type must be extracted as WithAnonArrayField_entries and

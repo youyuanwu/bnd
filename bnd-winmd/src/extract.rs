@@ -464,12 +464,11 @@ fn extract_struct_from_entity(
         .filter(|c| c.get_kind() == EntityKind::FieldDecl && c.get_name().is_some())
         .filter_map(|c| {
             let ft = c.get_type()?.get_canonical_type();
-            // Peel one array level — handles `struct { ... } field[N]`.
-            let inner = if ft.get_kind() == TypeKind::ConstantArray {
-                ft.get_element_type()?.get_canonical_type()
-            } else {
-                ft
-            };
+            // Peel all array levels — handles `struct { ... } field[M][N]`.
+            let mut inner = ft;
+            while inner.get_kind() == TypeKind::ConstantArray {
+                inner = inner.get_element_type()?.get_canonical_type();
+            }
             if inner.get_kind() != TypeKind::Record {
                 return None;
             }
@@ -753,24 +752,23 @@ fn smallest_int_for_bits(bits: usize) -> CType {
 /// name like `"union (unnamed at file.h:37:5)"`. This function detects that
 /// case, recursively extracts the anonymous record as a separate `StructDef`
 /// with a synthetic name `ParentName_FieldName`, and returns the `CType` for
-/// the field (either `Named` for a bare record, or `Array { Named }` for an
-/// array of anonymous records like `struct { ... } pool_map[N]`).
+/// the field. Handles 1D and multi-dimensional arrays:
+/// - bare record → `Named`
+/// - `field[N]`   → `Array { Named, N }`
+/// - `field[M][N]` → `Array { Array { Named, N }, M }`
 fn try_extract_anonymous_field(
     field_type: &ClangType,
     parent_name: &str,
     field_name: &str,
     nested_types: &mut Vec<StructDef>,
 ) -> Option<CType> {
-    let canonical = field_type.get_canonical_type();
-
-    // Peel one array level if present — handles `struct { ... } field[N]`.
-    let (inner, array_len) = if canonical.get_kind() == TypeKind::ConstantArray {
-        let len = canonical.get_size().unwrap_or(0);
-        let elem = canonical.get_element_type()?;
-        (elem.get_canonical_type(), Some(len))
-    } else {
-        (canonical, None)
-    };
+    // Peel all array levels, collecting dims outermost-first.
+    let mut dims: Vec<usize> = Vec::new();
+    let mut inner = field_type.get_canonical_type();
+    while inner.get_kind() == TypeKind::ConstantArray {
+        dims.push(inner.get_size().unwrap_or(0));
+        inner = inner.get_element_type()?.get_canonical_type();
+    }
 
     if inner.get_kind() != TypeKind::Record {
         return None;
@@ -789,7 +787,7 @@ fn try_extract_anonymous_field(
                 parent = %parent_name,
                 field = %field_name,
                 synthetic = %synthetic_name,
-                array_len,
+                dims = ?dims,
                 "extracted anonymous {kind} as synthetic type"
             );
             nested_types.push(nested);
@@ -798,14 +796,12 @@ fn try_extract_anonymous_field(
                 name: synthetic_name,
                 resolved: None,
             };
-            if let Some(len) = array_len {
-                Some(CType::Array {
-                    element: Box::new(named),
-                    len,
-                })
-            } else {
-                Some(named)
-            }
+            // Wrap from innermost outward: dims is outermost-first, so fold in reverse.
+            let ctype = dims.iter().rev().fold(named, |acc, &len| CType::Array {
+                element: Box::new(acc),
+                len,
+            });
+            Some(ctype)
         }
         Err(e) => {
             warn!(

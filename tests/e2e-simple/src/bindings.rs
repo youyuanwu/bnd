@@ -136,6 +136,23 @@ impl Default for Widget {
 }
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]
+pub struct WithAnon2DArrayField {
+    pub tc_rxq: [[WithAnon2DArrayField_tc_rxq; 8]; 1],
+    pub count: i32,
+}
+impl Default for WithAnon2DArrayField {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+#[repr(C, packed(2))]
+#[derive(Clone, Copy, Default)]
+pub struct WithAnon2DArrayField_tc_rxq {
+    pub base: u16,
+    pub nb_queue: u16,
+}
+#[repr(C, packed(4))]
+#[derive(Clone, Copy)]
 pub struct WithAnonArrayField {
     pub entries: [WithAnonArrayField_entries; 4],
     pub count: i32,

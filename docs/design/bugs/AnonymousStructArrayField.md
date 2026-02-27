@@ -1,7 +1,7 @@
 # Anonymous Struct Used as Array Element Not Extracted
 
 **Component:** bnd-winmd  
-**Status:** Fixed
+**Status:** Partially fixed — 1D arrays fixed; 2D arrays produce wrong layout (upstream windows-bindgen limitation)
 
 ## Problem
 
@@ -14,45 +14,103 @@ struct (unnamed at rte_ethdev.h:999:2) — referenced in field `pool_map`
 of struct `rte_eth_vmdq_dcb_conf`
 ```
 
-## Affected Pattern
+## Affected Patterns
+
+### 1D array (fixed)
 
 ```c
-struct rte_eth_vmdq_dcb_conf {
-    // ...
+struct {
+    uint16_t vlan_id;
+    uint64_t pools;
+} pool_map[RTE_ETH_VMDQ_MAX_VLAN_FILTERS];
+```
+
+Canonical type: `ConstantArray(Record)` — fixed by peeling one level.
+
+### 2D array (open)
+
+```c
+struct rte_eth_dcb_tc_queue_mapping {
     struct {
-        uint16_t vlan_id;
-        uint64_t pools;
-    } pool_map[RTE_ETH_VMDQ_MAX_VLAN_FILTERS];  // array of anonymous struct
-    // ...
+        uint16_t base;
+        uint16_t nb_queue;
+    } tc_rxq[RTE_ETH_MAX_VMDQ_POOL][RTE_ETH_DCB_NUM_TCS];
 };
 ```
 
-The field type is `ConstantArray` of an anonymous `Record` — not a
-bare `Record`. The named-field variant (`union { ... } addr;`) is
-handled, but the array variant is not.
+Canonical type: `ConstantArray(ConstantArray(Record))` — the current
+single-peel fix finds another `ConstantArray`, not a `Record`, and
+returns `None`.
 
 ## Root Cause
 
-`try_extract_anonymous_field()` checks the canonical type kind:
+`try_extract_anonymous_field()` peels exactly one `ConstantArray` level:
 
 ```rust
-let canonical = field_type.get_canonical_type();
-if canonical.get_kind() != TypeKind::Record {
-    return None;  // ← returns here for ConstantArray
-}
+let (inner, array_len) = if canonical.get_kind() == TypeKind::ConstantArray {
+    let len = canonical.get_size().unwrap_or(0);
+    let elem = canonical.get_element_type()?;
+    (elem.get_canonical_type(), Some(len))  // ← only peels once
+} else {
+    (canonical, None)
+};
+if inner.get_kind() != TypeKind::Record { return None; }
 ```
 
-When `field_type` is `struct { ... } pool_map[N]`, the canonical type
-is `ConstantArray`, not `Record`. The function returns `None` without
-extracting the anonymous element type. The field is then mapped via
-`map_clang_type()`, which produces `CType::Array { element: CType::Named("struct (unnamed ...)"), ... }` — an unresolvable named reference.
+For `tc_rxq[M][N]`, after one peel `inner` is still `ConstantArray(Record)`,
+not `Record`, so the function returns `None`.
 
-## Fix
+## Fix for Multi-Dimensional Arrays
 
-In `try_extract_anonymous_field()`, add a peel step before the
-`Record` check: if the canonical type is `ConstantArray`, extract the
-element type and array length, then check if the element is an
-anonymous record.
+Peel **all** array levels, collecting dimensions as a `Vec<usize>`.
+Check for anonymous record at the innermost element type. Wrap the
+extracted synthetic type in nested `CType::Array` from innermost
+outward.
+
+```rust
+// Peel all array levels, collecting dims outermost-first.
+let mut dims: Vec<usize> = Vec::new();
+let mut inner = field_type.get_canonical_type();
+while inner.get_kind() == TypeKind::ConstantArray {
+    dims.push(inner.get_size().unwrap_or(0));
+    inner = match inner.get_element_type() {
+        Some(e) => e.get_canonical_type(),
+        None => return None,
+    };
+}
+
+if inner.get_kind() != TypeKind::Record { return None; }
+// ... extract anonymous record as synthetic_name ...
+
+// Wrap from innermost outward.
+let named = CType::Named { name: synthetic_name, resolved: None };
+let ctype = dims.iter().rev().fold(named, |acc, &len| {
+    CType::Array { element: Box::new(acc), len }
+});
+Some(ctype)
+```
+
+The same peel-all-levels logic must also be applied to the
+`named_anon_decls` set collection to avoid double-extraction.
+
+## Test Plan
+
+Add to `simple.h`:
+
+```c
+struct WithAnon2DArrayField {
+    struct {
+        uint16_t base;
+        uint16_t nb_queue;
+    } tc_rxq[4][8];
+    int count;
+};
+```
+
+Verify:
+- `WithAnon2DArrayField_tc_rxq` extracted as synthetic struct
+- `size_of::<WithAnon2DArrayField>() == 4 * 8 * 4 + 4 == 132` (with alignment)
+- No unresolved type references
 
 ## Implementation
 
@@ -72,12 +130,14 @@ once by the C11 anonymous member path (as `WithAnonArrayField__anon_0`).
 The call site uses the returned `CType` directly — no `CType::Named`
 wrapping needed.
 
-## Test Result
+## Test Results
 
-`WithAnonArrayField` in `simple.h` with `struct { unsigned short id; unsigned int mask; } entries[4]`:
-- `WithAnonArrayField_entries` extracted as synthetic struct (8 bytes)
-- `WithAnonArrayField.entries` emitted as `[WithAnonArrayField_entries; 4]`
-- `size_of::<WithAnonArrayField>() == 36` (matches C)
-- No double-extraction, no unresolved type references
+**1D**: `WithAnonArrayField` with `struct { ... } entries[4]` → `[WithAnonArrayField_entries; 4]`, size=36. Test: `test_anon_struct_array_field`.
 
-Test: `test_anon_struct_array_field` in `tests/e2e-simple/src/lib.rs`.
+**2D**: `WithAnon2DArrayField` with `struct { ... } tc_rxq[4][8]` — extraction produces the correct nested `CType::Array { Array { Named, 8 }, 4 }`. However, **upstream windows-bindgen does not support nested `ArrayFixed`** and emits `[[T; 8]; 1]` (wrong outer dimension). The local fork handles this correctly and emits `[[T; 8]; 4]`.
+
+The 2D test (`test_anon_struct_2d_array_field`) is `#[ignore]` — passes with the local fork, fails with upstream.
+
+## Known Limitation: 2D Arrays Require windows-bindgen Fork
+
+Upstream windows-bindgen does not support nested `ArrayFixed`. Multi-dimensional anonymous struct array fields produce a binding with the wrong outer dimension. Until the fork change is merged upstream, these bindings are incorrect and should not be used for FFI.
