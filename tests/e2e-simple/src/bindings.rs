@@ -134,6 +134,23 @@ impl Default for Widget {
         unsafe { core::mem::zeroed() }
     }
 }
+#[repr(C, packed(4))]
+#[derive(Clone, Copy)]
+pub struct WithAnonArrayField {
+    pub entries: [WithAnonArrayField_entries; 4],
+    pub count: i32,
+}
+impl Default for WithAnonArrayField {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
+#[repr(C, packed(4))]
+#[derive(Clone, Copy, Default)]
+pub struct WithAnonArrayField_entries {
+    pub id: u16,
+    pub mask: u32,
+}
 #[repr(C, packed(8))]
 #[derive(Clone, Copy)]
 pub struct WithBitfield {

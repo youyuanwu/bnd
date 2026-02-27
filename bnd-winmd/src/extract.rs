@@ -455,18 +455,25 @@ fn extract_struct_from_entity(
     let children: Vec<_> = entity.get_children();
 
     // Collect entity IDs of anonymous record decls that have an explicit
-    // named FieldDecl (e.g. `union { ... } addr;`). These are handled by
-    // the existing try_extract_anonymous_field path on the FieldDecl, so
-    // we must NOT also extract them via the C11 anonymous member path.
+    // named FieldDecl (e.g. `union { ... } addr;` or `struct { ... } arr[N]`).
+    // These are handled by the existing try_extract_anonymous_field path on
+    // the FieldDecl, so we must NOT also extract them via the C11 anonymous
+    // member path.
     let named_anon_decls: HashSet<_> = children
         .iter()
         .filter(|c| c.get_kind() == EntityKind::FieldDecl && c.get_name().is_some())
         .filter_map(|c| {
             let ft = c.get_type()?.get_canonical_type();
-            if ft.get_kind() != TypeKind::Record {
+            // Peel one array level — handles `struct { ... } field[N]`.
+            let inner = if ft.get_kind() == TypeKind::ConstantArray {
+                ft.get_element_type()?.get_canonical_type()
+            } else {
+                ft
+            };
+            if inner.get_kind() != TypeKind::Record {
                 return None;
             }
-            let decl = ft.get_declaration()?;
+            let decl = inner.get_declaration()?;
             if decl.is_anonymous() {
                 Some(decl.get_usr())
             } else {
@@ -530,15 +537,12 @@ fn extract_struct_from_entity(
         let field_name = child.get_name().unwrap_or_default();
         let field_type = child.get_type().context("field has no type")?;
 
-        // Check for anonymous record type (unnamed struct/union used as a field type).
-        // Clang gives these names like "union (unnamed at file.h:37:5)" which can't
-        // be resolved. We extract them as separate TypeDefs with synthetic names.
+        // Check for anonymous record type (unnamed struct/union used as a field type),
+        // including the case where it appears as an array element type
+        // (e.g. `struct { ... } pool_map[N]`).
         let ctype =
             match try_extract_anonymous_field(&field_type, name, &field_name, &mut nested_types) {
-                Some(synthetic_name) => CType::Named {
-                    name: synthetic_name,
-                    resolved: None,
-                },
+                Some(ctype) => ctype,
                 None => map_clang_type(&field_type)
                     .with_context(|| format!("unsupported type for field '{}'", field_name))?,
             };
@@ -748,19 +752,30 @@ fn smallest_int_for_bits(bits: usize) -> CType {
 /// (e.g. `union { int a; float b; } field;`), clang gives it a non-portable
 /// name like `"union (unnamed at file.h:37:5)"`. This function detects that
 /// case, recursively extracts the anonymous record as a separate `StructDef`
-/// with a synthetic name `ParentName_FieldName`, and returns the synthetic
-/// name so the caller can reference it.
+/// with a synthetic name `ParentName_FieldName`, and returns the `CType` for
+/// the field (either `Named` for a bare record, or `Array { Named }` for an
+/// array of anonymous records like `struct { ... } pool_map[N]`).
 fn try_extract_anonymous_field(
     field_type: &ClangType,
     parent_name: &str,
     field_name: &str,
     nested_types: &mut Vec<StructDef>,
-) -> Option<String> {
+) -> Option<CType> {
     let canonical = field_type.get_canonical_type();
-    if canonical.get_kind() != TypeKind::Record {
+
+    // Peel one array level if present — handles `struct { ... } field[N]`.
+    let (inner, array_len) = if canonical.get_kind() == TypeKind::ConstantArray {
+        let len = canonical.get_size().unwrap_or(0);
+        let elem = canonical.get_element_type()?;
+        (elem.get_canonical_type(), Some(len))
+    } else {
+        (canonical, None)
+    };
+
+    if inner.get_kind() != TypeKind::Record {
         return None;
     }
-    let decl = canonical.get_declaration()?;
+    let decl = inner.get_declaration()?;
     if !decl.is_anonymous() {
         return None;
     }
@@ -774,11 +789,23 @@ fn try_extract_anonymous_field(
                 parent = %parent_name,
                 field = %field_name,
                 synthetic = %synthetic_name,
+                array_len,
                 "extracted anonymous {kind} as synthetic type"
             );
             nested_types.push(nested);
-            nested_types.append(&mut more); // handle deeply nested anonymous types
-            Some(synthetic_name)
+            nested_types.append(&mut more);
+            let named = CType::Named {
+                name: synthetic_name,
+                resolved: None,
+            };
+            if let Some(len) = array_len {
+                Some(CType::Array {
+                    element: Box::new(named),
+                    len,
+                })
+            } else {
+                Some(named)
+            }
         }
         Err(e) => {
             warn!(

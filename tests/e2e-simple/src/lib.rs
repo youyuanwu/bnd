@@ -247,6 +247,25 @@ mod tests {
     }
 
     #[test]
+    fn test_anon_struct_array_field() {
+        // `struct { ... } entries[4]` — anonymous struct used as array element.
+        // The element type must be extracted as WithAnonArrayField_entries and
+        // the field emitted as [WithAnonArrayField_entries; 4].
+        assert_eq!(std::mem::size_of::<WithAnonArrayField_entries>(), 8);
+        assert_eq!(
+            std::mem::size_of::<WithAnonArrayField>(),
+            36, // 4 * 8 (entries) + 4 (count) = 36
+        );
+        let mut s = WithAnonArrayField::default();
+        s.entries[0].id = 42;
+        s.entries[0].mask = 0xDEAD;
+        assert_eq!(s.entries[0].id, 42);
+        assert_eq!(s.entries[0].mask, 0xDEAD);
+        s.count = 4;
+        assert_eq!(s.count, 4);
+    }
+
+    #[test]
     fn test_bitfield_enum_extracted() {
         // BitfieldKind enum (used in a bitfield context) must be discovered
         // by sonar and emitted with the correct variants.

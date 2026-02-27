@@ -104,3 +104,14 @@ struct WithBitfield {
     unsigned int flags:24;
     int data;
 };
+
+// Anonymous struct used as array element — tests that bnd extracts
+// the anonymous type and wraps the field in CType::Array correctly.
+// sizeof == 4 * (2+2 padding + 4) + 4 + 4 padding == 40
+struct WithAnonArrayField {
+    struct {
+        unsigned short id;
+        unsigned int   mask;
+    } entries[4];
+    int count;
+};
