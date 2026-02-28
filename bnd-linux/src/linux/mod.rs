@@ -22,5 +22,7 @@ pub mod sendfile;
 pub mod signalfd;
 #[cfg(feature = "timerfd")]
 pub mod timerfd;
+#[cfg(feature = "types")]
+pub mod types;
 #[cfg(feature = "xattr")]
 pub mod xattr;

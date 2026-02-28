@@ -89,3 +89,13 @@ library = "c"
 headers = ["sys/mount.h"]
 traverse = ["sys/mount.h"]
 clang_args = ["-D_LINUX_MOUNT_H"]
+
+# Partition 9: types — Linux-specific typedefs from <linux/types.h>
+# __be16/__be32/__be64 (big-endian) and __le* (little-endian) are used
+# extensively by RDMA (infiniband/verbs.h) and networking headers.
+# In userspace __bitwise is a no-op, so these are plain integer typedefs.
+[[partition]]
+namespace = "linux.types"
+library = "c"
+headers = ["linux/types.h"]
+traverse = ["linux/types.h"]

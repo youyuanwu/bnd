@@ -16,7 +16,7 @@ windows-link.workspace = true
 libc = "0.2"
 
 [features]
-default = ["epoll", "eventfd", "inotify", "mount", "sendfile", "signalfd", "timerfd", "xattr"]
+default = ["epoll", "eventfd", "inotify", "mount", "sendfile", "signalfd", "timerfd", "types", "xattr"]
 Foundation = []
 # generated features
 epoll = ["Foundation"]
@@ -26,4 +26,5 @@ mount = ["Foundation"]
 sendfile = ["Foundation"]
 signalfd = ["Foundation"]
 timerfd = ["Foundation"]
+types = ["Foundation"]
 xattr = ["Foundation"]
