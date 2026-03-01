@@ -1,5 +1,7 @@
 mod bindings;
 
+extern crate bnd_macros as windows_link;
+
 #[cfg(test)]
 mod tests {
     use crate::bindings::MultiTest::Types::*;

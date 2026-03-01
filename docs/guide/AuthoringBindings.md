@@ -27,7 +27,7 @@ You need two things:
 
 ```toml
 [dependencies]
-windows-link = "0.2"
+bnd-macros = "0.0.1"
 
 [build-dependencies]
 bnd-winmd = "0.1"
@@ -154,9 +154,16 @@ fn main() {
 Then in `src/lib.rs`:
 
 ```rust
+extern crate bnd_macros as windows_link;
+
 mod bindings;
 pub use bindings::*;
 ```
+
+The `extern crate` alias makes `windows_link::link!` (emitted by
+`windows-bindgen`) resolve to `bnd_macros::link!`. See
+[BndMacros.md](../design/BndMacros.md) for details on the two available
+macros (`link!` and `link_raw!`).
 
 ### Option B: Package mode (feature-gated sub-modules)
 
@@ -191,8 +198,14 @@ Foundation = []
 And `src/lib.rs`:
 
 ```rust
+extern crate bnd_macros as windows_link;
+
 pub mod zstd;
 ```
+
+The `extern crate` alias makes `windows_link::link!` (emitted by
+`windows-bindgen`) resolve to `bnd_macros::link!`. The module name must
+match the `name` field in the TOML config.
 
 ---
 

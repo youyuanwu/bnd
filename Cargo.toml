@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bnd-winmd", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib", "tests/bnd-linux-tests"]
+members = ["bnd-macros", "bnd-winmd", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib", "tests/bnd-linux-tests"]
 
 package.edition = "2024"
 package.authors = [ "youyuanwu@outlook.com" ]
@@ -20,7 +20,7 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 windows-bindgen = "0.66"
 # windows-bindgen = { path = "../windows-rs/crates/libs/bindgen"}
-windows-link = "0.2"
+bnd-macros = { path = "bnd-macros", version = "0.0.1" }
 windows-metadata = "0.60"
 
 # Crate in this repo.

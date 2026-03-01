@@ -65,7 +65,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-windows-link = "0.2"
+bnd-macros.workspace = true
 
 [features]
 default = ["zstd"]
@@ -79,10 +79,15 @@ The `# generated features` marker must be the last line of `[features]` —
 **`bnd-zstd/src/lib.rs`**:
 
 ```rust
+extern crate bnd_macros as windows_link;
+
 pub mod zstd;
 ```
 
-The module name must match the `name` field in the TOML config.
+The `extern crate` alias makes `windows_link::link!` (emitted by
+`windows-bindgen`) resolve to `bnd_macros::link!`. See
+[BndMacros.md](../design/BndMacros.md) for the two available macros
+(`link!` emits `#[link]` attributes, `link_raw!` does not).
 
 **`bnd-zstd/build.rs`** (if the library needs link directives):
 
@@ -222,7 +227,7 @@ fn generated_sources_are_up_to_date() {
 
     let tmp = tempfile::tempdir().unwrap();
     let stub_toml = "[package]\nname = \"tmp\"\nversion = \"0.0.0\"\n\
-        edition = \"2024\"\n\n[dependencies]\nwindows-link = \"0.2\"\n\n\
+        edition = \"2024\"\n\n[dependencies]\nbnd-macros = \"0.0.1\"\n\n\
         [features]\nFoundation = []\n# generated features\n";
     std::fs::write(tmp.path().join("Cargo.toml"), stub_toml).unwrap();
 

@@ -9,4 +9,4 @@ bnd-winmd.workspace = true
 windows-bindgen.workspace = true
 
 [dependencies]
-windows-link.workspace = true
+bnd-macros.workspace = true

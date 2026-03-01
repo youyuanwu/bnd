@@ -11,3 +11,7 @@
 //! - **`rand`** — random number generation
 
 pub mod openssl;
+
+// Re-export bnd_macros as windows_link at the crate root so generated code
+// that references `windows_link::link!` resolves to our own macro crate.
+extern crate bnd_macros as windows_link;

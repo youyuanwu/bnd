@@ -10,4 +10,4 @@ windows-bindgen.workspace = true
 simple-impl.workspace = true  # ensures cdylib is built first
 
 [dependencies]
-windows-link.workspace = true
+bnd-macros.workspace = true

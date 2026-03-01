@@ -1,0 +1,9 @@
+[package]
+name = "bnd-macros"
+version = "0.0.1"
+edition.workspace = true
+description = "Link macros for bnd-generated FFI bindings"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+readme = "README.md"

@@ -10,7 +10,7 @@ readme = "README.md"
 
 [dependencies]
 bnd-linux = { path = "../bnd-linux", features = ["posix_time", "posix_stdio", "posix_pthread", "posix_types"] }
-windows-link.workspace = true
+bnd-macros.workspace = true
 
 [features]
 default = ["bio", "bn", "crypto", "evp", "rand", "sha", "ssl", "types"]
