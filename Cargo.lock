@@ -75,7 +75,7 @@ checksum = "843867be96c8daad0d758b57df9392b6d8d271134fce549de6ce169ff98a92af"
 
 [[package]]
 name = "bnd-linux"
-version = "0.0.1"
+version = "0.0.6"
 dependencies = [
  "bnd-macros",
 ]
@@ -100,7 +100,7 @@ dependencies = [
 
 [[package]]
 name = "bnd-macros"
-version = "0.0.1"
+version = "0.0.6"
 
 [[package]]
 name = "bnd-openssl"
@@ -122,7 +122,7 @@ dependencies = [
 
 [[package]]
 name = "bnd-winmd"
-version = "0.0.5"
+version = "0.0.6"
 dependencies = [
  "anyhow",
  "clang",

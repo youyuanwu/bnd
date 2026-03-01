@@ -1,6 +1,6 @@
 [package]
 name = "bnd-linux"
-version = "0.0.1"
+version = "0.0.6"
 edition.workspace = true
 description = "Rust FFI bindings for POSIX and Linux system APIs generated as WinMD metadata"
 authors.workspace = true
