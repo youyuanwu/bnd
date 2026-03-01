@@ -1,0 +1,283 @@
+include_paths = ["/usr/include/x86_64-linux-gnu", "/usr/include"]
+
+[output]
+name = "bnd_linux"
+file = "bnd-linux.winmd"
+
+# =============================================================================
+# POSIX partitions
+# =============================================================================
+
+# Partition: shared POSIX types — uid_t, pid_t, mode_t, off_t, gid_t, etc.
+# Must come first so the type registry claims these names (first-writer-wins)
+# and the dedup pass removes duplicates from later partitions.
+[[partition]]
+namespace = "libc.posix.types"
+library = "c"
+headers = ["sys/types.h"]
+traverse = ["sys/types.h", "bits/types.h"]
+
+# Partition: fcntl — creat + O_* flags
+# open/openat/fcntl are variadic and will be auto-skipped
+[[partition]]
+namespace = "libc.posix.fcntl"
+library = "c"
+headers = ["fcntl.h"]
+traverse = ["fcntl.h", "bits/fcntl-linux.h"]
+
+# Partition: unistd — read/write/close/lseek
+[[partition]]
+namespace = "libc.posix.unistd"
+library = "c"
+headers = ["unistd.h"]
+traverse = ["unistd.h"]
+
+# Partition: sys/stat — struct stat + stat/fstat/chmod + S_* constants
+[[partition]]
+namespace = "libc.posix.stat"
+library = "c"
+headers = ["sys/stat.h"]
+traverse = ["sys/stat.h", "bits/struct_stat.h", "bits/types/struct_timespec.h"]
+
+# Partition: sys/mman — mmap/munmap/mprotect + MAP_*/PROT_* constants
+[[partition]]
+namespace = "libc.posix.mmap"
+library = "c"
+headers = ["sys/mman.h"]
+traverse = ["sys/mman.h", "bits/mman-linux.h", "bits/mman-map-flags-generic.h"]
+
+# Partition: dirent — opendir/readdir/closedir + struct dirent + DT_* constants
+[[partition]]
+namespace = "libc.posix.dirent"
+library = "c"
+headers = ["dirent.h"]
+traverse = ["dirent.h", "bits/dirent.h"]
+
+# Partition: sys/socket — socket/bind/listen/accept + AF_*/SOCK_*/SO_* constants
+[[partition]]
+namespace = "libc.posix.socket"
+library = "c"
+headers = ["sys/socket.h"]
+traverse = [
+    "sys/socket.h",
+    "bits/socket.h",
+    "bits/socket_type.h",
+    "bits/socket-constants.h",
+    "bits/types/struct_iovec.h",
+]
+
+# Partition: netinet/in + arpa/inet — sockaddr_in, in6_addr, inet_pton/ntop
+[[partition]]
+namespace = "libc.posix.inet"
+library = "c"
+headers = ["netinet/in.h", "arpa/inet.h"]
+traverse = ["netinet/in.h", "arpa/inet.h"]
+
+# Partition: netdb — getaddrinfo/freeaddrinfo + struct addrinfo + AI_* constants
+[[partition]]
+namespace = "libc.posix.netdb"
+library = "c"
+headers = ["netdb.h"]
+traverse = ["netdb.h", "bits/netdb.h"]
+
+# Partition: signal — signal/sigaction/kill/raise + struct sigaction + SIG*/SA_* constants
+[[partition]]
+namespace = "libc.posix.signal"
+library = "c"
+headers = ["signal.h"]
+traverse = [
+    "signal.h",
+    "bits/sigaction.h",
+    "bits/signum-generic.h",
+    "bits/signum-arch.h",
+    "bits/sigcontext.h",
+    "bits/types/__sigset_t.h",
+    "bits/types/siginfo_t.h",
+    "bits/types/__sigval_t.h",
+    "bits/types/stack_t.h",
+    "bits/types/struct_sigstack.h",
+]
+
+# Partition: dlfcn — dlopen/dlclose/dlsym/dlerror + RTLD_* constants + Dl_info struct
+# On glibc 2.34+, dl* symbols live in libc (libdl.so.2 is a stub).
+[[partition]]
+namespace = "libc.posix.dl"
+library = "c"
+headers = ["dlfcn.h"]
+traverse = ["dlfcn.h", "bits/dlfcn.h"]
+
+# Partition: errno — __errno_location() returns *mut i32, E* error constants
+[[partition]]
+namespace = "libc.posix.errno"
+library = "c"
+headers = ["errno.h"]
+traverse = [
+    "errno.h",
+    "bits/errno.h",
+    "linux/errno.h",
+    "asm/errno.h",
+    "asm-generic/errno.h",
+    "asm-generic/errno-base.h",
+]
+
+# Partition: sched — sched_yield/sched_setscheduler + SCHED_*/CLONE_* constants
+# clone() is variadic and will be auto-skipped.
+# On glibc 2.34+, sched_* symbols live in libc.
+[[partition]]
+namespace = "libc.posix.sched"
+library = "c"
+headers = ["sched.h"]
+traverse = [
+    "sched.h",
+    "bits/sched.h",
+    "bits/types/struct_sched_param.h",
+    "bits/cpu-set.h",
+]
+
+# Partition: time — clock_gettime/nanosleep/gmtime + CLOCK_* constants + struct tm
+[[partition]]
+namespace = "libc.posix.time"
+library = "c"
+headers = ["time.h"]
+traverse = [
+    "time.h",
+    "bits/time.h",
+    "bits/types/clock_t.h",
+    "bits/types/struct_tm.h",
+    "bits/types/clockid_t.h",
+    "bits/types/timer_t.h",
+    "bits/types/struct_itimerspec.h",
+    "bits/types/locale_t.h",
+    "bits/types/__locale_t.h",
+]
+
+# Partition: pthread — pthread_create/join/mutex/cond/rwlock + PTHREAD_* constants
+# pthread_create takes a function pointer param (delegate-as-param codegen path).
+# On glibc 2.34+, pthread_* symbols live in libc.
+[[partition]]
+namespace = "libc.posix.pthread"
+library = "c"
+headers = ["pthread.h"]
+traverse = [
+    "pthread.h",
+    "bits/pthreadtypes.h",
+    "bits/thread-shared-types.h",
+    "bits/pthreadtypes-arch.h",
+    "bits/atomic_wide_counter.h",
+    "bits/struct_mutex.h",
+    "bits/struct_rwlock.h",
+    "bits/types/__sigset_t.h",
+    "bits/types/struct___jmp_buf_tag.h",
+    "bits/pthread_stack_min-dynamic.h",
+    "bits/pthread_stack_min.h",
+]
+
+# Partition: stdio — fopen/fclose/fread/fwrite/fseek/ftell/fileno/popen + constants
+# printf/scanf families are variadic and will be auto-skipped.
+# FILE (struct _IO_FILE) is opaque — not traversing bits/types/struct_FILE.h.
+# fpos_t requires __mbstate_t traversal.
+[[partition]]
+namespace = "libc.posix.stdio"
+library = "c"
+headers = ["stdio.h"]
+traverse = [
+    "stdio.h",
+    "bits/stdio_lim.h",
+    "bits/types/__fpos_t.h",
+    "bits/types/__mbstate_t.h",
+    "bits/types/struct_FILE.h",
+    "bits/types/cookie_io_functions_t.h",
+]
+
+# =============================================================================
+# Linux partitions
+# =============================================================================
+
+# Partition: epoll — epoll_create1/epoll_ctl/epoll_wait + EPOLL* constants
+# epoll_data_t is a union inside the packed epoll_event struct.
+[[partition]]
+namespace = "libc.linux.epoll"
+library = "c"
+headers = ["sys/epoll.h"]
+traverse = [
+    "sys/epoll.h",
+    "bits/epoll.h",
+]
+
+# Partition: eventfd — eventfd/eventfd_read/eventfd_write + EFD_* constants
+[[partition]]
+namespace = "libc.linux.eventfd"
+library = "c"
+headers = ["sys/eventfd.h"]
+traverse = [
+    "sys/eventfd.h",
+    "bits/eventfd.h",
+]
+
+# Partition: timerfd — timerfd_create/timerfd_settime/timerfd_gettime + TFD_* constants
+# Uses clockid_t and struct itimerspec from posix.time (cross-partition ref).
+[[partition]]
+namespace = "libc.linux.timerfd"
+library = "c"
+headers = ["sys/timerfd.h"]
+traverse = [
+    "sys/timerfd.h",
+    "bits/timerfd.h",
+]
+
+# Partition: signalfd — signalfd() + struct signalfd_siginfo + SFD_* constants
+# Uses sigset_t from posix.signal (cross-partition ref).
+[[partition]]
+namespace = "libc.linux.signalfd"
+library = "c"
+headers = ["sys/signalfd.h"]
+traverse = [
+    "sys/signalfd.h",
+    "bits/signalfd.h",
+]
+
+# Partition: inotify — inotify_init1/inotify_add_watch/inotify_rm_watch + IN_* constants
+# struct inotify_event has a flexible array member (char name[]) — known limitation.
+[[partition]]
+namespace = "libc.linux.inotify"
+library = "c"
+headers = ["sys/inotify.h"]
+traverse = ["sys/inotify.h"]
+
+# Partition: sendfile — sendfile() zero-copy file transfer
+# Uses off_t from posix.types (cross-partition ref).
+[[partition]]
+namespace = "libc.linux.sendfile"
+library = "c"
+headers = ["sys/sendfile.h"]
+traverse = ["sys/sendfile.h"]
+
+# Partition: xattr — extended attribute operations (setxattr/getxattr/listxattr/removexattr)
+[[partition]]
+namespace = "libc.linux.xattr"
+library = "c"
+headers = ["sys/xattr.h"]
+traverse = ["sys/xattr.h"]
+
+# Partition: mount — mount/umount + MS_* flags + new-style fsopen/fsmount API
+# -D_LINUX_MOUNT_H prevents linux/mount.h from being included, which allows
+# sys/mount.h's own struct mount_attr definition (guarded by #ifndef
+# MOUNT_ATTR_SIZE_VER0) to be visible. Without this, linux/mount.h defines
+# MOUNT_ATTR_SIZE_VER0 first, hiding the struct and introducing duplicate
+# MS_* constants with non-deterministic types.
+[[partition]]
+namespace = "libc.linux.mount"
+library = "c"
+headers = ["sys/mount.h"]
+traverse = ["sys/mount.h"]
+clang_args = ["-D_LINUX_MOUNT_H"]
+
+# Partition: types — Linux-specific typedefs from <linux/types.h>
+# __be16/__be32/__be64 (big-endian) and __le* (little-endian) are used
+# extensively by RDMA (infiniband/verbs.h) and networking headers.
+# In userspace __bitwise is a no-op, so these are plain integer typedefs.
+[[partition]]
+namespace = "libc.linux.types"
+library = "c"
+headers = ["linux/types.h"]
+traverse = ["linux/types.h"]

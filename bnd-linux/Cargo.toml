@@ -2,29 +2,42 @@
 name = "bnd-linux"
 version = "0.0.1"
 edition.workspace = true
-description = "Rust FFI bindings for Linux-specific system APIs (epoll, eventfd, timerfd, etc.)"
+description = "Rust FFI bindings for POSIX and Linux system APIs generated as WinMD metadata"
 authors.workspace = true
 repository.workspace = true
 license.workspace = true
 readme = "README.md"
 
 [dependencies]
-bnd-posix = { path = "../bnd-posix", features = ["signal", "stat", "time", "types"] }
 windows-link.workspace = true
 
-[dev-dependencies]
-libc = "0.2"
-
 [features]
-default = ["epoll", "eventfd", "inotify", "mount", "sendfile", "signalfd", "timerfd", "types", "xattr"]
 Foundation = []
 # generated features
-epoll = ["Foundation"]
-eventfd = ["Foundation"]
-inotify = ["Foundation"]
-mount = ["Foundation"]
-sendfile = ["Foundation"]
-signalfd = ["Foundation"]
-timerfd = ["Foundation"]
-types = ["Foundation"]
-xattr = ["Foundation"]
+linux = ["Foundation"]
+linux_epoll = ["linux"]
+linux_eventfd = ["linux"]
+linux_inotify = ["linux"]
+linux_mount = ["linux"]
+linux_sendfile = ["linux"]
+linux_signalfd = ["linux"]
+linux_timerfd = ["linux"]
+linux_types = ["linux"]
+linux_xattr = ["linux"]
+posix = ["Foundation"]
+posix_dirent = ["posix"]
+posix_dl = ["posix"]
+posix_errno = ["posix"]
+posix_fcntl = ["posix"]
+posix_inet = ["posix"]
+posix_mmap = ["posix"]
+posix_netdb = ["posix"]
+posix_pthread = ["posix"]
+posix_sched = ["posix"]
+posix_signal = ["posix"]
+posix_socket = ["posix"]
+posix_stat = ["posix"]
+posix_stdio = ["posix"]
+posix_time = ["posix"]
+posix_types = ["posix"]
+posix_unistd = ["posix"]

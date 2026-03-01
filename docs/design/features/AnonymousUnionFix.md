@@ -41,8 +41,8 @@ Extended `extract_struct_inner()` to also process anonymous
 
 ## Real-World Impact
 
-`sigcontext` in bnd-posix gained the previously-dropped
-`fpstate`/`__fpstate_word` anonymous union. The bnd-posix sources
+`sigcontext` in bnd-linux gained the previously-dropped
+`fpstate`/`__fpstate_word` anonymous union. The bnd-linux sources
 and winmd were regenerated.
 
 ## Tests

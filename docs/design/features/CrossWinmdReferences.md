@@ -1,13 +1,13 @@
 # Design: Cross-WinMD Type References
 
 > **Status: Implemented.** All phases completed. OpenSSL bindings now
-> reference POSIX types from `bnd-posix` via cross-winmd TypeRefs.
+> reference POSIX types from `bnd-linux` via cross-winmd TypeRefs.
 > 236 tests passing, clippy clean.
 
 ## Problem
 
 OpenSSL headers reference POSIX system types that are also defined in
-`bnd-posix`. Today `openssl.toml` drags in glibc sub-headers
+`bnd-linux`. Today `openssl.toml` drags in glibc sub-headers
 (`bits/types/struct_tm.h`, `bits/types/struct_FILE.h`) so that those types
 exist locally inside the openssl winmd. This duplicates `struct tm`,
 `_IO_FILE`, and their transitive dependencies (`__off_t`, `_IO_lock_t`, …)
@@ -15,13 +15,13 @@ across two crates.
 
 Duplication means:
 - **ABI mismatch risk** — the two copies are independent types in Rust;
-  passing a `bnd_posix::posix::time::tm` to an `openssl::crypto` function
+  passing a `bnd_linux::libc::posix::time::tm` to an `openssl::crypto` function
   that expects its own `tm` requires a transmute.
 - **Binary bloat** — identical struct definitions emitted twice.
 - **Maintenance burden** — traverse lists for system types must be kept in
   sync across every TOML that needs them.
 
-The goal is to let `bnd-openssl` reference types from `bnd-posix` instead
+The goal is to let `bnd-openssl` reference types from `bnd-linux` instead
 of redefining them.
 
 ---
@@ -33,7 +33,7 @@ of redefining them.
 ### `--in` (load metadata)
 
 ```
---in bnd-posix.winmd --in openssl.winmd
+--in bnd-linux.winmd --in openssl.winmd
 ```
 
 All `.winmd` files passed to `--in` are merged into a single
@@ -42,44 +42,44 @@ TypeRef resolution is purely by `(namespace, name)` lookup in this merged
 map. The `AssemblyRef` table is written for ECMA-335 conformance but
 **never read** during resolution.
 
-This means a TypeRef in `openssl.winmd` pointing to `posix.time.tm` will
-resolve successfully as long as `bnd-posix.winmd` is also passed via
+This means a TypeRef in `openssl.winmd` pointing to `libc.posix.time.tm` will
+resolve successfully as long as `bnd-linux.winmd` is also passed via
 `--in`.
 
 ### `--reference` (suppress codegen for external types)
 
 ```
---reference bnd_posix,full,posix
+--reference bnd_linux,full,libc
 ```
 
 Format: `<crate>,<style>,<namespace-or-type>`
 
 | Part | Meaning |
 |---|---|
-| `bnd_posix` | Rust crate name used in path prefixes (`bnd_posix::posix::time::tm`) |
+| `bnd_linux` | Rust crate name used in path prefixes (`bnd_linux::libc::posix::time::tm`) |
 | `full` | Keep the full namespace path as module segments |
-| `posix` | Match all types under the `posix.*` namespace tree |
+| `libc` | Match all types under the `libc.*` namespace tree |
 
 **Styles:**
 
-| Style | Path for `posix.time.tm` |
+| Style | Path for `libc.posix.time.tm` |
 |---|---|
-| `flat` | `bnd_posix::tm` |
-| `full` | `bnd_posix::posix::time::tm` |
-| `skip-root` | `bnd_posix::time::tm` |
+| `flat` | `bnd_linux::tm` |
+| `full` | `bnd_linux::libc::posix::time::tm` |
+| `skip-root` | `bnd_linux::posix::time::tm` |
 
 **Effect:** Types matching the reference pattern are used for dependency
 resolution (understanding signatures, struct fields) but are **never
-emitted** in the output. The generated code emits `use bnd_posix::...`
+emitted** in the output. The generated code emits `use bnd_linux::...`
 paths instead of local type definitions.
 
 ### Combined usage
 
 ```
---in bnd-posix.winmd       # metadata for resolution
+--in bnd-linux.winmd       # metadata for resolution
 --in openssl.winmd         # metadata to generate
 --filter openssl           # only emit openssl.* types
---reference bnd_posix,full,posix  # posix.* types come from bnd_posix crate
+--reference bnd_linux,full,libc  # libc.* types come from bnd_linux crate
 ```
 
 windows-bindgen's `TypeMap::filter()` collects all types matching
@@ -116,8 +116,8 @@ a simpler struct matching the TOML schema:
 
 ```toml
 [[type_import]]
-winmd = "../bnd-posix/winmd/bnd-posix.winmd"
-namespace = "posix"
+winmd = "../bnd-linux/winmd/bnd-linux.winmd"
+namespace = "libc"
 ```
 
 The `winmd` path is resolved relative to the TOML file's directory
@@ -126,10 +126,10 @@ The `winmd` path is resolved relative to the TOML file's directory
 bnd-winmd reads the referenced winmd at extraction time, walks its TypeDef
 table, and pre-registers every type found into the `TypeRegistry` with its
 original namespace. When emit encounters `CType::Named { name: "tm" }`, it
-finds `"tm"` → `"posix.time"` in the registry and emits:
+finds `"tm"` → `"libc.posix.time"` in the registry and emits:
 
 ```
-TypeRef(namespace="posix.time", name="tm")
+TypeRef(namespace="libc.posix.time", name="tm")
 ```
 
 No local TypeDef is emitted — just a reference row. The assembly metadata
@@ -148,22 +148,22 @@ pub fn generate(output_dir: &Path) {
     bnd_winmd::run(&gen_dir.join("openssl.toml"), Some(&openssl_winmd))
         .expect("bnd-winmd failed");
 
-    // Step 2: Locate posix winmd (produced by bnd-posix-gen)
-    let posix_winmd = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../bnd-posix/winmd/bnd-posix.winmd");
+    // Step 2: Locate bnd-linux winmd (produced by bnd-linux-gen)
+    let linux_winmd = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join("../bnd-linux/winmd/bnd-linux.winmd");
 
     // Step 3: Generate Rust with cross-references
     windows_bindgen::bindgen([
         "--in",
         openssl_winmd.to_str().unwrap(),
         "--in",
-        posix_winmd.to_str().unwrap(),
+        linux_winmd.to_str().unwrap(),
         "--out",
         output_dir.to_str().unwrap(),
         "--filter",
         "openssl",
         "--reference",
-        "bnd_posix,full,posix",
+        "bnd_linux,full,libc",
         "--sys",
         "--package",
         "--no-toml",
@@ -173,11 +173,11 @@ pub fn generate(output_dir: &Path) {
 ```
 
 `--filter openssl` ensures only openssl types are generated.
-`--reference bnd_posix,full,posix` tells bindgen that any `posix.*`
-type comes from the `bnd_posix` crate with `full` path style, producing
-paths like `bnd_posix::posix::time::tm`. The `full` style is required
-because `bnd-posix` keeps the `posix` root module (`pub mod posix` in
-lib.rs) — `skip-root` would generate `bnd_posix::time::tm` which doesn't
+`--reference bnd_linux,full,libc` tells bindgen that any `libc.*`
+type comes from the `bnd_linux` crate with `full` path style, producing
+paths like `bnd_linux::libc::posix::time::tm`. The `full` style is required
+because `bnd-linux` keeps the `libc` root module (`pub mod libc` in
+lib.rs) — `skip-root` would generate `bnd_linux::posix::time::tm` which doesn't
 compile.
 
 `--no-toml` is included because bnd-openssl already has its own
@@ -203,29 +203,29 @@ headers = ["openssl/crypto.h"]
 traverse = ["openssl/crypto.h"]
 
 [[type_import]]
-winmd = "../bnd-posix/winmd/bnd-posix.winmd"
-namespace = "posix"
+winmd = "../bnd-linux/winmd/bnd-linux.winmd"
+namespace = "libc"
 ```
 
 The system types (`tm`, `_IO_FILE`, etc.) are no longer extracted locally —
-they're referenced from the posix winmd via TypeRef rows.
+they're referenced from the bnd-linux winmd via TypeRef rows.
 
 ### 4. bnd-openssl Cargo.toml: add dependency
 
 ```toml
 [dependencies]
-bnd-posix = { path = "../bnd-posix" }
+bnd-linux = { path = "../bnd-linux" }
 windows-link.workspace = true
 ```
 
-The generated code will contain `use bnd_posix::posix::time::tm;` (or
+The generated code will contain `use bnd_linux::libc::posix::time::tm;` (or
 similar `super::` paths depending on `--package` mode), so the runtime
 dependency is required.
 
 Feature-gate the dependency to pull in only the needed modules:
 
 ```toml
-bnd-posix = { path = "../bnd-posix", features = ["time", "stdio", "pthread", "types"] }
+bnd-linux = { path = "../bnd-linux", features = ["time", "stdio", "pthread", "types"] }
 ```
 
 > **Note:** The initial design expected only `time` and `stdio`, but
@@ -245,7 +245,7 @@ windows_link::link!("crypto" "C" fn OPENSSL_gmtime(timer : *const i64, result : 
 pub struct tm {
     pub tm_sec: i32,
     pub tm_min: i32,
-    // ... 9 fields duplicated from bnd-posix
+    // ... 9 fields duplicated from bnd-linux
 }
 ```
 
@@ -255,10 +255,10 @@ pub struct tm {
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn OPENSSL_gmtime(
     timer : *const i64,
-    result : *mut bnd_posix::posix::time::tm
-) -> *mut bnd_posix::posix::time::tm);
+    result : *mut bnd_linux::libc::posix::time::tm
+) -> *mut bnd_linux::libc::posix::time::tm);
 
-// No local `struct tm` — it lives in bnd_posix::posix::time
+// No local `struct tm` — it lives in bnd_linux::libc::posix::time
 ```
 
 ---
@@ -297,27 +297,27 @@ All phases completed. See commits on the `dev` branch.
 ### Phase 2: Gen crate changes
 
 6. ✅ **Update `bnd-openssl-gen`** — pass both winmds to `windows_bindgen`,
-   add `--reference bnd_posix,full,posix`.
+   add `--reference bnd_linux,full,libc`.
 
 7. ✅ **Update `openssl.toml`** — remove `bits/types/struct_tm.h` and
    `bits/types/struct_FILE.h` from traverse, add `[[type_import]]`.
 
-8. ✅ **Add `bnd-posix` dependency** to `bnd-openssl/Cargo.toml` with
+8. ✅ **Add `bnd-linux` dependency** to `bnd-openssl/Cargo.toml` with
    feature gates: `features = ["time", "stdio", "pthread", "types"]`.
 
 ### Phase 3: Validation
 
-9.  ✅ **Build ordering** — `bnd-posix-gen` must run before
-    `bnd-openssl-gen` so the posix winmd exists. The gen crates run
+9.  ✅ **Build ordering** — `bnd-linux-gen` must run before
+    `bnd-openssl-gen` so the bnd-linux winmd exists. The gen crates run
     outside `cargo build` (manual `cargo run -p`), so add a clear error
     message when the referenced winmd file doesn't exist.
 
 10. ✅ **Roundtrip test** — add `roundtrip_openssl.rs` assertion that
-    `openssl.crypto` functions reference `posix.time.tm` as a TypeRef
+    `openssl.crypto` functions reference `libc.posix.time.tm` as a TypeRef
     (not a local TypeDef).
 
 11. ✅ **E2E test** — call `OPENSSL_gmtime` with a
-    `bnd_posix::posix::time::tm` from the posix crate, verifying no
+    `bnd_linux::libc::posix::time::tm` from the bnd-linux crate, verifying no
     transmute is needed.
 
 ---
@@ -336,7 +336,7 @@ fn seed_registry_from_winmd(registry: &mut TypeRegistry, winmd_path: &Path) {
     let bytes = std::fs::read(winmd_path)
         .unwrap_or_else(|e| panic!(
             "failed to read external winmd {}: {e}\n\
-             Hint: run `cargo run -p bnd-posix-gen` first",
+             Hint: run `cargo run -p bnd-linux-gen` first",
             winmd_path.display()
         ));
     let file = File::new(bytes).expect("parse external winmd");
@@ -364,14 +364,14 @@ type.
 ## Dependency Graph
 
 ```
-bnd-posix-gen
+bnd-linux-gen
     │
     ▼
-bnd-posix.winmd ──────────────┐
+bnd-linux.winmd ──────────────┐
     │                         │
     ▼                         ▼
-bnd-posix (crate)    bnd-openssl-gen
-                         │    reads posix.winmd for
+bnd-linux (crate)    bnd-openssl-gen
+                         │    reads bnd-linux.winmd for
                          │    type_import + --reference
                          ▼
                     openssl.winmd
@@ -380,7 +380,7 @@ bnd-posix (crate)    bnd-openssl-gen
                     bnd-openssl (crate)
                          │
                          ▼
-                    depends on bnd-posix (runtime)
+                    depends on bnd-linux (runtime)
 ```
 
 ---
@@ -389,20 +389,20 @@ bnd-posix (crate)    bnd-openssl-gen
 
 The openssl `crypto.h` partition currently traverses two glibc headers:
 
-| System header | Types extracted | Already in bnd-posix |
+| System header | Types extracted | Already in bnd-linux |
 |---|---|---|
-| `bits/types/struct_tm.h` | `tm` (9 fields) | `posix.time` |
-| `bits/types/struct_FILE.h` | `_IO_FILE` (30 fields), `_IO_lock_t` | `posix.stdio` |
+| `bits/types/struct_tm.h` | `tm` (9 fields) | `libc.posix.time` |
+| `bits/types/struct_FILE.h` | `_IO_FILE` (30 fields), `_IO_lock_t` | `libc.posix.stdio` |
 
 Additional transitive types that may be pulled in:
-- `__off_t`, `__off64_t` — from `_IO_FILE` fields → `posix.types`
-- `__ssize_t` — from cookie callbacks → `posix.types`
+- `__off_t`, `__off64_t` — from `_IO_FILE` fields → `libc.posix.types`
+- `__ssize_t` — from cookie callbacks → `libc.posix.types`
 
 After the cross-reference change, `openssl.toml` needs zero glibc traverse
-headers. All system types flow through the posix winmd.
+headers. All system types flow through the bnd-linux winmd.
 
 Future libraries (zlib, curl, etc.) that also reference `FILE*` or
-`struct tm*` will follow the same pattern: import from `bnd-posix.winmd`,
+`struct tm*` will follow the same pattern: import from `bnd-linux.winmd`,
 never traverse glibc headers locally.
 
 ---
@@ -411,24 +411,24 @@ never traverse glibc headers locally.
 
 ### 1. `full` path style (not `skip-root`)
 
-`bnd-posix` keeps the root `posix` module: `lib.rs` has `pub mod posix`,
-and `--package` mode generates `src/posix/time/mod.rs` etc.  The crate
+`bnd-linux` keeps the root `libc` module: `lib.rs` has `pub mod libc`,
+and `--package` mode generates `src/libc/posix/time/mod.rs` etc.  The crate
 does not re-export modules at the crate root, so the correct path to
-`tm` is `bnd_posix::posix::time::tm`.
+`tm` is `bnd_linux::libc::posix::time::tm`.
 
-This means `--reference bnd_posix,full,posix` is the correct flag.
-`skip-root` would generate `bnd_posix::time::tm` which doesn't compile.
+This means `--reference bnd_linux,full,libc` is the correct flag.
+`skip-root` would generate `bnd_linux::posix::time::tm` which doesn't compile.
 
 ### 2. Build order enforcement
 
 The gen crates run outside `cargo build` (manual `cargo run -p`), so there
 is no automatic ordering. The implementation adds a clear panic message
 when the referenced winmd doesn't exist, pointing users to run
-`cargo run -p bnd-posix-gen` first.
+`cargo run -p bnd-linux-gen` first.
 
 ### 3. Feature gating
 
-`bnd-openssl` depends on `bnd-posix` with explicit features:
+`bnd-openssl` depends on `bnd-linux` with explicit features:
 `features = ["time", "stdio", "pthread", "types"]`. This pulls in only
 the modules whose types are actually referenced by openssl signatures.
 

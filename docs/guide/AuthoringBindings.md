@@ -113,8 +113,8 @@ those types instead of re-extracting them:
 
 ```toml
 [[type_import]]
-winmd = "path/to/bnd-posix.winmd"
-namespace = "posix"
+winmd = "path/to/bnd-linux.winmd"
+namespace = "libc"
 ```
 
 | Field | Meaning |
@@ -123,7 +123,7 @@ namespace = "posix"
 | `namespace` | Root namespace filter — only types under this namespace are imported |
 
 Imported types are emitted as cross-crate references in the generated
-bindings (e.g. `bnd_posix::posix::…`). Pass `--reference <crate>` to
+bindings (e.g. `bnd_linux::libc::posix::…`). Pass `--reference <crate>` to
 `windows-bindgen` for each external crate.
 
 ---

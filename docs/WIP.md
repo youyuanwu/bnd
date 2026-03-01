@@ -54,7 +54,7 @@ See [bug doc](bugs/pointer-mutability-lost.md).
 
 ---
 
-## Planned — bnd-posix API Families
+## Planned — bnd-linux API Families
 
 ### ~~4. Socket partitions~~ ✅
 

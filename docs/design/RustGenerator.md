@@ -75,8 +75,8 @@ C/C++ Headers
 | PtrConst workaround | Always emit `PtrMut` — `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs panics windows-bindgen. Mutability preserved via `ParamAttributes::Out` on mutable pointer parameters. |
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
 | Round-trip integration tests | Multiple fixture files |
-| E2E integration tests | Multiple crates (zlib against real `libz.so`, 16 POSIX API families via bnd-posix, OpenSSL libssl+libcrypto via bnd-openssl) |
-| Package-mode code generation | `bnd-posix-gen` and `bnd-openssl-gen` drive bnd-winmd + `windows-bindgen --package` to generate checked-in source trees with feature-gated sub-modules |
+| E2E integration tests | Multiple crates (zlib against real `libz.so`, 16 POSIX API families via bnd-linux, OpenSSL libssl+libcrypto via bnd-openssl) |
+| Package-mode code generation | `bnd-linux-gen` and `bnd-openssl-gen` drive bnd-winmd + `windows-bindgen --package` to generate checked-in source trees with feature-gated sub-modules |
 | Cross-WinMD type imports | `[[type_import]]` in TOML pre-seeds TypeRegistry from external winmd; `--reference` flag tells windows-bindgen to emit external crate paths. See [CrossWinmdReferences.md](CrossWinmdReferences.md) |
 | Pre-emit type-reference validation | `validate_type_references()` walks all CType trees before emit, catches `Named { resolved: None }` types missing from TypeRegistry. Reports actionable errors with type name, context (function param / struct field), and partition. |
 
@@ -106,7 +106,7 @@ bnd-winmd/
 └── tests/
     ├── roundtrip_simple.rs       # simple.h fixture
     ├── roundtrip_multi.rs        # multi-partition fixture
-    ├── roundtrip_posixfile.rs     # bnd-posix fixture
+    ├── roundtrip_posixfile.rs     # bnd-linux fixture
     ├── roundtrip_zlib.rs          # zlib system header
     ├── roundtrip_openssl.rs       # openssl multi-library + cross-winmd refs
     └── roundtrip_validation.rs    # pre-emit type-reference validation
@@ -116,35 +116,38 @@ tests/
 │   ├── simple/ (simple.h, simple.toml)
 │   ├── multi/ (graphics.h, audio.h, multi.toml)
 │   ├── unresolved/ (unresolved.h, unresolved_dep.h, unresolved.toml)
-│   ├── bnd-posix/ (bnd-posix.toml — POSIX headers)
 │   └── zlib/ (zlib.toml — references system headers)
 ├── simple-impl/              # Native C lib for e2e-simple
 ├── e2e-simple/               # E2E tests (single partition + unions)
 ├── e2e-multi/                # E2E tests (multi-partition)
 └── e2e-zlib/                 # E2E tests (system header, real libz.so)
 
-bnd-posix/
+bnd-linux/
 ├── Cargo.toml                # Feature-gated sub-modules
 ├── src/
 │   ├── lib.rs                # Hand-written module root
-│   └── posix/                # Auto-generated namespace modules (16 partitions)
+│   └── libc/                 # Auto-generated namespace modules
 │       ├── mod.rs
-│       ├── dirent/mod.rs
-│       ├── dl/mod.rs
-│       ├── errno/mod.rs
-│       ├── fcntl/mod.rs
-│       ├── inet/mod.rs
-│       ├── mmap/mod.rs
-│       ├── netdb/mod.rs
-│       ├── pthread/mod.rs
-│       ├── sched/mod.rs
-│       ├── signal/mod.rs
-│       ├── socket/mod.rs
-│       ├── stat/mod.rs
-│       ├── stdio/mod.rs
-│       ├── time/mod.rs
-│       ├── types/mod.rs
-│       └── unistd/mod.rs
+│       ├── posix/            # POSIX API families
+│       │   ├── mod.rs
+│       │   ├── dirent/mod.rs
+│       │   ├── dl/mod.rs
+│       │   ├── errno/mod.rs
+│       │   ├── fcntl/mod.rs
+│       │   ├── inet/mod.rs
+│       │   ├── mmap/mod.rs
+│       │   ├── netdb/mod.rs
+│       │   ├── pthread/mod.rs
+│       │   ├── sched/mod.rs
+│       │   ├── signal/mod.rs
+│       │   ├── socket/mod.rs
+│       │   ├── stat/mod.rs
+│       │   ├── stdio/mod.rs
+│       │   ├── time/mod.rs
+│       │   ├── types/mod.rs
+│       │   └── unistd/mod.rs
+│       └── linux/            # Linux-specific API families
+│           └── ...
 └── tests/                    # E2E tests (one per partition)
     ├── posixfile_e2e.rs      # Fcntl/Unistd
     ├── stat_e2e.rs           # Stat
@@ -162,7 +165,7 @@ bnd-posix/
     └── time_e2e.rs           # Time
 
 bnd-openssl/
-├── Cargo.toml                # Feature-gated sub-modules, depends on bnd-posix
+├── Cargo.toml                # Feature-gated sub-modules, depends on bnd-linux
 ├── build.rs                  # cargo:rustc-link-lib=crypto / ssl
 ├── src/
 │   ├── lib.rs                # Hand-written module root
@@ -266,7 +269,7 @@ constants, delegate, pinvoke.
 **roundtrip_multi.rs** (multi-partition): namespace placement,
 functions, cross-partition typeref, constants, enums.
 
-**roundtrip_posixfile.rs** (bnd-posix): fcntl/stat/unistd functions,
+**roundtrip_posixfile.rs** (bnd-linux): fcntl/stat/unistd functions,
 struct fields, struct sizes, constants, pinvoke.
 
 **roundtrip_zlib.rs** (system headers): zlib structs, delegates,
@@ -285,8 +288,8 @@ Generated FFI bindings linked against real native libraries.
 | `e2e-simple` | Single partition, simple.h, widgets + unions + anonymous nested types |
 | `e2e-multi` | Multi-partition, cross-namespace type references |
 | `e2e-zlib` | System header, real libz.so, compress/uncompress roundtrip |
-| `bnd-posix` | Real libc: 16 POSIX API families (file I/O, mmap, dirent, stat, sockets, inet, netdb, signal, dl, errno, sched, time, pthread, stdio, types, unistd) |
-| `bnd-openssl` | Real libssl + libcrypto: 8 partitions, opaque typedefs, multi-library, cross-WinMD refs to bnd-posix |
+| `bnd-linux` | Real libc: 16 POSIX API families (file I/O, mmap, dirent, stat, sockets, inet, netdb, signal, dl, errno, sched, time, pthread, stdio, types, unistd) |
+| `bnd-openssl` | Real libssl + libcrypto: 8 partitions, opaque typedefs, multi-library, cross-WinMD refs to bnd-linux |
 
 ### Doc Tests + Freshness Test
 
@@ -338,7 +341,7 @@ merged reader resolves types by `(namespace, name)` across all loaded
 winmds.
 
 First consumer: `bnd-openssl` imports POSIX types (`tm`, `_IO_FILE`,
-`pthread_once_t`, `off_t`, etc.) from `bnd-posix.winmd` instead of
+`pthread_once_t`, `off_t`, etc.) from `bnd-linux.winmd` instead of
 re-extracting glibc headers. See [CrossWinmdReferences.md](CrossWinmdReferences.md).
 
 ### `windows-bindgen` Compatibility Conventions
@@ -368,7 +371,7 @@ All of the above are implemented and verified by tests.
 | Emission (model → winmd) | ~430 | `emit.rs` |
 | Roundtrip tests | ~1,340 | 5 files |
 | E2E test crates (simple/multi/zlib) | ~530 | 3 crates |
-| bnd-posix E2E tests | ~2,000 | 14 files |
+| bnd-linux E2E tests | ~2,000 | 14 files |
 | bnd-openssl E2E tests | ~370 | 7 files |
 | **Total (bnd-winmd library)** | **~1,855** | |
 | **Total (library + all tests)** | **~6,095** | |

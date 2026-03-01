@@ -258,8 +258,8 @@ Key points:
 | `tests/e2e-simple/` (build.rs, `--flat`) | ✅ |
 | `tests/e2e-multi/` (build.rs, namespaced) | ✅ |
 | `tests/e2e-zlib/` (build.rs, `--flat`, real libz.so) | ✅ |
-| `bnd-posix/` (package mode, POSIX syscalls) | ✅ |
-| `bnd-posix-gen/` (generator, `--package` mode) | ✅ |
+| `bnd-linux/` (package mode, POSIX + Linux syscalls) | ✅ |
+| `bnd-linux-gen/` (generator, `--package` mode) | ✅ |
 | Multi-header wrapper generation (`config.rs`) | ✅ |
 | Clang singleton fix (`AllWinmd` LazyLock) | ✅ |
 | roundtrip + e2e + doc-tests | ✅ **all passing, 0 warnings** |

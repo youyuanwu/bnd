@@ -1,0 +1,37 @@
+[package]
+name = "bnd-linux-tests"
+version = "0.0.1"
+edition.workspace = true
+publish = false
+
+[dependencies]
+bnd-linux = { path = "../../bnd-linux", features = [
+    "linux",
+    "linux_epoll",
+    "linux_eventfd",
+    "linux_inotify",
+    "linux_mount",
+    "linux_sendfile",
+    "linux_signalfd",
+    "linux_timerfd",
+    "linux_types",
+    "linux_xattr",
+    "posix",
+    "posix_dirent",
+    "posix_dl",
+    "posix_errno",
+    "posix_fcntl",
+    "posix_inet",
+    "posix_mmap",
+    "posix_netdb",
+    "posix_pthread",
+    "posix_sched",
+    "posix_signal",
+    "posix_socket",
+    "posix_stat",
+    "posix_stdio",
+    "posix_time",
+    "posix_types",
+    "posix_unistd",
+] }
+libc = "0.2"

@@ -4,11 +4,11 @@ include_paths = ["/usr/include/x86_64-linux-gnu", "/usr/include"]
 name = "openssl"
 file = "openssl.winmd"
 
-# Import POSIX types from the bnd-posix winmd so that struct tm, _IO_FILE,
+# Import POSIX types from the bnd-linux winmd so that struct tm, _IO_FILE,
 # etc. are emitted as TypeRefs instead of being extracted locally.
 [[type_import]]
-winmd = "../bnd-posix/winmd/bnd-posix.winmd"
-namespace = "posix"
+winmd = "../bnd-linux/winmd/bnd-linux.winmd"
+namespace = "libc"
 
 # Partition 1: Opaque type forward declarations
 # 120 typedef struct foo_st FOO patterns — no functions

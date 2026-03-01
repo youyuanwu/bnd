@@ -9,7 +9,7 @@ license.workspace = true
 readme = "README.md"
 
 [dependencies]
-bnd-posix = { path = "../bnd-posix", features = ["time", "stdio", "pthread", "types"] }
+bnd-linux = { path = "../bnd-linux", features = ["posix_time", "posix_stdio", "posix_pthread", "posix_types"] }
 windows-link.workspace = true
 
 [features]

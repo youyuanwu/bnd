@@ -272,5 +272,5 @@ fn version_returns_nonzero() {
 ## Reference implementations
 
 - [`bnd-openssl`](../../bnd-openssl/) / [`bnd-openssl-gen`](../../bnd-openssl-gen/) — multi-partition, two shared libraries
-- [`bnd-posix`](../../bnd-posix/) / [`bnd-posix-gen`](../../bnd-posix-gen/) — 15 partitions, single shared library
+- [`bnd-linux`](../../bnd-linux/) / [`bnd-linux-gen`](../../bnd-linux-gen/) — POSIX + Linux partitions, single shared library
 - [`tests/fixtures/simple/simple.toml`](../../tests/fixtures/simple/simple.toml) — minimal single-partition example
