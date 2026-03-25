@@ -308,4 +308,29 @@ mod tests {
         // even though it only has 8 bytes of fields (x: i32, y: i32).
         assert_eq!(std::mem::size_of::<CacheAligned>(), 64);
     }
+
+    #[test]
+    fn test_cacheline_aligned_embedded() {
+        // AlignedInner has __attribute__((aligned(64))), sizeof == 64.
+        assert_eq!(std::mem::size_of::<AlignedInner>(), 64);
+
+        // EmbeddingAligned embeds AlignedInner. In C, the aligned_member
+        // field starts at offset 64 (not 16) due to the alignment attribute.
+        // Total C sizeof: 64 (padding) + 64 (AlignedInner) + 4 (after) + padding = 192.
+        assert_eq!(
+            std::mem::size_of::<EmbeddingAligned>(),
+            192,
+            "EmbeddingAligned size must match C layout (with cacheline padding)"
+        );
+        assert_eq!(
+            std::mem::offset_of!(EmbeddingAligned, aligned_member),
+            64,
+            "aligned_member must start at offset 64 (cacheline aligned)"
+        );
+        assert_eq!(
+            std::mem::offset_of!(EmbeddingAligned, after),
+            128,
+            "after must follow aligned_member at offset 128"
+        );
+    }
 }

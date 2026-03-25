@@ -12,6 +12,18 @@ windows_link::link!("simple" "C" fn create_widget(name : *const i8, bounds : Rec
 windows_link::link!("simple" "C" fn destroy_widget(w : *mut Widget));
 windows_link::link!("simple" "C" fn widget_count() -> i32);
 windows_link::link!("simple" "C" fn widget_is_visible(w : *const Widget) -> bool);
+#[repr(C, packed(64))]
+#[derive(Clone, Copy)]
+pub struct AlignedInner {
+    pub a: i64,
+    pub b: i64,
+    pub _padding: [u8; 48],
+}
+impl Default for AlignedInner {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
 pub const BF_KIND_FLAG: u32 = 1u32;
 pub const BF_KIND_NONE: u32 = 0u32;
 pub const BF_KIND_VALUE: u32 = 2u32;
@@ -40,6 +52,21 @@ pub type CompareFunc = Option<
 >;
 pub const DEFAULT_HEIGHT: i32 = 600i32;
 pub const DEFAULT_WIDTH: i32 = 800i32;
+#[repr(C, packed(64))]
+#[derive(Clone, Copy)]
+pub struct EmbeddingAligned {
+    pub before_a: i64,
+    pub before_b: i64,
+    pub _pad_0: [u8; 48],
+    pub aligned_member: AlignedInner,
+    pub after: i32,
+    pub _padding: [u8; 60],
+}
+impl Default for EmbeddingAligned {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]
 pub struct HasAnonUnion {

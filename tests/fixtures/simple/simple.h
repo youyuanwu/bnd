@@ -123,3 +123,19 @@ struct WithAnonArrayField {
     } entries[4];
     int count;
 };
+
+// Struct embedding a cache-aligned struct — tests inter-field padding.
+// The embedded `aligned_member` field must start at offset 64 (not at
+// offset 16 which is where natural alignment would place it).
+// This reproduces the ____cacheline_aligned_in_smp kernel bug.
+struct AlignedInner {
+    long a;
+    long b;
+} __attribute__((aligned(64)));
+
+struct EmbeddingAligned {
+    long before_a;
+    long before_b;
+    struct AlignedInner aligned_member;
+    int after;
+};

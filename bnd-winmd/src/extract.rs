@@ -3,7 +3,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{Context, Result};
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 use clang::{
     CallingConvention, Entity, EntityKind, Index, Type as ClangType, TypeKind,
@@ -452,6 +452,11 @@ fn extract_struct_from_entity(
     let mut fields = Vec::new();
     let mut nested_types = Vec::new();
     let mut anon_counter = 0u32;
+    // Parallel vec: clang byte-offset for each field pushed into `fields`.
+    // Used after bitfield flattening to insert inter-field alignment padding.
+    let mut field_offsets: Vec<Option<usize>> = Vec::new();
+    // Parallel vec: field size in bytes (from clang or extracted struct).
+    let mut field_sizes: Vec<usize> = Vec::new();
     let children: Vec<_> = entity.get_children();
 
     // Collect entity IDs of anonymous record decls that have an explicit
@@ -515,6 +520,10 @@ fn extract_struct_from_entity(
                             bitfield_width: None,
                             bitfield_offset: None,
                         });
+                        // Anonymous members don't have a FieldDecl with
+                        // get_offset_of_field(); offset unknown.
+                        field_offsets.push(None);
+                        field_sizes.push(nested.size);
                         nested_types.push(nested);
                         nested_types.append(&mut more);
                     }
@@ -558,6 +567,15 @@ fn extract_struct_from_entity(
         };
 
         trace!(field = %field_name, ty = ?ctype, bitfield_width, bitfield_offset, "  field");
+        // Record clang byte-offset for non-bitfield fields.
+        let clang_offset = if !child.is_bit_field() {
+            child.get_offset_of_field().ok().map(|bits| bits / 8)
+        } else {
+            None
+        };
+        let clang_field_size = field_type.get_sizeof().unwrap_or(0);
+        field_offsets.push(clang_offset);
+        field_sizes.push(clang_field_size);
         fields.push(FieldDef {
             name: field_name,
             ty: ctype,
@@ -571,69 +589,17 @@ fn extract_struct_from_entity(
     // bitfields that pack into the same storage unit (determined by
     // bitfield_offset continuity) are merged into one field.
     if !is_union {
-        fields = flatten_bitfields(fields, name);
+        fields = flatten_bitfields(fields, name, &mut field_offsets, &mut field_sizes);
     }
 
-    // Append trailing padding if clang's sizeof exceeds what repr(C)
-    // layout would produce from the fields alone. This handles
-    // `__attribute__((aligned(N)))` which rounds the struct size up
-    // beyond the natural field-based padding that windows-bindgen
-    // computes from packed(N).
-    //
-    // windows-bindgen computes size from fields, rounding up to the
-    // maximum field alignment (not the struct's declared alignment).
-    // We approximate this by rounding last_field_end up to the largest
-    // individual field's natural alignment.
+    // Insert inter-field and trailing padding based on clang's actual
+    // field offsets. This handles `__attribute__((aligned(N)))` on embedded
+    // struct fields (e.g. ____cacheline_aligned_in_smp) where repr(C)
+    // natural alignment would place the field at the wrong offset, as well
+    // as trailing padding for alignment attributes on the struct itself.
     if size > 0 && !fields.is_empty() && !is_union {
-        let mut last_field_end: usize = 0;
-        let mut max_field_align: usize = 1;
-        for child in &children {
-            if child.get_kind() != EntityKind::FieldDecl {
-                continue;
-            }
-            if let Ok(offset_bits) = child.get_offset_of_field() {
-                let offset_bytes = offset_bits / 8;
-                let field_ty = child.get_type();
-                let field_size = field_ty
-                    .as_ref()
-                    .and_then(|t| t.get_sizeof().ok())
-                    .unwrap_or(0);
-                let field_align = field_ty
-                    .as_ref()
-                    .and_then(|t| t.get_alignof().ok())
-                    .unwrap_or(1);
-                let end = offset_bytes + field_size;
-                if end > last_field_end {
-                    last_field_end = end;
-                }
-                if field_align > max_field_align {
-                    max_field_align = field_align;
-                }
-            }
-        }
-        if last_field_end > 0 && max_field_align > 0 {
-            let natural_size = (last_field_end + max_field_align - 1) & !(max_field_align - 1);
-            if size > natural_size {
-                let trailing_pad = size - last_field_end;
-                debug!(
-                    name = %name,
-                    struct_size = size,
-                    natural_size,
-                    last_field_end,
-                    trailing_pad,
-                    "appending trailing padding for alignment attribute"
-                );
-                fields.push(FieldDef {
-                    name: "_padding".to_string(),
-                    ty: CType::Array {
-                        element: Box::new(CType::U8),
-                        len: trailing_pad,
-                    },
-                    bitfield_width: None,
-                    bitfield_offset: None,
-                });
-            }
-        }
+        fields =
+            insert_alignment_padding(fields, &field_offsets, &field_sizes, &children, size, name);
     }
 
     Ok((
@@ -656,26 +622,39 @@ fn extract_struct_from_entity(
 /// integer field sized to cover the group's total bit span.
 ///
 /// Non-bitfield fields pass through unchanged.
-fn flatten_bitfields(fields: Vec<FieldDef>, struct_name: &str) -> Vec<FieldDef> {
+///
+/// `field_offsets` is updated in parallel: merged groups keep the first
+/// field's offset entry; extra entries are removed.
+fn flatten_bitfields(
+    fields: Vec<FieldDef>,
+    struct_name: &str,
+    field_offsets: &mut Vec<Option<usize>>,
+    field_sizes: &mut Vec<usize>,
+) -> Vec<FieldDef> {
     if !fields.iter().any(|f| f.bitfield_width.is_some()) {
         return fields;
     }
 
     let mut result: Vec<FieldDef> = Vec::new();
+    let mut new_offsets: Vec<Option<usize>> = Vec::new();
+    let mut new_sizes: Vec<usize> = Vec::new();
     // Accumulator for the current group of adjacent bitfields.
-    let mut group: Vec<&FieldDef> = Vec::new();
+    let mut group: Vec<(usize, &FieldDef)> = Vec::new(); // (original index, field)
     let mut group_index = 0u32;
 
-    let flush_group = |group: &mut Vec<&FieldDef>,
+    let flush_group = |group: &mut Vec<(usize, &FieldDef)>,
                        result: &mut Vec<FieldDef>,
+                       new_offsets: &mut Vec<Option<usize>>,
+                       new_sizes: &mut Vec<usize>,
+                       field_offsets: &[Option<usize>],
                        group_index: &mut u32,
                        struct_name: &str| {
         if group.is_empty() {
             return;
         }
-        let first = group[0];
+        let (first_idx, first) = group[0];
         let group_start = first.bitfield_offset.unwrap_or(0);
-        let last = group[group.len() - 1];
+        let (_, last) = group[group.len() - 1];
         let group_end = last.bitfield_offset.unwrap_or(0) + last.bitfield_width.unwrap_or(0);
         let total_bits = group_end - group_start;
 
@@ -684,7 +663,7 @@ fn flatten_bitfields(fields: Vec<FieldDef>, struct_name: &str) -> Vec<FieldDef> 
             (first.name.clone(), smallest_int_for_bits(total_bits))
         } else {
             // Merged group: synthetic name, covering type.
-            let names: Vec<&str> = group.iter().map(|f| f.name.as_str()).collect();
+            let names: Vec<&str> = group.iter().map(|(_, f)| f.name.as_str()).collect();
             debug!(
                 struct_name = %struct_name,
                 fields = ?names,
@@ -696,6 +675,13 @@ fn flatten_bitfields(fields: Vec<FieldDef>, struct_name: &str) -> Vec<FieldDef> 
                 smallest_int_for_bits(total_bits),
             )
         };
+        let merged_size = match &ty {
+            CType::U8 => 1,
+            CType::U16 => 2,
+            CType::U32 => 4,
+            CType::U64 => 8,
+            _ => 0,
+        };
         *group_index += 1;
 
         result.push(FieldDef {
@@ -704,34 +690,66 @@ fn flatten_bitfields(fields: Vec<FieldDef>, struct_name: &str) -> Vec<FieldDef> 
             bitfield_width: None,
             bitfield_offset: None,
         });
+        // Keep the first field's offset for the merged group.
+        new_offsets.push(field_offsets.get(first_idx).copied().flatten());
+        new_sizes.push(merged_size);
         group.clear();
     };
 
-    for field in &fields {
+    for (i, field) in fields.iter().enumerate() {
         if let (Some(offset), Some(width)) = (field.bitfield_offset, field.bitfield_width) {
             // Check if this field is contiguous with the current group.
-            if let Some(last) = group.last() {
+            if let Some((_, last)) = group.last() {
                 let prev_end = last.bitfield_offset.unwrap_or(0) + last.bitfield_width.unwrap_or(0);
                 if offset != prev_end {
                     // Gap — flush the current group and start a new one.
-                    flush_group(&mut group, &mut result, &mut group_index, struct_name);
+                    flush_group(
+                        &mut group,
+                        &mut result,
+                        &mut new_offsets,
+                        &mut new_sizes,
+                        field_offsets,
+                        &mut group_index,
+                        struct_name,
+                    );
                 }
             }
             let _ = (offset, width); // used above via field
-            group.push(field);
+            group.push((i, field));
         } else {
             // Non-bitfield: flush any pending group, then pass through.
-            flush_group(&mut group, &mut result, &mut group_index, struct_name);
+            flush_group(
+                &mut group,
+                &mut result,
+                &mut new_offsets,
+                &mut new_sizes,
+                field_offsets,
+                &mut group_index,
+                struct_name,
+            );
             result.push(FieldDef {
                 name: field.name.clone(),
                 ty: field.ty.clone(),
                 bitfield_width: None,
                 bitfield_offset: None,
             });
+            new_offsets.push(field_offsets.get(i).copied().flatten());
+            new_sizes.push(field_sizes.get(i).copied().unwrap_or(0));
         }
     }
     // Flush any trailing group.
-    flush_group(&mut group, &mut result, &mut group_index, struct_name);
+    flush_group(
+        &mut group,
+        &mut result,
+        &mut new_offsets,
+        &mut new_sizes,
+        field_offsets,
+        &mut group_index,
+        struct_name,
+    );
+
+    *field_offsets = new_offsets;
+    *field_sizes = new_sizes;
     result
 }
 
@@ -743,6 +761,179 @@ fn smallest_int_for_bits(bits: usize) -> CType {
         17..=32 => CType::U32,
         _ => CType::U64,
     }
+}
+
+/// Insert inter-field and trailing padding so the generated struct matches
+/// clang's actual layout byte-for-byte.
+///
+/// For each field with a known clang offset, if the offset exceeds where
+/// `repr(C)` natural layout would place it, a `_pad_N: [u8; gap]` field is
+/// inserted before it. This handles `__attribute__((aligned(N)))` on
+/// embedded struct types (e.g. `____cacheline_aligned_in_smp`) where the
+/// field must start at a higher offset than natural alignment dictates.
+///
+/// After all fields, if `struct_size` exceeds the last field's end, trailing
+/// padding is appended.
+fn insert_alignment_padding(
+    fields: Vec<FieldDef>,
+    field_offsets: &[Option<usize>],
+    field_sizes: &[usize],
+    children: &[Entity],
+    struct_size: usize,
+    struct_name: &str,
+) -> Vec<FieldDef> {
+    // Build two alignment maps from clang entities:
+    // - field_align_map: clang's reported alignment for the field type (includes
+    //   alignment attributes like __attribute__((aligned(64))))
+    // - field_rust_align_map: the natural alignment that repr(C) would use in Rust
+    //   (max of the embedded type's field alignments, since windows-bindgen uses
+    //   packed(N) which sets max alignment, not min alignment)
+    let mut field_align_map: HashMap<String, usize> = HashMap::new();
+    let mut field_rust_align_map: HashMap<String, usize> = HashMap::new();
+    for child in children {
+        if child.get_kind() != EntityKind::FieldDecl {
+            continue;
+        }
+        if let Some(name) = child.get_name() {
+            let clang_type = child.get_type();
+            let clang_align = clang_type
+                .as_ref()
+                .and_then(|t| t.get_alignof().ok())
+                .unwrap_or(1);
+            field_align_map.insert(name.clone(), clang_align);
+
+            // For struct/union types, compute the max field alignment as
+            // the effective Rust-side alignment (what repr(C) will use).
+            let rust_align = clang_type
+                .as_ref()
+                .and_then(|t| {
+                    let canonical = t.get_canonical_type();
+                    if canonical.get_kind() == TypeKind::Record {
+                        let decl = canonical.get_declaration()?;
+                        let mut max_align: usize = 1;
+                        for field_child in decl.get_children() {
+                            if field_child.get_kind() == EntityKind::FieldDecl {
+                                let fa = field_child
+                                    .get_type()
+                                    .and_then(|ft| ft.get_alignof().ok())
+                                    .unwrap_or(1);
+                                if fa > max_align {
+                                    max_align = fa;
+                                }
+                            }
+                        }
+                        Some(max_align)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or(clang_align);
+            field_rust_align_map.insert(name, rust_align);
+        }
+    }
+
+    let mut result: Vec<FieldDef> = Vec::new();
+    let mut cursor: usize = 0; // expected byte position
+    let mut pad_counter = 0u32;
+
+    for (i, field) in fields.iter().enumerate() {
+        let clang_offset = field_offsets.get(i).copied().flatten();
+        let field_size = field_sizes.get(i).copied().unwrap_or(0);
+
+        if let Some(offset) = clang_offset {
+            // Compute where Rust's repr(C) would naturally place this field.
+            // Use the Rust-side alignment (max field alignment of embedded struct)
+            // rather than clang's type alignment, because windows-bindgen uses
+            // packed(N) which doesn't enforce min alignment from alignment attributes.
+            let rust_align = field_rust_align_map.get(&field.name).copied().unwrap_or(1);
+            let natural_offset = if rust_align > 0 {
+                (cursor + rust_align - 1) & !(rust_align - 1)
+            } else {
+                cursor
+            };
+
+            // Only insert explicit padding when clang's offset exceeds
+            // the natural repr(C) position — this means the field has an
+            // alignment attribute (e.g. ____cacheline_aligned) that forces
+            // it beyond natural alignment.
+            if offset > natural_offset {
+                let gap = offset - cursor;
+                debug!(
+                    name = %struct_name,
+                    field = %field.name,
+                    expected_offset = natural_offset,
+                    actual_offset = offset,
+                    gap,
+                    "inserting inter-field alignment padding (beyond natural alignment)"
+                );
+                result.push(FieldDef {
+                    name: format!("_pad_{pad_counter}"),
+                    ty: CType::Array {
+                        element: Box::new(CType::U8),
+                        len: gap,
+                    },
+                    bitfield_width: None,
+                    bitfield_offset: None,
+                });
+                pad_counter += 1;
+            }
+            cursor = offset;
+        }
+
+        cursor += field_size;
+
+        result.push(FieldDef {
+            name: field.name.clone(),
+            ty: field.ty.clone(),
+            bitfield_width: field.bitfield_width,
+            bitfield_offset: field.bitfield_offset,
+        });
+    }
+
+    // Trailing padding: if struct_size exceeds the natural repr(C) size.
+    // Use the max Rust-side field alignment (not clang's, which includes
+    // alignment attributes that packed(N) doesn't enforce).
+    if struct_size > cursor {
+        let mut max_rust_field_align: usize = 1;
+        for child in children {
+            if child.get_kind() != EntityKind::FieldDecl {
+                continue;
+            }
+            if let Some(name) = child.get_name() {
+                let ra = field_rust_align_map.get(&name).copied().unwrap_or(1);
+                if ra > max_rust_field_align {
+                    max_rust_field_align = ra;
+                }
+            }
+        }
+        let natural_size = if max_rust_field_align > 0 {
+            (cursor + max_rust_field_align - 1) & !(max_rust_field_align - 1)
+        } else {
+            cursor
+        };
+        if struct_size > natural_size {
+            let trailing = struct_size - cursor;
+            debug!(
+                name = %struct_name,
+                struct_size,
+                natural_size,
+                last_field_end = cursor,
+                trailing,
+                "appending trailing padding for alignment attribute"
+            );
+            result.push(FieldDef {
+                name: "_padding".to_string(),
+                ty: CType::Array {
+                    element: Box::new(CType::U8),
+                    len: trailing,
+                },
+                bitfield_width: None,
+                bitfield_offset: None,
+            });
+        }
+    }
+
+    result
 }
 
 /// Try to extract an anonymous record field type as a synthetic named type.
