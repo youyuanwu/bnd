@@ -137,7 +137,7 @@ impl Default for Widget {
 #[repr(C, packed(4))]
 #[derive(Clone, Copy)]
 pub struct WithAnon2DArrayField {
-    pub tc_rxq: [[WithAnon2DArrayField_tc_rxq; 8]; 1],
+    pub tc_rxq: [[WithAnon2DArrayField_tc_rxq; 8]; 4],
     pub count: i32,
 }
 impl Default for WithAnon2DArrayField {

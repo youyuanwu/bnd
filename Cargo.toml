@@ -18,8 +18,8 @@ tempfile = "3"
 toml = "1"
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-windows-bindgen = "0.66"
-# windows-bindgen = { path = "../windows-rs/crates/libs/bindgen"}
+# windows-bindgen = "0.66"
+windows-bindgen = { path = "../windows-rs/crates/libs/bindgen"}
 windows-metadata = "0.60"
 
 # Crate in this repo.
