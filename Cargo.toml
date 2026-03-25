@@ -23,5 +23,5 @@ windows-bindgen = "0.66"
 windows-metadata = "0.60"
 
 # Crate in this repo.
-bnd-winmd = { path = "bnd-winmd" , version = "0.0.6" }
+bnd-winmd = { path = "bnd-winmd" , version = "0.0.7" }
 bnd-macros = { path = "bnd-macros", version = "0.0.6" }
