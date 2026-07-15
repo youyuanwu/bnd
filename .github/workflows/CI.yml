@@ -10,7 +10,7 @@ jobs:
         os: [ ubuntu-latest ]
         rust: [ 1.97.0 ]
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v7
 
     - name: Install system dependencies
       run: sudo apt-get update && sudo apt-get install -y libclang-dev zlib1g-dev
