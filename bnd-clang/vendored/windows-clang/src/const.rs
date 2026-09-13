@@ -235,6 +235,7 @@ impl Const {
         args: &[&str],
     ) -> Result<Vec<Self>, Error> {
         let eval_args = with_unlimited_errors(args);
+        let c_mode = uses_c_probe(args);
         let mut results = vec![];
         // Swallowed probes are split until a singleton poison macro can be dropped.
         let mut queue: Vec<Vec<String>> = vec![names.to_vec()];
@@ -245,7 +246,7 @@ impl Const {
                 if !name.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
                     continue;
                 }
-                source.push_str(&eval_probe(name));
+                source.push_str(&eval_probe(name, c_mode));
             }
             let tu =
                 index.parse_unsaved(synthetic, &source, &eval_args, CXTranslationUnit_KeepGoing)?;
@@ -282,6 +283,29 @@ fn with_unlimited_errors<'a>(args: &[&'a str]) -> Vec<&'a str> {
     out
 }
 
+fn uses_c_probe(args: &[&str]) -> bool {
+    let mut language = None;
+    let mut expects_language = false;
+
+    for arg in args {
+        if expects_language {
+            language = Some(*arg);
+            expects_language = false;
+        } else if *arg == "-x" {
+            expects_language = true;
+        } else if let Some(value) = arg.strip_prefix("-x")
+            && !value.is_empty()
+        {
+            language = Some(value);
+        }
+    }
+
+    matches!(
+        language,
+        Some("c" | "c-header" | "objective-c" | "objective-c-header")
+    )
+}
+
 /// Counts top-level comma-separated macro-expansion results for the shape gate.
 /// This rejects GUID initializer lists before the C comma operator can fold them to an integer.
 const NARG_PROLOGUE: &str = "\
@@ -292,9 +316,14 @@ const NARG_PROLOGUE: &str = "\
 /// width, and signedness. `& 0` rejects pointer/string/floating expressions, while
 /// `__RDL_NARG` catches post-expansion comma lists such as GUID initializers.
 /// Validity is read from recovered enum values, not diagnostics.
-fn eval_probe(name: &str) -> String {
+fn eval_probe(name: &str, c_mode: bool) -> String {
+    let value_probe = if c_mode {
+        format!("static const __auto_type __rdl_eval_{name} = ({name});")
+    } else {
+        format!("constexpr auto __rdl_eval_{name} = ({name});")
+    };
     format!(
-        "constexpr auto __rdl_eval_{name} = ({name});\n\
+        "{value_probe}\n\
          enum {{ __rdl_ok_{name} = (({name}) & 0) + 1 }};\n\
          enum {{ __rdl_nc_{name} = __RDL_NARG({name}) }};\n\
          enum {{ __rdl_sz_{name} = sizeof({name}) }};\n\

@@ -4,9 +4,15 @@ pub mod __sigset_t;
 pub mod epoll;
 #[cfg(feature = "eventfd")]
 pub mod eventfd;
+#[cfg(feature = "inotify")]
+pub mod inotify;
 #[cfg(feature = "sendfile")]
 pub mod sendfile;
+#[cfg(feature = "struct_itimerspec")]
+pub mod struct_itimerspec;
 #[cfg(feature = "struct_timespec")]
 pub mod struct_timespec;
+#[cfg(feature = "timerfd")]
+pub mod timerfd;
 #[cfg(feature = "types")]
 pub mod types;

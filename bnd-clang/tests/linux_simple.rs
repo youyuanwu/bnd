@@ -186,6 +186,40 @@ fn generates_bool_function_and_conditional_constant() {
 }
 
 #[test]
+fn generates_c_expression_macros() {
+    let index = open_index();
+    let apis = index.expect("SimpleTest", "Apis");
+
+    let combined = apis
+        .fields()
+        .find(|field| field.name() == "COMBINED_FLAGS")
+        .expect("COMBINED_FLAGS constant");
+    assert_eq!(
+        combined.constant().expect("COMBINED_FLAGS value").value(),
+        windows_metadata::Value::I32(3)
+    );
+
+    let high_bit = apis
+        .fields()
+        .find(|field| field.name() == "HIGH_BIT")
+        .expect("HIGH_BIT constant");
+    assert_eq!(
+        high_bit.constant().expect("HIGH_BIT value").value(),
+        windows_metadata::Value::U32(1 << 31)
+    );
+
+    let buffer_bytes = apis
+        .fields()
+        .find(|field| field.name() == "BUFFER_BYTES")
+        .expect("BUFFER_BYTES constant");
+    assert_eq!(buffer_bytes.ty(), windows_metadata::Type::USize);
+    assert_eq!(
+        buffer_bytes.constant().expect("BUFFER_BYTES value").value(),
+        windows_metadata::Value::U32(16)
+    );
+}
+
+#[test]
 fn skips_unsupported_int128_typedefs() {
     let index = open_index();
     let types: Vec<_> = index.types().map(|ty| ty.name()).collect();
