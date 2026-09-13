@@ -53,10 +53,6 @@ impl TypeTree {
         types
     }
 
-    pub fn feature(&self) -> String {
-        namespace_feature(self.namespace)
-    }
-
     fn with_namespace(namespace: &'static str) -> Self {
         Self {
             namespace,

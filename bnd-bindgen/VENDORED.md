@@ -11,10 +11,19 @@ This crate contains an experimental fork of `windows-bindgen`.
 | Vendored directory | `vendored/windows-bindgen` |
 | License | MIT OR Apache-2.0 |
 
-The vendored directory is an unmodified copy of the upstream crate at the
+The vendored directory started as an exact copy of the upstream crate at the
 recorded revision, including its original manifest, README, and license
 files. The bnd package manifest lives one level above it and points its
 library target at the vendored source.
 
 Local experiments should modify files under `vendored/windows-bindgen` so
 the fork remains easy to compare with upstream.
+
+## Local changes
+
+- Package feature dependencies can use an explicitly configured root
+  namespace without flattening its Rust module hierarchy.
+- Namespace path segments use Rust keyword escaping, allowing header-derived
+  modules such as `libc::r#in` to be referenced from sibling modules.
+- String constants in portable `libc` sys packages use inline
+  NUL-terminated pointers instead of requiring `windows-sys` string wrappers.

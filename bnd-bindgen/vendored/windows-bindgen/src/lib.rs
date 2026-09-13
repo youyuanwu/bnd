@@ -91,6 +91,7 @@ pub struct Bindgen {
     compose: Vec<String>,
     rustfmt: Option<String>,
     layout: Layout,
+    package_feature_root: Option<String>,
     style: Style,
     dead_code: bool,
 }
@@ -336,6 +337,43 @@ impl Bindgen {
         self
     }
 
+    /// Treats the given top-level package namespace as a feature-only root
+    /// whose child namespaces depend directly on one another.
+    pub fn package_feature_root(&mut self, namespace: &str) -> &mut Self {
+        assert!(
+            !namespace.is_empty() && !namespace.contains('.'),
+            "package feature root must be a top-level namespace"
+        );
+        self.package_feature_root = Some(namespace.to_string());
+        self
+    }
+
+    fn is_package_feature_root(&self, namespace: &str) -> bool {
+        is_flat_container(namespace) || self.package_feature_root.as_deref() == Some(namespace)
+    }
+
+    fn package_feature_root_contains(&self, namespace: &str) -> bool {
+        self.package_feature_root.as_deref().is_none_or(|root| {
+            namespace == root
+                || namespace
+                    .strip_prefix(root)
+                    .is_some_and(|suffix| suffix.starts_with('.'))
+        })
+    }
+
+    fn package_feature(&self, namespace: &str) -> String {
+        if let Some(root) = &self.package_feature_root {
+            if let Some(relative) = namespace
+                .strip_prefix(root)
+                .and_then(|relative| relative.strip_prefix('.'))
+            {
+                return relative.replace('.', "_");
+            }
+            return namespace.replace('.', "_");
+        }
+        namespace_feature(namespace)
+    }
+
     /// Includes implementation traits for every WinRT interface in scope.
     #[track_caller]
     pub fn implement_all(&mut self) -> &mut Self {
@@ -462,6 +500,10 @@ impl Bindgen {
         assert!(
             self.compose.is_empty() || self.style.is_minimal(),
             "`compose` requires `minimal`"
+        );
+        assert!(
+            self.package_feature_root.is_none() || self.layout.is_package(),
+            "`package_feature_root` requires `package`"
         );
 
         let mut include: Vec<&str> = vec![];
@@ -910,6 +952,26 @@ mod tests {
                 "Other.Third".to_string()
             ]
         );
+    }
+
+    #[test]
+    fn custom_package_feature_root_is_generic() {
+        let mut builder = Bindgen::new();
+        builder.package().package_feature_root("Company");
+
+        assert!(builder.is_package_feature_root("Company"));
+        assert!(builder.package_feature_root_contains("Company.Network"));
+        assert!(!builder.package_feature_root_contains("Other.Network"));
+        assert_eq!(
+            builder.package_feature("Company.Network.Socket"),
+            "Network_Socket"
+        );
+    }
+
+    #[test]
+    #[should_panic(expected = "package feature root must be a top-level namespace")]
+    fn nested_package_feature_root_panics() {
+        Bindgen::new().package_feature_root("Company.Native");
     }
 
     #[test]

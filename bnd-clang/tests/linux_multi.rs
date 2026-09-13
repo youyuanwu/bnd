@@ -105,6 +105,107 @@ fn header_scope_keeps_only_roots_and_reachable_types() {
 }
 
 #[test]
+fn symbol_filter_keeps_function_type_typedef_dependency() {
+    let temp = tempfile::tempdir().expect("create temporary output directory");
+    let header = temp.path().join("callbacks.h");
+    let rdl = temp.path().join("callbacks.rdl");
+    let winmd = temp.path().join("callbacks.winmd");
+    std::fs::write(
+        &header,
+        "typedef int Callback(void* context);\n\
+         void consume(Callback* callback);\n\
+         void ignored(void);\n",
+    )
+    .expect("write callback fixture");
+
+    windows_clang::clang()
+        .input(&header)
+        .args(["-x", "c", "-std=c11"])
+        .namespace("CallbackFilter")
+        .library("simple")
+        .symbol("consume")
+        .output(&rdl)
+        .write()
+        .expect("generate symbol-filtered callback RDL");
+    windows_rdl::reader()
+        .input(&rdl)
+        .output(&winmd)
+        .write()
+        .expect("compile callback RDL");
+
+    let file =
+        windows_metadata::reader::File::new(std::fs::read(winmd).expect("read callback WinMD"))
+            .expect("parse callback WinMD");
+    let index = windows_metadata::reader::Index::new(vec![file]);
+    index.expect("CallbackFilter", "Callback");
+    let methods: Vec<_> = index
+        .expect("CallbackFilter", "Apis")
+        .methods()
+        .map(|method| method.name())
+        .collect();
+    assert_eq!(methods, ["consume"]);
+}
+
+#[test]
+fn unsupported_layout_propagates_through_cpp_bases() {
+    let temp = tempfile::tempdir().expect("create temporary output directory");
+    let header = temp.path().join("inheritance.hpp");
+    let rdl = temp.path().join("inheritance.rdl");
+    let winmd = temp.path().join("inheritance.winmd");
+    std::fs::write(
+        &header,
+        "typedef struct { char bytes[104]; } Bad __attribute__((aligned(16)));\n\
+         struct Base { Bad* value; };\n\
+         struct Derived : Base { int value; };\n\
+         struct Rejected { Bad* bad; struct Kept { int value; } child; };\n\
+         struct Outer { struct Nested { Bad* value; }; int value; };\n\
+         class IExample { public: virtual void use(Bad* value) = 0; };\n\
+         class IDerived : public IExample { public: virtual void other() = 0; };\n\
+         class IGood { public: virtual void use(int value) = 0; };\n\
+         void consume(Derived* value);\n\
+         void consume_outer(Outer* value);\n\
+         void kept_nested(Rejected::Kept* value);\n\
+         int kept(void);\n",
+    )
+    .expect("write inheritance fixture");
+
+    windows_clang::clang()
+        .input(&header)
+        .args(["-x", "c++", "-std=c++20"])
+        .namespace("Inheritance")
+        .library("simple")
+        .output(&rdl)
+        .write()
+        .expect("generate inheritance RDL");
+    windows_rdl::reader()
+        .input(&rdl)
+        .output(&winmd)
+        .write()
+        .expect("compile inheritance RDL");
+
+    let file =
+        windows_metadata::reader::File::new(std::fs::read(winmd).expect("read inheritance WinMD"))
+            .expect("parse inheritance WinMD");
+    let index = windows_metadata::reader::Index::new(vec![file]);
+    let types: Vec<_> = index.types().map(|ty| ty.name()).collect();
+    for name in ["Bad", "Base", "Derived", "Rejected", "IExample", "IDerived"] {
+        assert!(!types.contains(&name), "{name} should be omitted");
+    }
+    for name in ["Outer", "IGood"] {
+        assert!(types.contains(&name), "{name} should be retained");
+    }
+    let methods: Vec<_> = index
+        .expect("Inheritance", "Apis")
+        .methods()
+        .map(|method| method.name())
+        .collect();
+    assert!(methods.contains(&"consume_outer"));
+    assert!(methods.contains(&"kept"));
+    assert!(methods.contains(&"kept_nested"));
+    assert!(!methods.contains(&"consume"));
+}
+
+#[test]
 fn generates_basic_types() {
     let index = open_index();
     let types: Vec<(String, String)> = index

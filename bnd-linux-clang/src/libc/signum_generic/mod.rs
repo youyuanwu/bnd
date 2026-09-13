@@ -1,0 +1,15 @@
+pub const SIGABRT: i32 = 6;
+pub const SIGALRM: i32 = 14;
+pub const SIGCLD: i32 = 17;
+pub const SIGFPE: i32 = 8;
+pub const SIGHUP: i32 = 1;
+pub const SIGILL: i32 = 4;
+pub const SIGINT: i32 = 2;
+pub const SIGIO: i32 = 29;
+pub const SIGIOT: i32 = 6;
+pub const SIGKILL: i32 = 9;
+pub const SIGPIPE: i32 = 13;
+pub const SIGQUIT: i32 = 3;
+pub const SIGSEGV: i32 = 11;
+pub const SIGTERM: i32 = 15;
+pub const SIGTRAP: i32 = 5;

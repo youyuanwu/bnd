@@ -102,10 +102,10 @@ impl CppConst {
 
             if field_ty == constant_ty {
                 if field_ty == Type::String {
-                    if config.bindgen.uses_inline_core_types() {
-                        // Sys bindings emit inline core types, so the w!/s!
-                        // macros are unavailable.
-                        // Emit an inline null-terminated array instead.
+                    if config.bindgen.style.is_sys() {
+                        // Portable sys bindings cannot rely on Windows string
+                        // wrappers or macros. Emit an inline null-terminated
+                        // array instead.
                         let (Value::Utf16(value_str) | Value::Utf8(value_str)) = constant.value()
                         else {
                             panic!("expected string constant")
@@ -114,7 +114,7 @@ impl CppConst {
                             let bytes: Vec<u8> =
                                 value_str.bytes().chain(std::iter::once(0)).collect();
                             let lit_bytes = bytes.iter().map(|b| Literal::u8_unsuffixed(*b));
-                            let ty = Type::PCSTR.write_name(config);
+                            let ty = quote! { *const u8 };
                             quote! {
                                 #cfg
                                 pub const #name: #ty = [#(#lit_bytes),*].as_ptr();
@@ -123,7 +123,7 @@ impl CppConst {
                             let units: Vec<u16> =
                                 value_str.encode_utf16().chain(std::iter::once(0)).collect();
                             let lit_units = units.iter().map(|u| Literal::u16_unsuffixed(*u));
-                            let ty = Type::PCWSTR.write_name(config);
+                            let ty = quote! { *const u16 };
                             quote! {
                                 #cfg
                                 pub const #name: #ty = [#(#lit_units),*].as_ptr();

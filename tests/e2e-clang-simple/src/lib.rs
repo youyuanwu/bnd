@@ -67,6 +67,15 @@ mod tests {
     }
 
     #[test]
+    fn stored_va_list_layout_matches_c_abi() {
+        assert_eq!(std::mem::size_of::<test_va_list>(), 24);
+        assert_eq!(std::mem::align_of::<test_va_list>(), 8);
+        assert_eq!(std::mem::size_of::<SavedVaList>(), 32);
+        assert_eq!(std::mem::align_of::<SavedVaList>(), 8);
+        assert_eq!(std::mem::offset_of!(SavedVaList, tail), 24);
+    }
+
+    #[test]
     fn generated_callback_uses_c_abi() {
         unsafe extern "C" fn compare(
             left: *const core::ffi::c_void,

@@ -718,6 +718,16 @@ impl Type {
         Self(unsafe { clang_getResultType(self.0) })
     }
 
+    pub fn fn_arg_types(&self) -> Vec<Self> {
+        let count = unsafe { clang_getNumArgTypes(self.0) };
+        if count < 0 {
+            return vec![];
+        }
+        (0..count)
+            .map(|index| Self(unsafe { clang_getArgType(self.0, index as u32) }))
+            .collect()
+    }
+
     pub fn array_element_type(&self) -> Self {
         Self(unsafe { clang_getArrayElementType(self.0) })
     }
@@ -835,6 +845,9 @@ impl Type {
                 }
                 let decl = self.ty();
                 let tag_name = decl.name();
+                if self.kind() == CXType_Record && decl.file_name().is_empty() {
+                    return metadata::Type::Void;
+                }
                 // Anonymous spellings need the declaration-location rename key.
                 let name = if is_anonymous_name(&tag_name) {
                     parser
@@ -914,12 +927,16 @@ impl Type {
             CXType_Pointer => {
                 let pointee = self.pointee_type();
                 // Function pointers emit separately as callbacks.
-                if pointee.kind() == CXType_FunctionProto
-                    || pointee.kind() == CXType_FunctionNoProto
-                {
+                if matches!(
+                    pointee.canonical_type().kind(),
+                    CXType_FunctionProto | CXType_FunctionNoProto
+                ) {
                     // Recover `NAME *` for pointers to function-type typedefs so delegate
                     // aliases use the named callback instead of an opaque pointer.
                     if let Some(name) = named_function_typedef_pointer(self) {
+                        if let Some(decl) = find_typedef(parser.tu.cursor(), &name) {
+                            parser.pending_typedefs.push(decl);
+                        }
                         let ns = parser
                             .ref_map
                             .get(&name)
@@ -1075,6 +1092,20 @@ fn named_function_typedef_pointer(ty: &Type) -> Option<String> {
     } else {
         None
     }
+}
+
+pub(crate) fn find_typedef(cursor: Cursor, name: &str) -> Option<Cursor> {
+    for child in cursor.children() {
+        if child.kind() == CXCursor_TypedefDecl && child.name() == name {
+            return Some(child);
+        }
+        if matches!(child.kind(), CXCursor_LinkageSpec | CXCursor_Namespace)
+            && let Some(found) = find_typedef(child, name)
+        {
+            return Some(found);
+        }
+    }
+    None
 }
 
 fn to_string(cxstr: CXString) -> String {

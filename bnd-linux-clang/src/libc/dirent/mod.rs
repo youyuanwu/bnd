@@ -1,0 +1,46 @@
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn alphasort(__e1 : *mut *mut dirent, __e2 : *mut *mut dirent) -> i32);
+windows_link::link!("c" "C" fn closedir(__dirp : *mut DIR) -> i32);
+windows_link::link!("c" "C" fn dirfd(__dirp : *mut DIR) -> i32);
+windows_link::link!("c" "C" fn fdopendir(__fd : i32) -> *mut DIR);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn getdirentries(__fd : i32, __buf : *mut i8, __nbytes : usize, __basep : *mut super::types::__off_t) -> super::types::__ssize_t);
+windows_link::link!("c" "C" fn opendir(__name : *const i8) -> *mut DIR);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn readdir(__dirp : *mut DIR) -> *mut dirent);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn readdir_r(__dirp : *mut DIR, __entry : *mut dirent, __result : *mut *mut dirent) -> i32);
+windows_link::link!("c" "C" fn rewinddir(__dirp : *mut DIR));
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn scandir(__dir : *const i8, __namelist : *mut *mut *mut dirent, __selector : *mut u8, __cmp : *mut u8) -> i32);
+windows_link::link!("c" "C" fn seekdir(__dirp : *mut DIR, __pos : i64));
+windows_link::link!("c" "C" fn telldir(__dirp : *mut DIR) -> i64);
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct DIR(pub u8);
+pub const DT_BLK: u32 = 6;
+pub const DT_CHR: u32 = 2;
+pub const DT_DIR: u32 = 4;
+pub const DT_FIFO: u32 = 1;
+pub const DT_LNK: u32 = 10;
+pub const DT_REG: u32 = 8;
+pub const DT_SOCK: u32 = 12;
+pub const DT_UNKNOWN: u32 = 0;
+pub const DT_WHT: u32 = 14;
+pub const MAXNAMLEN: i32 = 255;
+#[repr(C)]
+#[cfg(feature = "types")]
+#[derive(Clone, Copy)]
+pub struct dirent {
+    pub d_ino: super::types::__ino_t,
+    pub d_off: super::types::__off_t,
+    pub d_reclen: u16,
+    pub d_type: u8,
+    pub d_name: [i8; 256],
+}
+#[cfg(feature = "types")]
+impl Default for dirent {
+    fn default() -> Self {
+        unsafe { core::mem::zeroed() }
+    }
+}

@@ -1,0 +1,14 @@
+pub const SA_INTERRUPT: i32 = 536870912;
+pub const SA_NOCLDSTOP: i32 = 1;
+pub const SA_NOCLDWAIT: i32 = 2;
+pub const SA_NODEFER: i32 = 1073741824;
+pub const SA_NOMASK: i32 = 1073741824;
+pub const SA_ONESHOT: u32 = 2147483648;
+pub const SA_ONSTACK: i32 = 134217728;
+pub const SA_RESETHAND: u32 = 2147483648;
+pub const SA_RESTART: i32 = 268435456;
+pub const SA_SIGINFO: i32 = 4;
+pub const SA_STACK: i32 = 134217728;
+pub const SIG_BLOCK: i32 = 0;
+pub const SIG_SETMASK: i32 = 2;
+pub const SIG_UNBLOCK: i32 = 1;
