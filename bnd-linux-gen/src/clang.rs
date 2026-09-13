@@ -33,10 +33,13 @@ pub fn generate(output_dir: &Path) {
             "libc",
             "--sys",
             "--package",
+            "--package-feature-root",
+            "libc",
         ]);
     });
-    std::fs::write(manifest_path, manifest).expect("failed to restore bnd-linux-clang Cargo.toml");
     if let Err(payload) = generation {
+        std::fs::write(manifest_path, manifest)
+            .expect("failed to restore bnd-linux-clang Cargo.toml");
         std::panic::resume_unwind(payload);
     }
 }
@@ -48,15 +51,83 @@ fn generate_metadata(output_dir: &Path) -> PathBuf {
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-clang WinMD directory");
     let linux_winmd = winmd_dir.join("bnd-linux-clang.winmd");
 
-    const HEADERS: [&str; 6] = [
+    const HEADERS: &[&str] = &[
         "sys/types.h",
-        "sys/eventfd.h",
+        "fcntl.h",
+        "unistd.h",
+        "sys/stat.h",
+        "sys/mman.h",
+        "dirent.h",
+        "sys/socket.h",
+        "netinet/in.h",
+        "arpa/inet.h",
+        "netdb.h",
+        "signal.h",
+        "dlfcn.h",
+        "errno.h",
+        "sched.h",
+        "time.h",
+        "sys/time.h",
+        "pthread.h",
+        "stdio.h",
         "sys/epoll.h",
+        "sys/eventfd.h",
+        "sys/timerfd.h",
+        "sys/signalfd.h",
         "sys/inotify.h",
         "sys/sendfile.h",
-        "sys/timerfd.h",
+        "sys/xattr.h",
+        "sys/mount.h",
+        "linux/types.h",
     ];
-    const PARTITION_HEADERS: [&str; 11] = [
+    const PARTITION_HEADERS: &[&str] = &[
+        "dirent.h",
+        "bits/dirent.h",
+        "arpa/inet.h",
+        "dlfcn.h",
+        "bits/dlfcn.h",
+        "errno.h",
+        "bits/errno.h",
+        "linux/errno.h",
+        "asm/errno.h",
+        "asm-generic/errno.h",
+        "asm-generic/errno-base.h",
+        "fcntl.h",
+        "bits/fcntl-linux.h",
+        "linux/types.h",
+        "netdb.h",
+        "bits/netdb.h",
+        "netinet/in.h",
+        "signal.h",
+        "bits/sigaction.h",
+        "bits/signum-generic.h",
+        "bits/signum-arch.h",
+        "bits/sigcontext.h",
+        "bits/types/__sigset_t.h",
+        "bits/types/siginfo_t.h",
+        "bits/types/__sigval_t.h",
+        "bits/types/stack_t.h",
+        "bits/types/struct_sigstack.h",
+        "sched.h",
+        "bits/sched.h",
+        "bits/types/struct_sched_param.h",
+        "bits/cpu-set.h",
+        "pthread.h",
+        "bits/pthreadtypes.h",
+        "bits/thread-shared-types.h",
+        "bits/pthreadtypes-arch.h",
+        "bits/atomic_wide_counter.h",
+        "bits/struct_mutex.h",
+        "bits/struct_rwlock.h",
+        "bits/types/struct___jmp_buf_tag.h",
+        "bits/pthread_stack_min-dynamic.h",
+        "bits/pthread_stack_min.h",
+        "stdio.h",
+        "bits/stdio_lim.h",
+        "bits/types/__fpos_t.h",
+        "bits/types/__mbstate_t.h",
+        "bits/types/struct_FILE.h",
+        "bits/types/cookie_io_functions_t.h",
         "sys/types.h",
         "bits/types.h",
         "sys/eventfd.h",
@@ -65,20 +136,56 @@ fn generate_metadata(output_dir: &Path) -> PathBuf {
         "bits/epoll.h",
         "sys/inotify.h",
         "bits/inotify.h",
+        "sys/mman.h",
+        "bits/mman-linux.h",
+        "bits/mman-map-flags-generic.h",
+        "sys/mount.h",
         "sys/sendfile.h",
+        "sys/signalfd.h",
+        "bits/signalfd.h",
+        "sys/socket.h",
+        "bits/socket.h",
+        "bits/socket_type.h",
+        "bits/socket-constants.h",
+        "bits/types/struct_iovec.h",
+        "sys/stat.h",
+        "bits/struct_stat.h",
+        "bits/types/struct_timespec.h",
+        "sys/time.h",
         "sys/timerfd.h",
         "bits/timerfd.h",
+        "sys/xattr.h",
+        "time.h",
+        "bits/time.h",
+        "bits/types/clock_t.h",
+        "bits/types/struct_tm.h",
+        "bits/types/clockid_t.h",
+        "bits/types/timer_t.h",
+        "bits/types/struct_itimerspec.h",
+        "bits/types/struct_timeval.h",
+        "bits/types/locale_t.h",
+        "bits/types/__locale_t.h",
+        "unistd.h",
     ];
     let source = HEADERS
+        .iter()
         .map(|header| format!("#include <{header}>\n"))
-        .concat();
+        .collect::<String>();
 
     windows_clang::clang()
         .input_text(&source)
-        .args(["-x", "c", "-std=c11"])
+        .args(["-x", "c", "-std=gnu11", "-D_LINUX_MOUNT_H"])
         .namespace("libc")
         .library("c")
-        .scope_headers(PARTITION_HEADERS)
+        .libraries([
+            ("crypt", "crypt"),
+            ("inet_net_ntop", "resolv"),
+            ("inet_net_pton", "resolv"),
+            ("inet_neta", "resolv"),
+        ])
+        .include_macros(["_IOFBF", "_IOLBF", "_IONBF"])
+        .exclude_symbol("bindresvport6")
+        .scope_headers(PARTITION_HEADERS.iter().copied())
         .output(&rdl_dir)
         .write_by_header()
         .expect("bnd-clang failed to generate Linux RDL partitions");
@@ -239,19 +346,24 @@ mod tests {
             .map(|field| field.name())
             .collect();
         let methods: Vec<_> = apis.methods().collect();
-        let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
 
         assert!(constants.contains(&"EPOLL_CTL_ADD"));
         assert!(events.contains(&"EPOLLIN"));
         assert!(events.contains(&"EPOLLET"));
-        assert!(methods.iter().all(|method| {
-            method
-                .impl_map()
-                .is_some_and(|import| import.import_scope().name() == "c")
-        }));
-        assert!(method_names.contains(&"epoll_create1"));
-        assert!(method_names.contains(&"epoll_ctl"));
-        assert!(method_names.contains(&"epoll_wait"));
+        for name in ["epoll_create1", "epoll_ctl", "epoll_wait"] {
+            let method = methods
+                .iter()
+                .find(|method| method.name() == name)
+                .unwrap_or_else(|| panic!("{name} missing"));
+            assert_eq!(
+                method
+                    .impl_map()
+                    .expect("native import")
+                    .import_scope()
+                    .name(),
+                "c"
+            );
+        }
 
         let inotify_event = index.expect("libc", "inotify_event");
         let fields: Vec<_> = inotify_event.fields().collect();
@@ -266,21 +378,26 @@ mod tests {
 
         let constants: Vec<_> = apis.fields().map(|field| field.name()).collect();
         let methods: Vec<_> = apis.methods().collect();
-        let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
 
         assert!(constants.contains(&"IN_CREATE"));
         assert!(constants.contains(&"IN_CLOSE"));
         assert!(constants.contains(&"IN_MOVE"));
         assert!(constants.contains(&"IN_ALL_EVENTS"));
         assert!(constants.contains(&"IN_NONBLOCK"));
-        assert!(methods.iter().all(|method| {
-            method
-                .impl_map()
-                .is_some_and(|import| import.import_scope().name() == "c")
-        }));
-        assert!(method_names.contains(&"inotify_add_watch"));
-        assert!(method_names.contains(&"inotify_init1"));
-        assert!(method_names.contains(&"inotify_rm_watch"));
+        for name in ["inotify_add_watch", "inotify_init1", "inotify_rm_watch"] {
+            let method = methods
+                .iter()
+                .find(|method| method.name() == name)
+                .unwrap_or_else(|| panic!("{name} missing"));
+            assert_eq!(
+                method
+                    .impl_map()
+                    .expect("native import")
+                    .import_scope()
+                    .name(),
+                "c"
+            );
+        }
 
         let itimerspec = index.expect("libc", "itimerspec");
         let fields: Vec<_> = itimerspec.fields().collect();
@@ -323,6 +440,156 @@ mod tests {
                 ),
             ]
         );
+
+        let signalfd_siginfo = index.expect("libc", "signalfd_siginfo");
+        let fields: Vec<_> = signalfd_siginfo.fields().collect();
+        assert_eq!(fields.first().expect("ssi_signo field").name(), "ssi_signo");
+        assert_eq!(fields.last().expect("__pad field").name(), "__pad");
+        assert_eq!(
+            fields.last().expect("__pad field").ty(),
+            windows_metadata::Type::ArrayFixed(Box::new(windows_metadata::Type::U8), 28)
+        );
+
+        let constants: Vec<_> = apis.fields().map(|field| field.name()).collect();
+        let methods: Vec<_> = apis.methods().collect();
+        let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
+
+        assert!(constants.contains(&"SFD_CLOEXEC"));
+        assert!(constants.contains(&"SFD_NONBLOCK"));
+        assert!(method_names.contains(&"signalfd"));
+
+        assert!(constants.contains(&"XATTR_CREATE"));
+        assert!(constants.contains(&"XATTR_REPLACE"));
+        for name in [
+            "setxattr",
+            "lsetxattr",
+            "fsetxattr",
+            "getxattr",
+            "lgetxattr",
+            "fgetxattr",
+            "listxattr",
+            "llistxattr",
+            "flistxattr",
+            "removexattr",
+            "lremovexattr",
+            "fremovexattr",
+        ] {
+            assert!(method_names.contains(&name), "{name} missing");
+        }
+
+        let getxattr = methods
+            .iter()
+            .find(|method| method.name() == "getxattr")
+            .expect("getxattr method");
+        let signature = getxattr.signature(&[]);
+        assert_eq!(
+            signature.return_type,
+            windows_metadata::Type::value_named("libc", "ssize_t")
+        );
+        assert_eq!(signature.types.last(), Some(&windows_metadata::Type::USize));
+
+        let mount_attr = index.expect("libc", "mount_attr");
+        assert_eq!(
+            mount_attr
+                .fields()
+                .map(|field| field.name())
+                .collect::<Vec<_>>(),
+            ["attr_set", "attr_clr", "propagation", "userns_fd"]
+        );
+        for name in [
+            "fsconfig",
+            "fsmount",
+            "fsopen",
+            "fspick",
+            "mount",
+            "mount_setattr",
+            "move_mount",
+            "open_tree",
+            "umount",
+            "umount2",
+        ] {
+            assert!(method_names.contains(&name), "{name} missing");
+        }
+        for name in ["__be16", "__be32", "__be64", "__le16", "__le32", "__le64"] {
+            assert!(has("libc", name), "{name} missing");
+        }
+        for name in [
+            "addrinfo",
+            "dirent",
+            "pthread_mutex_t",
+            "sigaction",
+            "sockaddr",
+            "stat",
+            "tm",
+        ] {
+            assert!(has("libc", name), "{name} missing");
+        }
+        for name in [
+            "__errno_location",
+            "clock_gettime",
+            "dlopen",
+            "fopen",
+            "getaddrinfo",
+            "inet_pton",
+            "mmap",
+            "opendir",
+            "pthread_create",
+            "sched_yield",
+            "sigaction",
+            "socket",
+            "stat",
+            "write",
+        ] {
+            assert!(method_names.contains(&name), "{name} missing");
+        }
+        for name in ["_IOFBF", "_IOLBF", "_IONBF"] {
+            assert!(constants.contains(&name), "{name} missing");
+        }
+        assert!(!has("libc", "__pthread_unwind_buf_t"));
+        for name in [
+            "__pthread_register_cancel",
+            "__pthread_unregister_cancel",
+            "__pthread_unwind_next",
+        ] {
+            assert!(!method_names.contains(&name), "{name} should be omitted");
+        }
+        assert!(!method_names.contains(&"bindresvport6"));
+        for (name, import_name) in [
+            ("fscanf", "__isoc99_fscanf"),
+            ("scanf", "__isoc99_scanf"),
+            ("sscanf", "__isoc99_sscanf"),
+            ("vfscanf", "__isoc99_vfscanf"),
+            ("vscanf", "__isoc99_vscanf"),
+            ("vsscanf", "__isoc99_vsscanf"),
+        ] {
+            let method = methods
+                .iter()
+                .find(|method| method.name() == name)
+                .unwrap_or_else(|| panic!("{name} missing"));
+            assert_eq!(
+                method.impl_map().expect("native import").import_name(),
+                import_name
+            );
+        }
+        for (name, library) in [
+            ("crypt", "crypt"),
+            ("inet_net_ntop", "resolv"),
+            ("inet_net_pton", "resolv"),
+            ("inet_neta", "resolv"),
+        ] {
+            let method = methods
+                .iter()
+                .find(|method| method.name() == name)
+                .unwrap_or_else(|| panic!("{name} missing"));
+            assert_eq!(
+                method
+                    .impl_map()
+                    .expect("native import")
+                    .import_scope()
+                    .name(),
+                library
+            );
+        }
 
         let sendfile = index
             .expect("libc", "Apis")

@@ -45,4 +45,13 @@ fn clang_generated_sources_are_up_to_date() {
     let actual = std::fs::read(temp.path().join("winmd/bnd-linux-clang.winmd"))
         .expect("read generated WinMD");
     assert_eq!(expected, actual, "bnd-linux-clang.winmd is out of date");
+
+    let expected =
+        std::fs::read_to_string(checked_in.join("Cargo.toml")).expect("read checked-in Cargo.toml");
+    let actual =
+        std::fs::read_to_string(temp.path().join("Cargo.toml")).expect("read generated Cargo.toml");
+    assert_eq!(
+        expected, actual,
+        "bnd-linux-clang Cargo.toml is out of date"
+    );
 }

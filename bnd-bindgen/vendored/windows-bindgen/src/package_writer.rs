@@ -63,13 +63,14 @@ impl Cfg {
         for dependency in compact {
             if dependency.is_empty()
                 || namespace_starts_with(config.namespace, dependency)
+                || config.bindgen.is_package_feature_root(dependency)
                 || dependency == "Windows.Foundation"
                 || config.prunable.contains(dependency)
             {
                 continue;
             }
 
-            features.insert(namespace_feature(dependency));
+            features.insert(config.bindgen.package_feature(dependency));
         }
 
         let mut tokens = quote! {};
@@ -105,6 +106,15 @@ impl Config<'_> {
         }
 
         let trees = tree.flatten_trees();
+        if let Some(root) = &self.bindgen.package_feature_root {
+            for tree in &trees {
+                assert!(
+                    self.bindgen.package_feature_root_contains(tree.namespace),
+                    "package feature root `{root}` does not contain selected namespace `{}`",
+                    tree.namespace
+                );
+            }
+        }
 
         // Pure COM-interface namespaces are empty in `windows-sys` and can be pruned.
         let mut prunable = BTreeSet::new();
@@ -142,7 +152,7 @@ impl Config<'_> {
                 let name = to_ident(name);
 
                 if flatten_children {
-                    let feature = tree.feature();
+                    let feature = self.bindgen.package_feature(tree.namespace);
 
                     for ty in &tree.types {
                         if matches!(ty, Type::CppConst(_))
@@ -161,13 +171,13 @@ impl Config<'_> {
                         #[cfg(feature = #feature)]
                         pub use #name::*;
                     });
-                } else if is_flat_container(tree.namespace) {
+                } else if self.bindgen.is_package_feature_root(tree.namespace) {
                     // The umbrella is always present; only per-header children are feature-gated.
                     tokens.combine(quote! {
                         pub mod #name;
                     });
                 } else {
-                    let feature = tree.feature();
+                    let feature = self.bindgen.package_feature(tree.namespace);
 
                     tokens.combine(quote! {
                         #[cfg(feature = #feature)]
@@ -216,34 +226,49 @@ impl Config<'_> {
             }
         }
 
-        let feature_namespaces: BTreeSet<&str> = trees
+        let feature_trees: Vec<&TypeTree> = if self.bindgen.package_feature_root.is_some() {
+            trees
+                .iter()
+                .copied()
+                .filter(|tree| !self.bindgen.is_package_feature_root(tree.namespace))
+                .collect()
+        } else {
+            trees
+                .iter()
+                .copied()
+                .skip(1)
+                .filter(|tree| !self.bindgen.is_package_feature_root(tree.namespace))
+                .collect()
+        };
+
+        let feature_namespaces: BTreeSet<&str> = feature_trees
             .iter()
-            .skip(1)
             .map(|tree| tree.namespace)
             .filter(|namespace| !prunable.contains(namespace))
-            .filter(|namespace| !is_flat_container(namespace))
             .collect();
 
         // Sort feature lines by feature name for stable Cargo.toml output.
         let mut feature_lines: Vec<String> = Vec::new();
+        let mut feature_sources = BTreeMap::<String, &str>::new();
 
-        for tree in trees.iter().skip(1) {
+        for tree in feature_trees {
             if prunable.contains(tree.namespace) {
                 continue;
             }
 
-            // The flat umbrella has no feature; its per-header children do.
-            if is_flat_container(tree.namespace) {
-                continue;
+            let feature = self.bindgen.package_feature(tree.namespace);
+            if let Some(existing) = feature_sources.insert(feature.clone(), tree.namespace) {
+                panic!(
+                    "package feature `{feature}` maps to both `{existing}` and `{}`",
+                    tree.namespace
+                );
             }
-
-            let feature = tree.feature();
 
             // Dependencies follow namespace shape: Win32 peers, WinRT parent, or Foundation.
             let (parent, _leaf) = tree.namespace.rsplit_once('.').unwrap();
 
-            if parent == "Windows.Win32" {
-                // Win32 header features depend on the other header stems their APIs reference.
+            if self.bindgen.is_package_feature_root(parent) {
+                // Flat header features depend on the other header stems their APIs reference.
                 let config = self.with_namespace(tree.namespace);
                 let mut dependencies = BTreeSet::new();
 
@@ -258,7 +283,7 @@ impl Config<'_> {
                 let list = dependencies
                     .iter()
                     .filter(|namespace| feature_namespaces.contains(*namespace))
-                    .map(|namespace| namespace_feature(namespace))
+                    .map(|namespace| self.bindgen.package_feature(namespace))
                     .collect::<BTreeSet<_>>()
                     .into_iter()
                     .map(|feature| format!("\"{feature}\""))
@@ -266,9 +291,11 @@ impl Config<'_> {
                     .join(", ");
 
                 feature_lines.push(format!("{feature} = [{list}]"));
+            } else if self.bindgen.is_package_feature_root(parent) {
+                feature_lines.push(format!("{feature} = []"));
             } else if parent != "Windows" {
                 // Nested WinRT namespaces depend on their parent root feature.
-                let dependency = namespace_feature(parent);
+                let dependency = self.bindgen.package_feature(parent);
 
                 feature_lines.push(format!("{feature} = [\"{dependency}\"]"));
             } else if tree.namespace == "Windows.Foundation" {
@@ -313,7 +340,7 @@ impl Config<'_> {
 }
 
 /// Always-present umbrella module for flat Win32 header stems.
-fn is_flat_container(namespace: &str) -> bool {
+pub(crate) fn is_flat_container(namespace: &str) -> bool {
     namespace == "Windows.Win32"
 }
 

@@ -26,6 +26,14 @@ typedef struct {
 
 // Function pointer (delegate)
 typedef int (*CompareFunc)(const void* a, const void* b);
+typedef int FunctionType(void* context);
+typedef struct {
+    FunctionType* callback;
+} FunctionTable;
+typedef void (*SignalHandler)(int);
+typedef SignalHandler SignalHandlerAlias;
+#define TEST_SIG_DEFAULT ((SignalHandler)0)
+#define TEST_SIG_ALIAS ((SignalHandlerAlias)0)
 
 // Union
 typedef union {
@@ -48,6 +56,21 @@ typedef struct {
 int create_widget(const char* name, Rect bounds, Widget* out);
 void destroy_widget(Widget* w);
 int widget_count(void);
+int consume_va_list(__builtin_va_list args);
+int redirected_scan(const char* input);
+int redirected_scan(const char* input) __asm__("actual_scan");
+typedef __builtin_va_list test_va_list;
+typedef struct {
+    test_va_list args;
+    int tail;
+} SavedVaList;
+typedef __builtin_va_list AlignedArgs __attribute__((aligned(16)));
+typedef struct {
+    char first;
+    AlignedArgs args;
+    int tail;
+} StoredAlignedArgs;
+void consume_stored_aligned_args(StoredAlignedArgs* value);
 
 // #define constants
 #define MAX_WIDGETS 256
@@ -58,6 +81,9 @@ int widget_count(void);
 #define COMBINED_FLAGS (FIRST_FLAG | SECOND_FLAG)
 #define HIGH_BIT (1U << 31)
 #define BUFFER_BYTES ((size_t)(FIRST_FLAG << 4))
+#define _IOFBF 0
+#define _IOLBF 1
+#define _IONBF 2
 
 // Conditional constant controlled by global clang_args in simple.toml.
 // Tests that top-level clang_args = ["-DCUSTOM_DEPTH=42"] is applied.
@@ -82,6 +108,9 @@ typedef __int128 __s128;
 typedef unsigned __int128 __u128;
 typedef __s128 s128;
 typedef __u128 u128;
+typedef __float128 f128;
+typedef f128 chained_f128;
+typedef _Complex double complex64;
 
 // C11 anonymous union member (no field name) — the union's fields
 // should be accessible and the struct should have correct size/offsets.
@@ -147,3 +176,19 @@ struct EmbeddingAligned {
     struct AlignedInner aligned_member;
     int after;
 };
+
+typedef struct {
+    char bytes[104];
+} UnrepresentableAligned __attribute__((aligned(16)));
+
+void consume_unrepresentable(UnrepresentableAligned* value);
+typedef void (*UnrepresentableCallback)(UnrepresentableAligned* value);
+typedef UnrepresentableCallback UnrepresentableCallbackAlias;
+typedef struct {
+    UnrepresentableAligned* value;
+} UnrepresentableHolder;
+typedef union {
+    char bytes[104];
+} UnrepresentableUnion __attribute__((aligned(16)));
+void consume_unrepresentable_callback(UnrepresentableCallbackAlias callback);
+void consume_unrepresentable_union(UnrepresentableUnion* value);

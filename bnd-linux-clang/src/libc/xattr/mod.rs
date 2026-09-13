@@ -1,0 +1,20 @@
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn fgetxattr(__fd : i32, __name : *const i8, __value : *mut core::ffi::c_void, __size : usize) -> super::types::ssize_t);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn flistxattr(__fd : i32, __list : *mut i8, __size : usize) -> super::types::ssize_t);
+windows_link::link!("c" "C" fn fremovexattr(__fd : i32, __name : *const i8) -> i32);
+windows_link::link!("c" "C" fn fsetxattr(__fd : i32, __name : *const i8, __value : *const core::ffi::c_void, __size : usize, __flags : i32) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn getxattr(__path : *const i8, __name : *const i8, __value : *mut core::ffi::c_void, __size : usize) -> super::types::ssize_t);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn lgetxattr(__path : *const i8, __name : *const i8, __value : *mut core::ffi::c_void, __size : usize) -> super::types::ssize_t);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn listxattr(__path : *const i8, __list : *mut i8, __size : usize) -> super::types::ssize_t);
+#[cfg(feature = "types")]
+windows_link::link!("c" "C" fn llistxattr(__path : *const i8, __list : *mut i8, __size : usize) -> super::types::ssize_t);
+windows_link::link!("c" "C" fn lremovexattr(__path : *const i8, __name : *const i8) -> i32);
+windows_link::link!("c" "C" fn lsetxattr(__path : *const i8, __name : *const i8, __value : *const core::ffi::c_void, __size : usize, __flags : i32) -> i32);
+windows_link::link!("c" "C" fn removexattr(__path : *const i8, __name : *const i8) -> i32);
+windows_link::link!("c" "C" fn setxattr(__path : *const i8, __name : *const i8, __value : *const core::ffi::c_void, __size : usize, __flags : i32) -> i32);
+pub const XATTR_CREATE: u32 = 1;
+pub const XATTR_REPLACE: u32 = 2;

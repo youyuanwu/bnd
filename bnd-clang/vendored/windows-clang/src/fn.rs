@@ -132,9 +132,19 @@ fn token_names_function(tokens: &[(CXTokenKind, String)], name: &str) -> bool {
         .is_some_and(|i| tokens.get(i + 1).is_some_and(|(_, s)| s == "("))
 }
 
+pub(crate) fn asm_import_name(cursor: &Cursor) -> Option<String> {
+    cursor
+        .children()
+        .into_iter()
+        .find(|child| child.kind() == CXCursor_AsmLabelAttr)
+        .map(|child| child.name())
+        .filter(|name| !name.is_empty())
+}
+
 impl Fn {
     pub fn parse(cursor: Cursor, parser: &mut Parser<'_>, extern_c: bool) -> Result<Self, Error> {
         let export_name = cursor.name();
+        let asm_import = asm_import_name(&cursor);
         let extern_c = extern_c || cursor.language() == CXLanguage_C;
         let return_type = cursor.result_type().to_type(parser);
 
@@ -174,8 +184,8 @@ impl Fn {
             .unwrap_or_else(|| parser.library.to_string());
 
         let (name, import_name) = match source_name {
-            Some(source) => (source, Some(export_name)),
-            None => (export_name, None),
+            Some(source) => (source, Some(asm_import.unwrap_or(export_name))),
+            None => (export_name, asm_import),
         };
 
         Ok(Self {

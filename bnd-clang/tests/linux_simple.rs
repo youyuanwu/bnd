@@ -14,6 +14,7 @@ static SIMPLE_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
         .args(["-x", "c", "-std=c11", "-DCUSTOM_DEPTH=42"])
         .namespace("SimpleTest")
         .library("simple")
+        .include_macros(["_IOFBF", "_IOLBF", "_IONBF"])
         .output(&rdl)
         .write()
         .expect("generate RDL from simple.h");
@@ -55,6 +56,7 @@ fn generates_simple_types() {
         "Color",
         "CompareFunc",
         "EmbeddingAligned",
+        "FunctionTable",
         "HasAnonUnion",
         "NetAddr",
         "Rect",
@@ -69,6 +71,19 @@ fn generates_simple_types() {
             "{expected} missing. Found: {types:?}"
         );
     }
+}
+
+#[test]
+fn collapses_pointer_to_function_type_typedef() {
+    let index = open_index();
+    let function_table = index.expect("SimpleTest", "FunctionTable");
+    let fields: Vec<_> = function_table.fields().collect();
+
+    assert_eq!(fields.len(), 1);
+    assert_eq!(
+        fields[0].ty(),
+        windows_metadata::Type::class_named("SimpleTest", "FunctionType")
+    );
 }
 
 #[test]
@@ -183,6 +198,61 @@ fn generates_bool_function_and_conditional_constant() {
         max_depth.constant().expect("MAX_DEPTH value").value(),
         windows_metadata::Value::I32(42)
     );
+    assert!(
+        apis.fields()
+            .all(|field| field.name() != "TEST_SIG_DEFAULT")
+    );
+    assert!(apis.fields().all(|field| field.name() != "TEST_SIG_ALIAS"));
+}
+
+#[test]
+fn projects_builtin_va_list_as_opaque_pointer() {
+    let index = open_index();
+    let method = index
+        .expect("SimpleTest", "Apis")
+        .methods()
+        .find(|method| method.name() == "consume_va_list")
+        .expect("consume_va_list method");
+
+    assert_eq!(
+        method.signature(&[]).types,
+        [windows_metadata::Type::PtrMut(
+            Box::new(windows_metadata::Type::Void),
+            1
+        )]
+    );
+
+    let va_list = index.expect("SimpleTest", "test_va_list");
+    let fields: Vec<_> = va_list.fields().collect();
+    assert_eq!(fields.len(), 1);
+    assert_eq!(
+        fields[0].ty(),
+        windows_metadata::Type::ArrayFixed(Box::new(windows_metadata::Type::U64), 3)
+    );
+
+    let saved = index.expect("SimpleTest", "SavedVaList");
+    assert_eq!(
+        saved.fields().map(|field| field.name()).collect::<Vec<_>>(),
+        ["args", "tail"]
+    );
+}
+
+#[test]
+fn preserves_assembly_label_import_name() {
+    let index = open_index();
+    let method = index
+        .expect("SimpleTest", "Apis")
+        .methods()
+        .find(|method| method.name() == "redirected_scan")
+        .expect("redirected_scan method");
+
+    assert_eq!(
+        method
+            .impl_map()
+            .expect("redirected_scan import")
+            .import_name(),
+        "actual_scan"
+    );
 }
 
 #[test]
@@ -217,19 +287,65 @@ fn generates_c_expression_macros() {
         buffer_bytes.constant().expect("BUFFER_BYTES value").value(),
         windows_metadata::Value::U32(16)
     );
+
+    for (name, expected) in [("_IOFBF", 0), ("_IOLBF", 1), ("_IONBF", 2)] {
+        let field = apis
+            .fields()
+            .find(|field| field.name() == name)
+            .unwrap_or_else(|| panic!("{name} constant"));
+        assert_eq!(
+            field.constant().expect("buffering mode value").value(),
+            windows_metadata::Value::I32(expected)
+        );
+    }
 }
 
 #[test]
-fn skips_unsupported_int128_typedefs() {
+fn skips_unsupported_numeric_typedefs() {
     let index = open_index();
     let types: Vec<_> = index.types().map(|ty| ty.name()).collect();
 
-    for unsupported in ["__s128", "__u128", "s128", "u128"] {
+    for unsupported in [
+        "__s128",
+        "__u128",
+        "s128",
+        "u128",
+        "f128",
+        "chained_f128",
+        "complex64",
+    ] {
         assert!(
             !types.contains(&unsupported),
             "{unsupported} should not be emitted"
         );
     }
+}
+
+#[test]
+fn skips_unrepresentable_typedef_alignment_and_dependents() {
+    let index = open_index();
+    let types: Vec<_> = index.types().map(|ty| ty.name()).collect();
+    for name in [
+        "UnrepresentableAligned",
+        "UnrepresentableCallback",
+        "UnrepresentableCallbackAlias",
+        "UnrepresentableHolder",
+        "UnrepresentableUnion",
+        "AlignedArgs",
+        "StoredAlignedArgs",
+    ] {
+        assert!(!types.contains(&name), "{name} should be omitted");
+    }
+
+    let methods: Vec<_> = index
+        .expect("SimpleTest", "Apis")
+        .methods()
+        .map(|method| method.name())
+        .collect();
+    assert!(!methods.contains(&"consume_unrepresentable"));
+    assert!(!methods.contains(&"consume_unrepresentable_callback"));
+    assert!(!methods.contains(&"consume_unrepresentable_union"));
+    assert!(!methods.contains(&"consume_stored_aligned_args"));
 }
 
 #[test]

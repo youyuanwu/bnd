@@ -1,0 +1,1 @@
+pub const PTHREAD_STACK_MIN: i32 = 16384;

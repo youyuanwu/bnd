@@ -91,6 +91,12 @@ pub(crate) struct Parser<'a> {
     pub iid_vars: HashMap<String, String>,
     /// Object-like macro replacement tokens for resolving calling conventions.
     pub macro_defs: &'a HashMap<String, Vec<String>>,
+    /// Leading-underscore macros explicitly selected by the caller.
+    pub include_macros: &'a HashSet<String>,
+    /// Function symbols explicitly excluded by the caller.
+    pub exclude_symbols: &'a HashSet<String>,
+    /// Types whose native size/alignment combination cannot be represented.
+    pub unsupported_types: &'a HashSet<String>,
     /// Expanded export name -> source spelling for object-like function aliases.
     /// Charset-selection aliases are excluded because they choose an `A`/`W` variant.
     pub alias_map: HashMap<String, String>,
@@ -109,6 +115,8 @@ struct NamespaceSpec<'a> {
     libraries: &'a HashMap<String, String>,
     filter: &'a [String],
     symbols: &'a HashSet<String>,
+    include_macros: &'a HashSet<String>,
+    exclude_symbols: &'a HashSet<String>,
 }
 
 impl<'a> Parser<'a> {
@@ -123,6 +131,9 @@ impl<'a> Parser<'a> {
         macro_defs: &'a HashMap<String, Vec<String>>,
         tu: &'a TranslationUnit,
         symbols: &'a HashSet<String>,
+        include_macros: &'a HashSet<String>,
+        exclude_symbols: &'a HashSet<String>,
+        unsupported_types: &'a HashSet<String>,
     ) -> Self {
         Self {
             namespace,
@@ -143,6 +154,9 @@ impl<'a> Parser<'a> {
             iid_vars: HashMap::new(),
             alias_map: build_alias_map(macro_defs),
             macro_defs,
+            include_macros,
+            exclude_symbols,
+            unsupported_types,
             symbols,
             drop_lib_less: false,
             winrt_types: None,
@@ -170,7 +184,13 @@ impl<'a> Parser<'a> {
                 CXCursor_FunctionDecl
                     if !child.is_definition()
                         && self.symbols.contains(&child.name())
-                        && !is_midl_proxy_stub(&child, self.libraries) =>
+                        && !is_midl_proxy_stub(&child, self.libraries)
+                        && !self.exclude_symbols.contains(&child.name())
+                        && !function_references_unsupported(
+                            &child,
+                            self.unsupported_types,
+                            self.tag_rename,
+                        ) =>
                 {
                     let item = Fn::parse(child, self, extern_c)?;
                     self.insert_fn(item, collector);
@@ -206,6 +226,9 @@ impl<'a> Parser<'a> {
                 }
                 // Lift nested records first so field type references resolve.
                 self.process_nested_types(child, collector, extern_c)?;
+                if self.unsupported_types.contains(&name) {
+                    return Ok(());
+                }
                 // Inline anonymous records are emitted by their enclosing record.
                 if child.is_anonymous_record() || is_named_instance_record(&child) {
                     return Ok(());
@@ -256,6 +279,9 @@ impl<'a> Parser<'a> {
                 }
                 // Lift nested records first so field type references resolve.
                 self.process_nested_types(child, collector, extern_c)?;
+                if self.unsupported_types.contains(&name) {
+                    return Ok(());
+                }
                 if child.is_anonymous_record() || is_named_instance_record(&child) {
                     return Ok(());
                 }
@@ -271,6 +297,10 @@ impl<'a> Parser<'a> {
             {
                 let tag_name = child.name();
                 let name = self.tag_rename.get(&tag_name).cloned().unwrap_or(tag_name);
+                self.process_nested_types(child, collector, extern_c)?;
+                if self.unsupported_types.contains(&name) {
+                    return Ok(());
+                }
                 if !self.ref_map.contains_key(&name) {
                     collector.insert(Item::Interface(Interface::parse(child, self)?));
                 }
@@ -318,7 +348,7 @@ impl<'a> Parser<'a> {
             }
             CXCursor_TypedefDecl if child.is_definition() => {
                 let name = child.name();
-                if !self.ref_map.contains_key(&name) {
+                if !self.ref_map.contains_key(&name) && !self.unsupported_types.contains(&name) {
                     if let Some(cb) = Callback::parse(child, self)? {
                         collector.insert(Item::Callback(cb));
                     } else if let Some(td) = Typedef::parse(child, self)? {
@@ -330,7 +360,13 @@ impl<'a> Parser<'a> {
             CXCursor_FunctionDecl
                 if !child.is_definition()
                     && !is_midl_proxy_stub(&child, self.libraries)
-                    && !is_midl_user_marshal_stub(&child) =>
+                    && !is_midl_user_marshal_stub(&child)
+                    && !self.exclude_symbols.contains(&child.name())
+                    && !function_references_unsupported(
+                        &child,
+                        self.unsupported_types,
+                        self.tag_rename,
+                    ) =>
             {
                 let item = Fn::parse(child, self, extern_c)?;
                 self.insert_fn(item, collector);
@@ -348,7 +384,8 @@ impl<'a> Parser<'a> {
                 } else if !child.is_macro_builtin()
                     && !child.is_macro_function_like()
                     && !child.name().is_empty()
-                    && !child.name().starts_with('_')
+                    && (!child.name().starts_with('_')
+                        || self.include_macros.contains(&child.name()))
                 {
                     // Non-type keywords and string literals are not integer constants.
                     let tokens = self.tu.tokenize(child.extent());
@@ -532,6 +569,10 @@ pub struct Clang {
     exclude_headers: HashSet<String>,
     /// Targeted function-symbol allowlist. Empty leaves emission unrestricted.
     symbols: HashSet<String>,
+    /// Leading-underscore macros explicitly selected for emission.
+    include_macros: HashSet<String>,
+    /// Function symbols explicitly excluded from emission.
+    exclude_symbols: HashSet<String>,
     /// Drops functions with no resolved import library; off for fixtures without `.lib` inputs.
     drop_lib_less: bool,
     /// Winmds used only to classify `ABI::Windows::*` projection declarations.
@@ -849,6 +890,42 @@ impl Clang {
         self
     }
 
+    /// Includes a leading-underscore macro that would otherwise be treated as internal.
+    pub fn include_macro(&mut self, name: &str) -> &mut Self {
+        self.include_macros.insert(name.to_string());
+        self
+    }
+
+    /// Includes leading-underscore macros that would otherwise be treated as internal.
+    pub fn include_macros<I, S>(&mut self, names: I) -> &mut Self
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        for name in names {
+            self.include_macro(name.as_ref());
+        }
+        self
+    }
+
+    /// Excludes a function symbol from emission.
+    pub fn exclude_symbol(&mut self, symbol: &str) -> &mut Self {
+        self.exclude_symbols.insert(symbol.to_string());
+        self
+    }
+
+    /// Excludes function symbols from emission.
+    pub fn exclude_symbols<I, S>(&mut self, symbols: I) -> &mut Self
+    where
+        I: IntoIterator<Item = S>,
+        S: AsRef<str>,
+    {
+        for symbol in symbols {
+            self.exclude_symbol(symbol.as_ref());
+        }
+        self
+    }
+
     /// Returns the version string reported by the loaded libclang.
     pub fn version() -> Result<String, Error> {
         let lib = Library::new()?;
@@ -865,6 +942,8 @@ impl Clang {
             libraries: &self.libraries,
             filter: &self.filter,
             symbols: &self.symbols,
+            include_macros: &self.include_macros,
+            exclude_symbols: &self.exclude_symbols,
         };
         let rdl = self.parse_and_emit(&reference, std::slice::from_ref(&spec))?;
         write_to_file(&self.output, formatter::format(&rdl[0]))?;
@@ -1183,6 +1262,7 @@ impl Clang {
         let enum_merge = merge_enum_typedef_idiom(tu, &mut tag_rename);
         // Share TU-wide macro definitions across per-header parsers.
         let macro_defs = collect_macro_defs(tu);
+        let unsupported_types = collect_unrepresentable_typedefs(tu, &tag_rename);
 
         // Flatten linkage blocks and deduplicate by clang identity across repeated SDK
         // declarations; the defining header only selects the output file.
@@ -1216,7 +1296,10 @@ impl Clang {
                     let replace = if child.is_definition() {
                         !existing.is_definition()
                     } else if !existing.is_definition() {
-                        child.extract_uuid(tu).is_some() && existing.extract_uuid(tu).is_none()
+                        (child.extract_uuid(tu).is_some() && existing.extract_uuid(tu).is_none())
+                            || (child.kind() == CXCursor_FunctionDecl
+                                && asm_import_name(&child).is_some()
+                                && asm_import_name(existing).is_none())
                     } else {
                         false
                     };
@@ -1260,6 +1343,9 @@ impl Clang {
                 &macro_defs,
                 tu,
                 &empty_symbols,
+                &self.include_macros,
+                &self.exclude_symbols,
+                &unsupported_types,
             );
             parser.header_root = Some(root);
             parser.drop_lib_less = self.drop_lib_less;
@@ -1463,6 +1549,7 @@ impl Clang {
         assign_nested_names(tu, &mut tag_rename);
         let enum_merge = merge_enum_typedef_idiom(tu, &mut tag_rename);
         let macro_defs = collect_macro_defs(tu);
+        let unsupported_types = collect_unrepresentable_typedefs(tu, &tag_rename);
 
         let mut parser = Parser::new(
             spec.namespace,
@@ -1474,6 +1561,9 @@ impl Clang {
             &macro_defs,
             tu,
             spec.symbols,
+            spec.include_macros,
+            spec.exclude_symbols,
+            &unsupported_types,
         );
 
         for child in tu.cursor().children() {
@@ -1731,6 +1821,7 @@ fn is_midl_proxy_stub(cursor: &Cursor, libraries: &HashMap<String, String>) -> b
     if !name.ends_with("_Proxy") && !name.ends_with("_Stub") {
         return false;
     }
+
     if libraries.contains_key(&name) {
         return false;
     }
@@ -1739,6 +1830,180 @@ fn is_midl_proxy_stub(cursor: &Cursor, libraries: &HashMap<String, String>) -> b
         .iter()
         .find(|c| c.kind() == CXCursor_ParmDecl)
         .is_some_and(|p| p.name() == "This")
+}
+
+fn record_name(cursor: &Cursor, tag_rename: &HashMap<String, String>) -> String {
+    let tag = cursor.name();
+    if is_anonymous_name(&tag) {
+        tag_rename
+            .get(&cursor.location_id())
+            .cloned()
+            .unwrap_or(tag)
+    } else {
+        tag_rename.get(&tag).cloned().unwrap_or(tag)
+    }
+}
+
+fn collect_unrepresentable_typedefs(
+    tu: &TranslationUnit,
+    tag_rename: &HashMap<String, String>,
+) -> HashSet<String> {
+    fn visit(cursor: Cursor, declarations: &mut Vec<Cursor>) {
+        for child in cursor.children() {
+            if matches!(
+                child.kind(),
+                CXCursor_TypedefDecl
+                    | CXCursor_StructDecl
+                    | CXCursor_UnionDecl
+                    | CXCursor_ClassDecl
+            ) {
+                declarations.push(child);
+            }
+            if matches!(
+                child.kind(),
+                CXCursor_LinkageSpec
+                    | CXCursor_Namespace
+                    | CXCursor_TypedefDecl
+                    | CXCursor_StructDecl
+                    | CXCursor_UnionDecl
+                    | CXCursor_ClassDecl
+            ) {
+                visit(child, declarations);
+            }
+        }
+    }
+
+    let mut declarations = Vec::new();
+    visit(tu.cursor(), &mut declarations);
+
+    let mut result = HashSet::new();
+    for cursor in &declarations {
+        if cursor.kind() != CXCursor_TypedefDecl {
+            continue;
+        }
+        let underlying = cursor.typedef_underlying_type();
+        if matches!(
+            underlying.canonical_type().kind(),
+            CXType_Record | CXType_ConstantArray
+        ) {
+            let size = underlying.size_of();
+            let alignment = cursor.ty().align_of();
+            if size > 0 && alignment > 0 && size % alignment != 0 {
+                result.insert(cursor.name());
+            }
+        }
+    }
+
+    loop {
+        let previous_len = result.len();
+        for cursor in &declarations {
+            let (name, depends_on_unsupported) = match cursor.kind() {
+                CXCursor_TypedefDecl => {
+                    let underlying = cursor.typedef_underlying_type();
+                    let alias_dependency =
+                        type_references_unsupported(&underlying, &result, tag_rename);
+                    let direct = if underlying.kind() == CXType_Elaborated {
+                        underlying.underlying_type()
+                    } else {
+                        underlying
+                    };
+                    let callback_dependency = direct.function_pointee().is_some_and(|function| {
+                        type_references_unsupported(&function.fn_result_type(), &result, tag_rename)
+                            || cursor
+                                .children()
+                                .iter()
+                                .filter(|child| child.kind() == CXCursor_ParmDecl)
+                                .any(|param| {
+                                    type_references_unsupported(&param.ty(), &result, tag_rename)
+                                })
+                    });
+                    (cursor.name(), callback_dependency || alias_dependency)
+                }
+                CXCursor_StructDecl | CXCursor_UnionDecl | CXCursor_ClassDecl => (
+                    record_name(cursor, tag_rename),
+                    record_references_unsupported(cursor, &result, tag_rename),
+                ),
+                _ => continue,
+            };
+            if depends_on_unsupported && !name.is_empty() {
+                result.insert(name);
+            }
+        }
+        if result.len() == previous_len {
+            break;
+        }
+    }
+    result
+}
+
+fn type_references_unsupported(
+    ty: &Type,
+    unsupported: &HashSet<String>,
+    tag_rename: &HashMap<String, String>,
+) -> bool {
+    match ty.kind() {
+        CXType_Typedef => {
+            let decl = ty.ty();
+            unsupported.contains(&decl.name())
+                || type_references_unsupported(
+                    &decl.typedef_underlying_type(),
+                    unsupported,
+                    tag_rename,
+                )
+        }
+        CXType_Record => {
+            let decl = ty.ty();
+            unsupported.contains(&record_name(&decl, tag_rename))
+        }
+        CXType_Pointer | CXType_LValueReference => {
+            type_references_unsupported(&ty.pointee_type(), unsupported, tag_rename)
+        }
+        CXType_ConstantArray | CXType_IncompleteArray => {
+            type_references_unsupported(&ty.array_element_type(), unsupported, tag_rename)
+        }
+        CXType_FunctionProto | CXType_FunctionNoProto => {
+            type_references_unsupported(&ty.fn_result_type(), unsupported, tag_rename)
+                || ty
+                    .fn_arg_types()
+                    .iter()
+                    .any(|argument| type_references_unsupported(argument, unsupported, tag_rename))
+        }
+        CXType_Elaborated => {
+            type_references_unsupported(&ty.underlying_type(), unsupported, tag_rename)
+        }
+        _ => false,
+    }
+}
+
+fn record_references_unsupported(
+    cursor: &Cursor,
+    unsupported: &HashSet<String>,
+    tag_rename: &HashMap<String, String>,
+) -> bool {
+    cursor.children().iter().any(|child| match child.kind() {
+        CXCursor_FieldDecl | CXCursor_CXXBaseSpecifier => {
+            type_references_unsupported(&child.ty(), unsupported, tag_rename)
+        }
+        CXCursor_StructDecl | CXCursor_UnionDecl if child.is_anonymous_record() => {
+            unsupported.contains(&record_name(child, tag_rename))
+                || record_references_unsupported(child, unsupported, tag_rename)
+        }
+        CXCursor_CXXMethod => function_references_unsupported(child, unsupported, tag_rename),
+        _ => false,
+    })
+}
+
+fn function_references_unsupported(
+    cursor: &Cursor,
+    unsupported: &HashSet<String>,
+    tag_rename: &HashMap<String, String>,
+) -> bool {
+    type_references_unsupported(&cursor.result_type(), unsupported, tag_rename)
+        || cursor
+            .children()
+            .iter()
+            .filter(|child| child.kind() == CXCursor_ParmDecl)
+            .any(|param| type_references_unsupported(&param.ty(), unsupported, tag_rename))
 }
 
 /// MIDL `_User*` wire-marshaling helpers are generated RPC internals, not public API.

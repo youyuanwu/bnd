@@ -21,12 +21,23 @@ impl Const {
         }
 
         let name = cursor.name();
-        if name.is_empty() || name.starts_with('_') {
+        if name.is_empty() || (name.starts_with('_') && !parser.include_macros.contains(&name)) {
             return Ok(None);
         }
 
         let tokens = parser.tu.tokenize(cursor.extent());
         let body: Vec<_> = tokens.into_iter().skip(1).collect();
+        if body.iter().any(|(kind, token)| {
+            *kind == CXToken_Identifier
+                && find_typedef(parser.tu.cursor(), token).is_some_and(|cursor| {
+                    cursor
+                        .typedef_underlying_type()
+                        .canonical_type()
+                        .is_function_pointer()
+                })
+        }) {
+            return Ok(None);
+        }
 
         if let Some((ty, value)) = parse_native_negative_cast(&body, parser.ref_map) {
             return Ok(Some(Self {

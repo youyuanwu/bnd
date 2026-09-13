@@ -32,8 +32,28 @@ fork remains easy to compare with upstream.
   for the active host ABI.
 - Typedefs that shadow Rust primitive names are omitted to prevent recursive
   generated aliases such as `pub type bool = bool`.
-- Direct and chained `__int128` typedefs are omitted because WinMD has no
-  128-bit integer representation.
+- Direct and chained 128-bit integer, 128-bit floating-point, and C complex
+  typedefs are omitted because WinMD cannot represent them.
+- Compiler `va_list` records and typedef chains are projected as opaque
+  pointers, matching their decayed C parameter ABI without exposing
+  compiler-private record layouts.
+- Deferred macro probes use C `__auto_type` or C++ `constexpr auto` so
+  expression macros retain native signedness and pointer-sized typedef
+  identity in either language mode.
+- Macros cast to function-pointer typedefs are omitted because WinMD cannot
+  represent function-pointer constants.
+- Pointers to bare function-type typedefs collapse to the generated callback
+  alias, avoiding an extra pointer indirection in callback tables.
+- Typedefs whose native size is not a multiple of their required alignment,
+  and functions depending on those types, are omitted because Rust cannot
+  represent those layouts as concrete value types.
+- Leading-underscore macros remain excluded by default; callers can
+  explicitly include public names through `include_macro(s)`.
+- Callers can exclude declarations for unavailable native symbols through
+  `exclude_symbol(s)`.
+- Function redeclaration selection preserves Clang assembly labels, ensuring
+  glibc redirects such as `scanf` to `__isoc99_scanf` reach the correct
+  exported symbol.
 - Partial bitfield allocation units use Clang field offsets to preserve their
   exact occupied byte span and the enclosing record's native alignment.
 - Explicit `scope_headers` activate the per-header reachability sweep without

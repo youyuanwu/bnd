@@ -28,6 +28,10 @@ impl Typedef {
         let name = cursor.name();
         let underlying = cursor.typedef_underlying_type();
 
+        if parser.unsupported_types.contains(&name) {
+            return Ok(None);
+        }
+
         // The enum/flags merge emits the public name with this typedef's storage type.
         if parser.enum_merge.contains_key(&name) {
             return Ok(None);
@@ -57,11 +61,16 @@ impl Typedef {
             return Ok(None);
         }
 
-        // WinMD has no 128-bit integer representation. Checking the canonical
-        // type also skips aliases chained through another unsupported typedef.
+        if let Some(ty) = opaque_builtin_array_storage(&underlying, cursor.ty().align_of()) {
+            return Ok(Some(Self { name, ty }));
+        }
+
+        // WinMD has no 128-bit integer/floating-point or C complex
+        // representation. Checking the canonical type also skips aliases
+        // chained through another unsupported typedef.
         if matches!(
             underlying.canonical_type().kind(),
-            CXType_Int128 | CXType_UInt128
+            CXType_Int128 | CXType_UInt128 | CXType_Float128 | CXType_Complex
         ) {
             return Ok(None);
         }
@@ -185,4 +194,32 @@ impl Typedef {
             type #name = #ty;
         })
     }
+}
+
+fn opaque_builtin_array_storage(ty: &Type, effective_alignment: i64) -> Option<metadata::Type> {
+    let canonical = ty.canonical_type();
+    if canonical.kind() != CXType_ConstantArray {
+        return None;
+    }
+    let element = canonical.array_element_type().canonical_type();
+    let declaration = element.ty();
+    if element.kind() != CXType_Record || !declaration.file_name().is_empty() {
+        return None;
+    }
+
+    let size = canonical.size_of();
+    if size <= 0 || effective_alignment <= 0 || size % effective_alignment != 0 {
+        return None;
+    }
+    let unit = match effective_alignment {
+        1 => metadata::Type::U8,
+        2 => metadata::Type::U16,
+        4 => metadata::Type::U32,
+        8 => metadata::Type::U64,
+        _ => return None,
+    };
+    Some(metadata::Type::ArrayFixed(
+        Box::new(unit),
+        (size / effective_alignment) as usize,
+    ))
 }

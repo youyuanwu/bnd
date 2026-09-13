@@ -1,0 +1,11 @@
+pub const MAP_DENYWRITE: i32 = 2048;
+pub const MAP_EXECUTABLE: i32 = 4096;
+pub const MAP_FIXED_NOREPLACE: i32 = 1048576;
+pub const MAP_GROWSDOWN: i32 = 256;
+pub const MAP_HUGETLB: i32 = 262144;
+pub const MAP_LOCKED: i32 = 8192;
+pub const MAP_NONBLOCK: i32 = 65536;
+pub const MAP_NORESERVE: i32 = 16384;
+pub const MAP_POPULATE: i32 = 32768;
+pub const MAP_STACK: i32 = 131072;
+pub const MAP_SYNC: i32 = 524288;

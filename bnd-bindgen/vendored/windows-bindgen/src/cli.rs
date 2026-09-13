@@ -21,6 +21,7 @@ use super::*;
 /// - `--rustfmt`: Rust formatter override.
 /// - `--derive`: Extra derived traits.
 /// - `--flat`: Omits namespace modules.
+/// - `--package-feature-root`: Treats the package's top-level namespace as a feature-only root.
 /// - `--sys`: Generates raw bindings that depend only on `windows-link`.
 /// - `--extern`: Uses extern declarations with `--sys`.
 /// - `--minimal`: Omits class wrappers, inherited forwarders, and handle wrappers.
@@ -106,6 +107,7 @@ where
                 "--package" => {
                     builder.package();
                 }
+                "--package-feature-root" => kind = ArgKind::PackageFeatureRoot,
                 "--sys" => {
                     builder.sys();
                 }
@@ -158,6 +160,9 @@ where
             ArgKind::Rustfmt => {
                 builder.rustfmt(&arg);
             }
+            ArgKind::PackageFeatureRoot => {
+                builder.package_feature_root(&arg);
+            }
         }
     }
 
@@ -183,6 +188,7 @@ enum ArgKind {
     Filter,
     FilterFile,
     Rustfmt,
+    PackageFeatureRoot,
     Derive,
     Implement,
     Compose,

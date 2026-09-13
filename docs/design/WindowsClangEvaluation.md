@@ -324,21 +324,28 @@ source API is not identical to `bnd-winmd`: inline declarations such as
 `z_stream`, while `bnd-winmd` retains `z_stream_s` and projects `z_stream`
 as a wrapper. The same difference applies to `gz_header`.
 
-`bnd-linux-gen` also contains an incremental direct-Clang path for the
-`sys/types.h`, `sys/eventfd.h`, `sys/epoll.h`, `sys/inotify.h`,
-`sys/sendfile.h`, and `sys/timerfd.h` surface.
+`bnd-linux-gen` also contains a direct-Clang path covering the complete
+header inventory configured in `bnd-linux.toml`: shared POSIX types; file,
+memory, directory, socket, network database, signal, dynamic loading, errno,
+scheduling, time, pthread, and stdio APIs; and the Linux epoll, eventfd,
+timerfd, signalfd, inotify, sendfile, xattr, mount, and kernel type surfaces.
 Like the windows-rs Win32 pipeline, it parses one combined translation unit,
 emits temporary RDL files per defining header under a single flat `libc`
 namespace, and compiles them into one canonical WinMD. A packaging-only
 metadata remap then turns header ownership into Rust module boundaries such
 as `libc::types` and `libc::sendfile`. The non-published `bnd-linux-clang`
 staging crate checks in those generated modules and exercises them together
-against libc. A golden-file test covers the WinMD and Rust source tree. The
-production `generate` path remains unchanged and continues to use `bnd-winmd`
-until the required Linux surface has equivalent coverage.
+against their native libraries. Most symbols link from libc; `crypt` is
+routed to libcrypt and `inet_net_*`/`inet_neta` are routed to libresolv.
+Package features and their cross-header dependencies are regenerated from
+the remapped metadata. A golden-file test covers the manifest, WinMD, and
+Rust source tree. The production `generate` path remains unchanged and
+continues to use `bnd-winmd` until the required Linux surface has equivalent
+coverage.
 
-These experiments remove the scalar-width, C-calling-convention, and
-partial-bitfield blockers from the fork. They also prove the partition and
+These experiments remove the scalar-width, C-calling-convention,
+partial-bitfield, compiler `va_list`, unsupported extended numeric, and
+package-feature blockers from the fork. They also prove the partition and
 reference primitives needed by a future configuration wrapper, but no
 general TOML orchestration exists yet. Injection and cross-crate generation
 gaps remain. `bnd-linux-gen` now uses the local `bnd-bindgen` fork for both

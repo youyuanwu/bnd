@@ -103,7 +103,7 @@ impl Config<'_> {
             }
 
             for namespace in namespace {
-                path.push_str(namespace);
+                path.push_str(&to_ident(namespace).into_string());
                 path.push_str("::");
             }
 
