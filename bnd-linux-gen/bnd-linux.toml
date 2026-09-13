@@ -134,11 +134,11 @@ traverse = [
     "bits/cpu-set.h",
 ]
 
-# Partition: time — clock_gettime/nanosleep/gmtime + CLOCK_* constants + struct tm
+# Partition: time — clock_gettime/nanosleep/gmtime + CLOCK_* constants + time structs
 [[partition]]
 namespace = "libc.posix.time"
 library = "c"
-headers = ["time.h"]
+headers = ["time.h", "sys/time.h"]
 traverse = [
     "time.h",
     "bits/time.h",
@@ -147,6 +147,7 @@ traverse = [
     "bits/types/clockid_t.h",
     "bits/types/timer_t.h",
     "bits/types/struct_itimerspec.h",
+    "bits/types/struct_timeval.h",
     "bits/types/locale_t.h",
     "bits/types/__locale_t.h",
 ]

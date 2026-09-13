@@ -131,6 +131,8 @@ windows_link::link!("crypto" "C" fn BN_add(r : *mut super::types:: BIGNUM, a : *
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_add_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
 #[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_are_coprime(a : *mut super::types:: BIGNUM, b : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
+#[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_asc2bn(a : *mut *mut super::types:: BIGNUM, str : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_bin2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
@@ -369,6 +371,18 @@ windows_link::link!("crypto" "C" fn BN_set_negative(b : *mut super::types:: BIGN
 windows_link::link!("crypto" "C" fn BN_set_params(mul : i32, high : i32, low : i32, mont : i32));
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_set_word(a : *mut super::types:: BIGNUM, w : u64) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_bin2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_bn2bin(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_bn2lebin(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_bn2native(a : *const super::types:: BIGNUM, to : *mut u8, tolen : i32) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_lebin2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn BN_signed_native2bn(s : *const u8, len : i32, ret : *mut super::types:: BIGNUM) -> *mut super::types:: BIGNUM);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn BN_sqr(r : *mut super::types:: BIGNUM, a : *const super::types:: BIGNUM, ctx : *mut super::types:: BN_CTX) -> i32);
 #[cfg(feature = "types")]

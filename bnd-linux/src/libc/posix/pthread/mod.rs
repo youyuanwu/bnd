@@ -237,11 +237,12 @@ impl Default for __pthread_cleanup_frame {
 pub struct __pthread_cond_s {
     pub __wseq: __atomic_wide_counter,
     pub __g1_start: __atomic_wide_counter,
-    pub __g_refs: [u32; 2],
     pub __g_size: [u32; 2],
     pub __g1_orig_size: u32,
     pub __wrefs: u32,
     pub __g_signals: [u32; 2],
+    pub __unused_initialized_1: u32,
+    pub __unused_initialized_2: u32,
 }
 impl Default for __pthread_cond_s {
     fn default() -> Self {
@@ -283,11 +284,11 @@ pub struct __pthread_mutex_s {
     pub __nusers: u32,
     pub __kind: i32,
     pub __spins: i16,
-    pub __elision: i16,
+    pub __unused: i16,
     pub __list: __pthread_list_t,
 }
 #[repr(C, packed(8))]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Default)]
 pub struct __pthread_rwlock_arch_t {
     pub __readers: u32,
     pub __writers: u32,
@@ -297,15 +298,9 @@ pub struct __pthread_rwlock_arch_t {
     pub __pad4: u32,
     pub __cur_writer: i32,
     pub __shared: i32,
-    pub __rwelision: i8,
-    pub __pad1: [u8; 7],
+    pub __pad1: u64,
     pub __pad2: u64,
     pub __flags: u32,
-}
-impl Default for __pthread_rwlock_arch_t {
-    fn default() -> Self {
-        unsafe { core::mem::zeroed() }
-    }
 }
 #[repr(C)]
 #[derive(Clone, Copy, Default)]

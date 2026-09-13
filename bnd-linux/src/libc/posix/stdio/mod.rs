@@ -191,7 +191,8 @@ pub struct _IO_FILE {
     pub _markers: *mut core::ffi::c_void,
     pub _chain: *mut _IO_FILE,
     pub _fileno: i32,
-    pub _flags2: i32,
+    pub _flags2: [u8; 3],
+    pub _short_backupbuf: [i8; 1],
     pub _old_offset: super::types::__off_t,
     pub _cur_column: u16,
     pub _vtable_offset: i8,
@@ -202,9 +203,11 @@ pub struct _IO_FILE {
     pub _wide_data: *mut core::ffi::c_void,
     pub _freeres_list: *mut _IO_FILE,
     pub _freeres_buf: *mut core::ffi::c_void,
-    pub __pad5: u64,
+    pub _prevchain: *mut *mut _IO_FILE,
     pub _mode: i32,
-    pub _unused2: [i8; 20],
+    pub _unused3: i32,
+    pub _total_written: super::types::__uint64_t,
+    pub _unused2: [i8; 8],
 }
 #[cfg(feature = "posix_types")]
 impl Default for _IO_FILE {
