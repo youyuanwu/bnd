@@ -296,9 +296,9 @@ Rust APIs and the ABI assertions already covered by bnd's end-to-end tests.
 
 The repository includes two non-published crates for experiments:
 
-- `bnd-clang`, containing an exact copy of `windows-clang` under
+- `bnd-clang`, containing a fork of `windows-clang` under
   `bnd-clang/vendored/windows-clang`.
-- `bnd-bindgen`, containing an exact copy of `windows-bindgen` under
+- `bnd-bindgen`, containing a fork of `windows-bindgen` under
   `bnd-bindgen/vendored/windows-bindgen`.
 
 Each crate records the upstream revision and license in `VENDORED.md`.
@@ -306,7 +306,19 @@ They participate in normal workspace builds. `bnd-clang` makes
 `clang-sys/runtime` optional and leaves it disabled for workspace builds, so
 both Clang frontends use the same linked libclang selected at build time.
 This avoids runtime discovery selecting a different libclang and changing
-generated ABI output. Neither fork replaces the production
+generated ABI output.
+
+The fork now maps C `long` and `unsigned long` from the widths reported by
+Clang, preserving Linux LP64 and Windows LLP64 behavior. Plain C functions
+and callbacks also retain the C calling convention rather than falling back
+to RDL's Windows platform default. Integration coverage ports the `multi`
+fixture through C headers, RDL, WinMD, generated Rust, and linked runtime
+calls. The first `simple` fixture tests cover LP64 fields and over-aligned
+records.
+
+These experiments remove the scalar-width and C-calling-convention blockers
+from the fork, but not the partial-bitfield, configuration, injection, or
+cross-crate generation gaps. Neither fork replaces the production
 `windows-bindgen` dependency or the current `bnd-winmd` pipeline yet.
 
 ## Upstream References

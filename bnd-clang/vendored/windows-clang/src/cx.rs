@@ -817,7 +817,7 @@ impl Type {
 
     pub fn to_type(&self, parser: &mut Parser<'_>) -> metadata::Type {
         if is_fundamental_scalar_kind(self.kind()) {
-            return scalar_kind_to_type(self.kind());
+            return scalar_type_to_type(self);
         }
         match self.kind() {
             CXType_Void => metadata::Type::Void,

@@ -124,7 +124,7 @@ fn collapse_scalar_typedef(name: &str, ty: &Type) -> Option<metadata::Type> {
     }
 
     let canonical = ty.canonical_type();
-    is_fundamental_scalar_kind(canonical.kind()).then(|| scalar_kind_to_type(canonical.kind()))
+    is_fundamental_scalar_kind(canonical.kind()).then(|| scalar_type_to_type(&canonical))
 }
 
 /// Map the Windows `HRESULT` spelling to its metadata system type.
@@ -722,17 +722,46 @@ fn requalify_string_alias(ty: metadata::Type, parser: &Parser<'_>) -> metadata::
     ty
 }
 
-/// Map a builtin scalar [`CXTypeKind`] to its [`metadata::Type`] (LLP64 widths).
-pub(crate) fn scalar_kind_to_type(kind: CXTypeKind) -> metadata::Type {
-    match kind {
+/// Return the RDL spelling for a builtin integer type using its target width.
+pub(crate) fn integer_type_repr(ty: &Type) -> Option<&'static str> {
+    if !is_fundamental_scalar_kind(ty.kind()) {
+        return None;
+    }
+
+    Some(match scalar_type_to_type(ty) {
+        metadata::Type::I8 => "i8",
+        metadata::Type::U8 => "u8",
+        metadata::Type::I16 => "i16",
+        metadata::Type::U16 => "u16",
+        metadata::Type::I32 => "i32",
+        metadata::Type::U32 => "u32",
+        metadata::Type::I64 => "i64",
+        metadata::Type::U64 => "u64",
+        _ => return None,
+    })
+}
+
+/// Map a builtin scalar type to metadata using Clang's target-specific width.
+pub(crate) fn scalar_type_to_type(ty: &Type) -> metadata::Type {
+    match ty.kind() {
         CXType_Bool => metadata::Type::Bool,
         CXType_Char_U | CXType_UChar => metadata::Type::U8,
         CXType_UShort | CXType_WChar | CXType_Char16 => metadata::Type::U16,
-        CXType_UInt | CXType_ULong | CXType_Char32 => metadata::Type::U32,
+        CXType_UInt | CXType_Char32 => metadata::Type::U32,
+        CXType_ULong => match ty.size_of() {
+            4 => metadata::Type::U32,
+            8 => metadata::Type::U64,
+            size => panic!("unsupported C unsigned long size: {size}"),
+        },
         CXType_ULongLong => metadata::Type::U64,
         CXType_Char_S | CXType_SChar => metadata::Type::I8,
         CXType_Short => metadata::Type::I16,
-        CXType_Int | CXType_Long => metadata::Type::I32,
+        CXType_Int => metadata::Type::I32,
+        CXType_Long => match ty.size_of() {
+            4 => metadata::Type::I32,
+            8 => metadata::Type::I64,
+            size => panic!("unsupported C long size: {size}"),
+        },
         CXType_LongLong => metadata::Type::I64,
         CXType_Float => metadata::Type::F32,
         CXType_Double => metadata::Type::F64,

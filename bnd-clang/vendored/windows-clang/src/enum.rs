@@ -12,17 +12,7 @@ pub struct Enum {
 
 impl Enum {
     pub fn parse(cursor: Cursor) -> Result<Self, Error> {
-        let repr = match cursor.enum_repr().kind() {
-            CXType_Int | CXType_Long => "i32",
-            CXType_UInt | CXType_ULong => "u32",
-            CXType_Short => "i16",
-            CXType_UShort => "u16",
-            CXType_Char_S | CXType_SChar => "i8",
-            CXType_Char_U | CXType_UChar => "u8",
-            CXType_LongLong => "i64",
-            CXType_ULongLong => "u64",
-            _ => "i32",
-        };
+        let repr = integer_type_repr(&cursor.enum_repr()).unwrap_or("i32");
 
         let name = cursor.name();
         let scoped = cursor.is_scoped_enum();

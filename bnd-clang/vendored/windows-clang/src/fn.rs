@@ -135,6 +135,7 @@ fn token_names_function(tokens: &[(CXTokenKind, String)], name: &str) -> bool {
 impl Fn {
     pub fn parse(cursor: Cursor, parser: &mut Parser<'_>, extern_c: bool) -> Result<Self, Error> {
         let export_name = cursor.name();
+        let extern_c = extern_c || cursor.language() == CXLanguage_C;
         let return_type = cursor.result_type().to_type(parser);
 
         let is_variadic = cursor.ty().is_variadic();

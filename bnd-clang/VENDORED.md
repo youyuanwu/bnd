@@ -25,3 +25,8 @@ fork remains easy to compare with upstream.
   feature. Workspace builds use the linked libclang selected by `clang-sys`,
   avoiding feature unification with the existing `clang` wrapper and keeping
   binding regeneration deterministic.
+- Plain functions and callbacks parsed from C translation units are emitted
+  with the C calling convention. This preserves their source ABI instead of
+  falling back to the Windows platform-default convention in RDL.
+- C `long` and `unsigned long` are mapped from the widths reported by Clang
+  for the configured target, preserving both Linux LP64 and Windows LLP64.
