@@ -1,15 +1,16 @@
 [package]
 name = "bnd-clang"
 version = "0.0.0"
-edition = "2024"
+edition.workspace = true
 rust-version = "1.95"
 publish = false
 license = "MIT OR Apache-2.0"
 description = "Experimental bnd fork of windows-clang"
-repository = "https://github.com/youyuanwu/bnd"
+repository.workspace = true
 readme = "vendored/windows-clang/readme.md"
 
 [lib]
+name = "windows_clang"
 path = "vendored/windows-clang/src/lib.rs"
 
 [dependencies]
