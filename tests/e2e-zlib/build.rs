@@ -18,8 +18,7 @@ fn main() {
         "Zlib",
         "--flat",
         "--sys",
-    ])
-    .unwrap();
+    ]);
 
     // Step 3: Link system libz
     println!("cargo:rustc-link-lib=dylib=z");

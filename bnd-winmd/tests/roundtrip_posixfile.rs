@@ -8,10 +8,10 @@ static POSIXFILE_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
     bnd_winmd::generate(&path).expect("generate posixfile winmd")
 });
 
-fn open_index() -> windows_metadata::reader::TypeIndex {
+fn open_index() -> windows_metadata::reader::Index {
     let file = windows_metadata::reader::File::new(POSIXFILE_WINMD.clone())
         .expect("parse posixfile winmd");
-    windows_metadata::reader::TypeIndex::new(vec![file])
+    windows_metadata::reader::Index::new(vec![file])
 }
 
 // ---------------------------------------------------------------------------

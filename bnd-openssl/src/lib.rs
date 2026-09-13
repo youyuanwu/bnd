@@ -10,6 +10,14 @@
 //! - **`crypto`** — library version and core utilities
 //! - **`rand`** — random number generation
 
+#![allow(
+    non_snake_case,
+    non_upper_case_globals,
+    non_camel_case_types,
+    dead_code,
+    clippy::all
+)]
+
 pub mod openssl;
 
 // Re-export bnd_macros as windows_link at the crate root so generated code

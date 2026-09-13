@@ -173,13 +173,25 @@ impl CType {
 /// emission to resolve `CType::Named` references to the correct namespace.
 #[derive(Debug, Default)]
 pub struct TypeRegistry {
-    /// Maps type name → namespace.
-    pub types: HashMap<String, String>,
+    /// Maps type name → metadata registration.
+    pub(crate) types: HashMap<String, RegisteredType>,
+}
+
+#[derive(Debug)]
+pub(crate) struct RegisteredType {
+    namespace: String,
+    is_value_type: bool,
 }
 
 impl TypeRegistry {
-    pub fn register(&mut self, name: &str, namespace: &str) {
-        self.types.insert(name.to_string(), namespace.to_string());
+    pub fn register(&mut self, name: &str, namespace: &str, is_value_type: bool) {
+        self.types.insert(
+            name.to_string(),
+            RegisteredType {
+                namespace: namespace.to_string(),
+                is_value_type,
+            },
+        );
     }
 
     /// Returns true if the type name is registered (i.e. was extracted from
@@ -193,7 +205,12 @@ impl TypeRegistry {
     pub fn namespace_for(&self, name: &str, default_namespace: &str) -> String {
         self.types
             .get(name)
-            .cloned()
+            .map(|ty| ty.namespace.clone())
             .unwrap_or_else(|| default_namespace.to_string())
+    }
+
+    /// Returns whether a registered type uses value-type signature encoding.
+    pub fn is_value_type(&self, name: &str) -> Option<bool> {
+        self.types.get(name).map(|ty| ty.is_value_type)
     }
 }

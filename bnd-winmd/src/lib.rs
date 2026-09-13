@@ -255,7 +255,7 @@ fn seed_registry_from_winmd(
     });
     let file = windows_metadata::reader::File::new(bytes)
         .unwrap_or_else(|| panic!("failed to parse external winmd: {}", winmd_path.display()));
-    let index = windows_metadata::reader::TypeIndex::new(vec![file]);
+    let index = windows_metadata::reader::Index::new(vec![file]);
     let mut count = 0usize;
     for td in index.types() {
         let ns = td.namespace();
@@ -272,12 +272,22 @@ fn seed_registry_from_winmd(
         // __sigset_t in posix.signal and posix.pthread), keep the
         // lexicographically smallest namespace for determinism.
         if !registry.contains(name) {
-            registry.register(name, ns);
+            let is_value_type = matches!(
+                td.category(),
+                windows_metadata::reader::TypeCategory::Struct
+                    | windows_metadata::reader::TypeCategory::Enum
+            );
+            registry.register(name, ns, is_value_type);
             count += 1;
         } else if registry.namespace_for(name, "").as_str() < ns {
             // Already have a smaller namespace — keep it.
         } else {
-            registry.register(name, ns);
+            let is_value_type = matches!(
+                td.category(),
+                windows_metadata::reader::TypeCategory::Struct
+                    | windows_metadata::reader::TypeCategory::Enum
+            );
+            registry.register(name, ns, is_value_type);
         }
     }
     info!(

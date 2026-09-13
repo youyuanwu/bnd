@@ -1,3 +1,11 @@
+#![allow(
+    non_snake_case,
+    non_upper_case_globals,
+    non_camel_case_types,
+    dead_code,
+    clippy::all
+)]
+
 mod bindings;
 
 extern crate bnd_macros as windows_link;
@@ -112,10 +120,7 @@ mod tests {
 
     #[test]
     fn test_delegate_type_exists() {
-        unsafe extern "system" fn cmp(
-            a: *const core::ffi::c_void,
-            b: *const core::ffi::c_void,
-        ) -> i32 {
+        unsafe extern "C" fn cmp(a: *const core::ffi::c_void, b: *const core::ffi::c_void) -> i32 {
             unsafe {
                 let a = *(a as *const i32);
                 let b = *(b as *const i32);

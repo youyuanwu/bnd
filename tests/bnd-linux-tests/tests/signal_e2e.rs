@@ -97,7 +97,7 @@ fn stack_t_struct_size() {
 
 #[test]
 fn sighandler_type_is_option_fn_pointer() {
-    // __sighandler_t is Option<unsafe extern "system" fn(i32)>
+    // __sighandler_t is Option<unsafe extern "C" fn(i32)>
     // It should be pointer-sized
     assert_eq!(
         std::mem::size_of::<signal::__sighandler_t>(),
@@ -152,7 +152,7 @@ fn raise_and_signal_handler() {
 
     static HANDLER_CALLED: AtomicBool = AtomicBool::new(false);
 
-    unsafe extern "system" fn handler(_sig: i32) {
+    unsafe extern "C" fn handler(_sig: i32) {
         HANDLER_CALLED.store(true, Ordering::SeqCst);
     }
 
@@ -187,7 +187,7 @@ fn sigaction_install_handler() {
 
     static RECEIVED_SIG: AtomicI32 = AtomicI32::new(0);
 
-    unsafe extern "system" fn handler(sig: i32) {
+    unsafe extern "C" fn handler(sig: i32) {
         RECEIVED_SIG.store(sig, Ordering::SeqCst);
     }
 
