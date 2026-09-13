@@ -1,17 +1,24 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 /// Generate the staged bnd-linux crate through bnd-clang.
 ///
-/// Each partition has its own RDL file and namespace. Earlier metadata is
-/// supplied as a reference while parsing later partitions, then all RDL is
-/// compiled into one WinMD for Rust generation.
+/// The canonical metadata uses one flat `libc` namespace partitioned into RDL
+/// files by defining header. A temporary remapped WinMD supplies the
+/// namespace-based Rust package layout.
 pub fn generate(output_dir: &Path) {
-    let temp = tempfile::tempdir().expect("failed to create bnd-clang metadata directory");
+    let temp = tempfile::tempdir().expect("failed to create temporary metadata directory");
     let generated_winmd = generate_metadata(temp.path());
     let winmd_dir = output_dir.join("winmd");
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-linux-clang WinMD directory");
     let winmd = winmd_dir.join("bnd-linux-clang.winmd");
-    std::fs::copy(generated_winmd, &winmd).expect("failed to save bnd-linux-clang WinMD");
+    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-linux-clang WinMD");
+    let remapped_winmd = temp.path().join("bnd-linux-clang.remapped.winmd");
+    remap_metadata(
+        &temp.path().join("metadata"),
+        &generated_winmd,
+        &remapped_winmd,
+    );
     let manifest_path = output_dir.join("Cargo.toml");
     let manifest =
         std::fs::read(&manifest_path).expect("failed to preserve bnd-linux-clang Cargo.toml");
@@ -19,7 +26,7 @@ pub fn generate(output_dir: &Path) {
     let generation = std::panic::catch_unwind(|| {
         windows_bindgen::bindgen([
             "--in",
-            winmd.to_str().unwrap(),
+            remapped_winmd.to_str().unwrap(),
             "--out",
             output_dir.to_str().unwrap(),
             "--filter",
@@ -35,63 +42,110 @@ pub fn generate(output_dir: &Path) {
 }
 
 fn generate_metadata(output_dir: &Path) -> PathBuf {
-    std::fs::create_dir_all(output_dir).expect("failed to create bnd-clang output directory");
+    let rdl_dir = output_dir.join("metadata");
+    clear_rdl_dir(&rdl_dir);
+    let winmd_dir = output_dir.join("winmd");
+    std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-clang WinMD directory");
+    let linux_winmd = winmd_dir.join("bnd-linux-clang.winmd");
 
-    let eventfd_rdl = output_dir.join("eventfd.rdl");
-    let eventfd_winmd = output_dir.join("eventfd.winmd");
-    let epoll_rdl = output_dir.join("epoll.rdl");
-    let linux_winmd = output_dir.join("bnd-linux-clang.winmd");
-
-    generate_partition(
+    const HEADERS: [&str; 4] = [
+        "sys/types.h",
         "sys/eventfd.h",
-        &["sys/eventfd.h", "bits/eventfd.h"],
-        "libc.linux.eventfd",
-        None,
-        &eventfd_rdl,
-    );
-    compile_rdl(&[&eventfd_rdl], &eventfd_winmd);
-    generate_partition(
         "sys/epoll.h",
-        &["sys/epoll.h", "bits/epoll.h"],
-        "libc.linux.epoll",
-        Some(&eventfd_winmd),
-        &epoll_rdl,
-    );
-    compile_rdl(&[&eventfd_rdl, &epoll_rdl], &linux_winmd);
+        "sys/sendfile.h",
+    ];
+    const PARTITION_HEADERS: [&str; 7] = [
+        "sys/types.h",
+        "bits/types.h",
+        "sys/eventfd.h",
+        "bits/eventfd.h",
+        "sys/epoll.h",
+        "bits/epoll.h",
+        "sys/sendfile.h",
+    ];
+    let source = HEADERS
+        .map(|header| format!("#include <{header}>\n"))
+        .concat();
 
+    windows_clang::clang()
+        .input_text(&source)
+        .args(["-x", "c", "-std=c11"])
+        .namespace("libc")
+        .library("c")
+        .scope_headers(PARTITION_HEADERS)
+        .output(&rdl_dir)
+        .write_by_header()
+        .expect("bnd-clang failed to generate Linux RDL partitions");
+
+    windows_rdl::reader()
+        .input(&rdl_dir)
+        .reference_default()
+        .output(&linux_winmd)
+        .write()
+        .expect("windows-rdl failed to compile Linux metadata");
     linux_winmd
 }
 
-fn generate_partition(
-    header: &str,
-    filters: &[&str],
-    namespace: &str,
-    reference: Option<&Path>,
-    output: &Path,
-) {
-    let mut generator = windows_clang::clang();
-    generator
-        .input_text(&format!("#include <{header}>\n"))
-        .args(["-x", "c", "-std=c11"])
-        .filters(filters)
-        .namespace(namespace)
-        .library("c")
-        .output(output);
-    if let Some(reference) = reference {
-        generator.reference(reference);
+fn remap_metadata(rdl_dir: &Path, input: &Path, output: &Path) {
+    let mut rdl_files: Vec<_> = std::fs::read_dir(rdl_dir)
+        .expect("failed to read bnd-clang RDL directory")
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.extension().is_some_and(|extension| extension == "rdl"))
+        .collect();
+    rdl_files.sort();
+
+    let mut routes = HashMap::new();
+    for path in rdl_files {
+        let stem = path
+            .file_stem()
+            .and_then(|stem| stem.to_str())
+            .expect("RDL file has no UTF-8 stem");
+        let stem = module_stem(stem);
+        for name in windows_rdl::item_names(&path, "libc").expect("failed to read RDL item names") {
+            routes.insert(name, format!("libc.{stem}"));
+        }
     }
-    generator
-        .write()
-        .unwrap_or_else(|error| panic!("bnd-clang failed to generate {header} RDL: {error}"));
+
+    windows_metadata::remap()
+        .source("libc")
+        .fallback("libc")
+        .routes(routes)
+        .input(input)
+        .output(output)
+        .remap()
+        .expect("failed to remap Linux metadata");
 }
 
-fn compile_rdl(inputs: &[&Path], output: &Path) {
-    windows_rdl::reader()
-        .inputs(inputs)
-        .reference_default()
-        .output(output)
-        .write()
-        .expect("windows-rdl failed to compile Linux metadata");
+fn module_stem(header_stem: &str) -> String {
+    let mut stem: String = header_stem
+        .chars()
+        .map(|ch| {
+            if ch.is_ascii_alphanumeric() || ch == '_' {
+                ch
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    if stem
+        .as_bytes()
+        .first()
+        .is_some_and(|byte| byte.is_ascii_digit())
+    {
+        stem.insert(0, '_');
+    }
+    stem
+}
+
+fn clear_rdl_dir(rdl_dir: &Path) {
+    std::fs::create_dir_all(rdl_dir).expect("failed to create bnd-clang RDL directory");
+    for entry in std::fs::read_dir(rdl_dir).expect("failed to read bnd-clang RDL directory") {
+        let path = entry.expect("failed to read RDL entry").path();
+        if path.extension().is_some_and(|extension| extension == "rdl") {
+            std::fs::remove_file(path).expect("failed to remove stale RDL partition");
+        }
+    }
 }
 
 #[cfg(test)]
@@ -105,7 +159,7 @@ mod tests {
     }
 
     #[test]
-    fn generates_eventfd_and_epoll_partitions() {
+    fn generates_ordered_linux_partitions() {
         let temp = tempfile::tempdir().expect("create temporary output directory");
         let winmd = generate_metadata(temp.path());
         let index = open_index(std::fs::read(&winmd).expect("read generated Linux WinMD"));
@@ -120,19 +174,27 @@ mod tests {
                 .any(|(actual_namespace, ty)| actual_namespace == namespace && ty == name)
         };
 
-        assert!(has("libc.linux.eventfd", "eventfd_t"));
-        assert!(has("libc.linux.eventfd", "Apis"));
-        assert!(has("libc.linux.epoll", "epoll_data_t"));
-        assert!(has("libc.linux.epoll", "epoll_event"));
-        assert!(has("libc.linux.epoll", "EPOLL_EVENTS"));
-        assert!(has("libc.linux.epoll", "Apis"));
+        assert!(has("libc", "off_t"));
+        assert!(has("libc", "ssize_t"));
+        assert!(has("libc", "eventfd_t"));
+        assert!(has("libc", "epoll_data_t"));
+        assert!(has("libc", "epoll_event"));
+        assert!(has("libc", "EPOLL_EVENTS"));
+        assert!(has("libc", "Apis"));
+        assert_eq!(
+            types
+                .iter()
+                .map(|(namespace, _)| namespace.as_str())
+                .collect::<std::collections::BTreeSet<_>>(),
+            ["libc"].into_iter().collect()
+        );
 
-        let eventfd_t = index.expect("libc.linux.eventfd", "eventfd_t");
+        let eventfd_t = index.expect("libc", "eventfd_t");
         let fields: Vec<_> = eventfd_t.fields().collect();
         assert_eq!(fields.len(), 1);
         assert_eq!(fields[0].ty(), windows_metadata::Type::U64);
 
-        let apis = index.expect("libc.linux.eventfd", "Apis");
+        let apis = index.expect("libc", "Apis");
         let constants: Vec<_> = apis.fields().collect();
         let constant_names: Vec<_> = constants.iter().map(|field| field.name()).collect();
         let methods: Vec<_> = apis.methods().collect();
@@ -164,14 +226,13 @@ mod tests {
             [windows_metadata::Type::U32, windows_metadata::Type::I32]
         );
 
-        let epoll_apis = index.expect("libc.linux.epoll", "Apis");
-        let constants: Vec<_> = epoll_apis.fields().map(|field| field.name()).collect();
+        let constants: Vec<_> = apis.fields().map(|field| field.name()).collect();
         let events: Vec<_> = index
-            .expect("libc.linux.epoll", "EPOLL_EVENTS")
+            .expect("libc", "EPOLL_EVENTS")
             .fields()
             .map(|field| field.name())
             .collect();
-        let methods: Vec<_> = epoll_apis.methods().collect();
+        let methods: Vec<_> = apis.methods().collect();
         let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
 
         assert!(constants.contains(&"EPOLL_CTL_ADD"));
@@ -185,5 +246,36 @@ mod tests {
         assert!(method_names.contains(&"epoll_create1"));
         assert!(method_names.contains(&"epoll_ctl"));
         assert!(method_names.contains(&"epoll_wait"));
+
+        let sendfile = index
+            .expect("libc", "Apis")
+            .methods()
+            .find(|method| method.name() == "sendfile")
+            .expect("sendfile method");
+        let import = sendfile.impl_map().expect("sendfile import");
+        assert_eq!(import.import_scope().name(), "c");
+        assert!(
+            import
+                .flags()
+                .contains(windows_metadata::PInvokeAttributes::CallConvCdecl)
+        );
+
+        let signature = sendfile.signature(&[]);
+        assert_eq!(
+            signature.return_type,
+            windows_metadata::Type::value_named("libc", "ssize_t")
+        );
+        assert_eq!(
+            signature.types,
+            [
+                windows_metadata::Type::I32,
+                windows_metadata::Type::I32,
+                windows_metadata::Type::PtrMut(
+                    Box::new(windows_metadata::Type::value_named("libc", "off_t")),
+                    1,
+                ),
+                windows_metadata::Type::USize,
+            ]
+        );
     }
 }

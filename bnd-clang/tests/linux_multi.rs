@@ -68,6 +68,43 @@ fn open_index() -> windows_metadata::reader::Index {
 }
 
 #[test]
+fn header_scope_keeps_only_roots_and_reachable_types() {
+    let temp = tempfile::tempdir().expect("create temporary output directory");
+    let dependency = temp.path().join("dependency.h");
+    let root = temp.path().join("root.h");
+    let output = temp.path().join("rdl");
+    std::fs::write(
+        &dependency,
+        "typedef struct Used { int value; } Used;\n\
+         typedef struct Unused { int value; } Unused;\n",
+    )
+    .expect("write dependency fixture");
+    std::fs::write(
+        &root,
+        "#include \"dependency.h\"\nvoid consume(Used* value);\n",
+    )
+    .expect("write root fixture");
+
+    windows_clang::clang()
+        .input(&root)
+        .args(["-x", "c", "-std=c11"])
+        .arg(format!("-I{}", temp.path().display()))
+        .namespace("HeaderScope")
+        .library("simple")
+        .scope_header("root.h")
+        .output(&output)
+        .write_by_header()
+        .expect("generate header-scoped RDL");
+
+    let root = std::fs::read_to_string(output.join("root.rdl")).expect("read root RDL");
+    let dependency =
+        std::fs::read_to_string(output.join("dependency.rdl")).expect("read dependency RDL");
+    assert!(root.contains("fn consume"));
+    assert!(dependency.contains("struct Used"));
+    assert!(!dependency.contains("struct Unused"));
+}
+
+#[test]
 fn generates_basic_types() {
     let index = open_index();
     let types: Vec<(String, String)> = index

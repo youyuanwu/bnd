@@ -36,3 +36,5 @@ fork remains easy to compare with upstream.
   128-bit integer representation.
 - Partial bitfield allocation units use Clang field offsets to preserve their
   exact occupied byte span and the enclosing record's native alignment.
+- Explicit `scope_headers` activate the per-header reachability sweep without
+  requiring an unrelated directory scope.
