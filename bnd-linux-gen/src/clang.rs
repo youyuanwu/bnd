@@ -48,20 +48,26 @@ fn generate_metadata(output_dir: &Path) -> PathBuf {
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-clang WinMD directory");
     let linux_winmd = winmd_dir.join("bnd-linux-clang.winmd");
 
-    const HEADERS: [&str; 4] = [
+    const HEADERS: [&str; 6] = [
         "sys/types.h",
         "sys/eventfd.h",
         "sys/epoll.h",
+        "sys/inotify.h",
         "sys/sendfile.h",
+        "sys/timerfd.h",
     ];
-    const PARTITION_HEADERS: [&str; 7] = [
+    const PARTITION_HEADERS: [&str; 11] = [
         "sys/types.h",
         "bits/types.h",
         "sys/eventfd.h",
         "bits/eventfd.h",
         "sys/epoll.h",
         "bits/epoll.h",
+        "sys/inotify.h",
+        "bits/inotify.h",
         "sys/sendfile.h",
+        "sys/timerfd.h",
+        "bits/timerfd.h",
     ];
     let source = HEADERS
         .map(|header| format!("#include <{header}>\n"))
@@ -246,6 +252,77 @@ mod tests {
         assert!(method_names.contains(&"epoll_create1"));
         assert!(method_names.contains(&"epoll_ctl"));
         assert!(method_names.contains(&"epoll_wait"));
+
+        let inotify_event = index.expect("libc", "inotify_event");
+        let fields: Vec<_> = inotify_event.fields().collect();
+        assert_eq!(
+            fields.iter().map(|field| field.name()).collect::<Vec<_>>(),
+            ["wd", "mask", "cookie", "len", "name"]
+        );
+        assert_eq!(
+            fields[4].ty(),
+            windows_metadata::Type::ArrayFixed(Box::new(windows_metadata::Type::I8), 0)
+        );
+
+        let constants: Vec<_> = apis.fields().map(|field| field.name()).collect();
+        let methods: Vec<_> = apis.methods().collect();
+        let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
+
+        assert!(constants.contains(&"IN_CREATE"));
+        assert!(constants.contains(&"IN_CLOSE"));
+        assert!(constants.contains(&"IN_MOVE"));
+        assert!(constants.contains(&"IN_ALL_EVENTS"));
+        assert!(constants.contains(&"IN_NONBLOCK"));
+        assert!(methods.iter().all(|method| {
+            method
+                .impl_map()
+                .is_some_and(|import| import.import_scope().name() == "c")
+        }));
+        assert!(method_names.contains(&"inotify_add_watch"));
+        assert!(method_names.contains(&"inotify_init1"));
+        assert!(method_names.contains(&"inotify_rm_watch"));
+
+        let itimerspec = index.expect("libc", "itimerspec");
+        let fields: Vec<_> = itimerspec.fields().collect();
+        assert_eq!(
+            fields.iter().map(|field| field.name()).collect::<Vec<_>>(),
+            ["it_interval", "it_value"]
+        );
+        assert!(fields.iter().all(|field| {
+            field.ty() == windows_metadata::Type::value_named("libc", "timespec")
+        }));
+
+        let constants: Vec<_> = apis.fields().map(|field| field.name()).collect();
+        let methods: Vec<_> = apis.methods().collect();
+        let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
+
+        assert!(constants.contains(&"TFD_CLOEXEC"));
+        assert!(constants.contains(&"TFD_NONBLOCK"));
+        assert!(constants.contains(&"TFD_TIMER_ABSTIME"));
+        assert!(constants.contains(&"TFD_TIMER_CANCEL_ON_SET"));
+        assert!(method_names.contains(&"timerfd_create"));
+        assert!(method_names.contains(&"timerfd_gettime"));
+        assert!(method_names.contains(&"timerfd_settime"));
+
+        let timerfd_settime = methods
+            .iter()
+            .find(|method| method.name() == "timerfd_settime")
+            .expect("timerfd_settime method");
+        assert_eq!(
+            timerfd_settime.signature(&[]).types,
+            [
+                windows_metadata::Type::I32,
+                windows_metadata::Type::I32,
+                windows_metadata::Type::PtrConst(
+                    Box::new(windows_metadata::Type::value_named("libc", "itimerspec")),
+                    1,
+                ),
+                windows_metadata::Type::PtrMut(
+                    Box::new(windows_metadata::Type::value_named("libc", "itimerspec")),
+                    1,
+                ),
+            ]
+        );
 
         let sendfile = index
             .expect("libc", "Apis")

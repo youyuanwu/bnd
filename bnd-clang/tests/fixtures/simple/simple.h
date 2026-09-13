@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stddef.h>
+
 // Enum
 typedef enum {
     COLOR_RED   = 0,
@@ -51,6 +53,11 @@ int widget_count(void);
 #define MAX_WIDGETS 256
 #define DEFAULT_WIDTH 800
 #define DEFAULT_HEIGHT 600
+#define FIRST_FLAG 0x1
+#define SECOND_FLAG 0x2
+#define COMBINED_FLAGS (FIRST_FLAG | SECOND_FLAG)
+#define HIGH_BIT (1U << 31)
+#define BUFFER_BYTES ((size_t)(FIRST_FLAG << 4))
 
 // Conditional constant controlled by global clang_args in simple.toml.
 // Tests that top-level clang_args = ["-DCUSTOM_DEPTH=42"] is applied.

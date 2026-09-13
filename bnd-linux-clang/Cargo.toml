@@ -20,8 +20,11 @@ default = [
     "__sigset_t",
     "epoll",
     "eventfd",
+    "inotify",
     "sendfile",
+    "struct_itimerspec",
     "struct_timespec",
+    "timerfd",
     "types",
 ]
 Foundation = []
@@ -29,6 +32,9 @@ Foundation = []
 __sigset_t = ["Foundation"]
 epoll = ["Foundation", "__sigset_t", "struct_timespec", "types"]
 eventfd = ["Foundation"]
+inotify = ["Foundation"]
 sendfile = ["Foundation", "types"]
+struct_itimerspec = ["Foundation", "struct_timespec"]
 struct_timespec = ["Foundation", "types"]
+timerfd = ["Foundation", "struct_itimerspec", "types"]
 types = ["Foundation"]

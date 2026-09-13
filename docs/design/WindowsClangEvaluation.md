@@ -325,7 +325,8 @@ source API is not identical to `bnd-winmd`: inline declarations such as
 as a wrapper. The same difference applies to `gz_header`.
 
 `bnd-linux-gen` also contains an incremental direct-Clang path for the
-`sys/types.h`, `sys/eventfd.h`, `sys/epoll.h`, and `sys/sendfile.h` surface.
+`sys/types.h`, `sys/eventfd.h`, `sys/epoll.h`, `sys/inotify.h`,
+`sys/sendfile.h`, and `sys/timerfd.h` surface.
 Like the windows-rs Win32 pipeline, it parses one combined translation unit,
 emits temporary RDL files per defining header under a single flat `libc`
 namespace, and compiles them into one canonical WinMD. A packaging-only
