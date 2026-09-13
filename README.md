@@ -22,7 +22,13 @@ C Headers ──→ libclang ──→ bnd-winmd ──→ .winmd ──→ wind
 ## Prerequisites
 
 - **libclang** — `apt install libclang-dev` (or equivalent)
+- **just** — command runner for generation and CI checks
 - **Rust nightly** — see `rust-toolchain.toml`
+
+## Development
+
+- Run `just` or `just generate` to regenerate all bindings.
+- Run `just ci` to execute the same checks as GitHub Actions.
 
 ## License
 
