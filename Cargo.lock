@@ -107,13 +107,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "bnd-linux-clang"
+version = "0.0.0"
+dependencies = [
+ "bnd-macros",
+ "libc",
+]
+
+[[package]]
 name = "bnd-linux-gen"
 version = "0.1.0"
 dependencies = [
+ "bnd-bindgen",
+ "bnd-clang",
  "bnd-winmd",
  "tempfile",
  "tracing-subscriber",
- "windows-bindgen",
+ "windows-metadata",
+ "windows-rdl",
 ]
 
 [[package]]

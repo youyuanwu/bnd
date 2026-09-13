@@ -324,12 +324,23 @@ source API is not identical to `bnd-winmd`: inline declarations such as
 `z_stream`, while `bnd-winmd` retains `z_stream_s` and projects `z_stream`
 as a wrapper. The same difference applies to `gz_header`.
 
+`bnd-linux-gen` also contains an incremental direct-Clang path for the
+`eventfd` and `epoll` partitions. It emits separate RDL files, supplies the
+first partition's metadata as a reference to the second, then compiles both
+into one WinMD. The non-published `bnd-linux-clang` staging crate compiles
+both generated modules into a checked-in namespace-based source tree with the
+local `bnd-bindgen` fork and exercises them together against libc. A
+golden-file test ensures regeneration is deterministic. The production
+`generate` path remains unchanged and continues to use `bnd-winmd` until the
+required Linux partitions have equivalent coverage.
+
 These experiments remove the scalar-width, C-calling-convention, and
 partial-bitfield blockers from the fork. They also prove the partition and
 reference primitives needed by a future configuration wrapper, but no
 general TOML orchestration exists yet. Injection and cross-crate generation
-gaps remain. Neither fork replaces the production `windows-bindgen`
-dependency or the current `bnd-winmd` pipeline yet.
+gaps remain. `bnd-linux-gen` now uses the local `bnd-bindgen` fork for both
+legacy and staged package generation, while bnd-clang has not replaced the
+current production `bnd-winmd` pipeline.
 
 ## Upstream References
 
