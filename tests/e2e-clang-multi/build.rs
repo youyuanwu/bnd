@@ -41,7 +41,6 @@ fn main() {
 fn generate_types(fixtures: &Path, output: &Path) {
     windows_clang::clang()
         .input(fixtures.join("types.h"))
-        .target("x86_64-unknown-linux-gnu")
         .args(["-x", "c", "-std=c11"])
         .namespace("MultiTest.Types")
         .library("simple")
@@ -54,7 +53,6 @@ fn generate_widget(fixtures: &Path, types_winmd: &Path, output: &Path) {
     windows_clang::clang()
         .input(fixtures.join("widget.h"))
         .reference(types_winmd)
-        .target("x86_64-unknown-linux-gnu")
         .args(["-x", "c", "-std=c11"])
         .filter("widget.h")
         .namespace("MultiTest.Widgets")

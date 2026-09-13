@@ -598,6 +598,11 @@ impl Cursor {
         unsafe { clang_getFieldDeclBitWidth(self.0) }
     }
 
+    pub fn offset_of_field(&self) -> Option<i64> {
+        let offset = unsafe { clang_Cursor_getOffsetOfField(self.0) };
+        (offset >= 0).then_some(offset)
+    }
+
     pub fn typedef_underlying_type(&self) -> Type {
         Type(unsafe { clang_getTypedefDeclUnderlyingType(self.0) })
     }

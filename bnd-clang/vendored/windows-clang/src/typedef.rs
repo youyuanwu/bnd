@@ -37,6 +37,35 @@ impl Typedef {
             return Ok(None);
         }
 
+        // Avoid recursive Rust aliases such as `typedef _Bool bool`.
+        if matches!(
+            name.as_str(),
+            "bool"
+                | "i8"
+                | "u8"
+                | "i16"
+                | "u16"
+                | "i32"
+                | "u32"
+                | "i64"
+                | "u64"
+                | "f32"
+                | "f64"
+                | "isize"
+                | "usize"
+        ) {
+            return Ok(None);
+        }
+
+        // WinMD has no 128-bit integer representation. Checking the canonical
+        // type also skips aliases chained through another unsupported typedef.
+        if matches!(
+            underlying.canonical_type().kind(),
+            CXType_Int128 | CXType_UInt128
+        ) {
+            return Ok(None);
+        }
+
         // GUID synonyms collapse to `GUID` at reference sites.
         if guid_alias(&name) {
             return Ok(None);

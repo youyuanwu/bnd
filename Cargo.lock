@@ -245,6 +245,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "e2e-clang-simple"
+version = "0.1.0"
+dependencies = [
+ "bnd-bindgen",
+ "bnd-clang",
+ "bnd-macros",
+ "simple-impl",
+ "windows-rdl",
+]
+
+[[package]]
 name = "e2e-multi"
 version = "0.1.0"
 dependencies = [
