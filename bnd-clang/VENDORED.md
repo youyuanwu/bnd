@@ -29,4 +29,10 @@ fork remains easy to compare with upstream.
   with the C calling convention. This preserves their source ABI instead of
   falling back to the Windows platform-default convention in RDL.
 - C `long` and `unsigned long` are mapped from the widths reported by Clang
-  for the configured target, preserving both Linux LP64 and Windows LLP64.
+  for the active host ABI.
+- Typedefs that shadow Rust primitive names are omitted to prevent recursive
+  generated aliases such as `pub type bool = bool`.
+- Direct and chained `__int128` typedefs are omitted because WinMD has no
+  128-bit integer representation.
+- Partial bitfield allocation units use Clang field offsets to preserve their
+  exact occupied byte span and the enclosing record's native alignment.

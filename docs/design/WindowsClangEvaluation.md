@@ -309,16 +309,16 @@ This avoids runtime discovery selecting a different libclang and changing
 generated ABI output.
 
 The fork now maps C `long` and `unsigned long` from the widths reported by
-Clang, preserving Linux LP64 and Windows LLP64 behavior. Plain C functions
-and callbacks also retain the C calling convention rather than falling back
-to RDL's Windows platform default. Integration coverage ports the `multi`
-fixture through C headers, RDL, WinMD, generated Rust, and linked runtime
-calls. The first `simple` fixture tests cover LP64 fields and over-aligned
-records.
+Clang for the active host ABI. Cross-compilation is not supported. Plain C
+functions and callbacks also retain the C calling convention rather than
+falling back to RDL's Windows platform default. Integration coverage ports
+the `multi` fixture through C headers, RDL, WinMD, generated Rust, and linked
+runtime calls. The `simple` fixture covers LP64 fields, over-aligned records,
+anonymous records and arrays, bitfields, and unsupported integer typedefs.
 
-These experiments remove the scalar-width and C-calling-convention blockers
-from the fork, but not the partial-bitfield, configuration, injection, or
-cross-crate generation gaps. Neither fork replaces the production
+These experiments remove the scalar-width, C-calling-convention, and
+partial-bitfield blockers from the fork. Configuration, injection, and
+cross-crate generation gaps remain. Neither fork replaces the production
 `windows-bindgen` dependency or the current `bnd-winmd` pipeline yet.
 
 ## Upstream References

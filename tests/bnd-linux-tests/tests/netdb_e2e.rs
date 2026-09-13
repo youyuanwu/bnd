@@ -2,6 +2,9 @@
 
 use bnd_linux::libc::posix::netdb;
 use bnd_linux::libc::posix::socket;
+use std::sync::Mutex;
+
+static PROTOCOL_LOOKUP_LOCK: Mutex<()> = Mutex::new(());
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -80,6 +83,7 @@ fn netent_struct_size() {
 
 #[test]
 fn getprotobyname_tcp() {
+    let _guard = PROTOCOL_LOOKUP_LOCK.lock().expect("lock protocol lookup");
     let name = c"tcp";
     let entry = unsafe { netdb::getprotobyname(name.as_ptr()) };
     assert!(!entry.is_null(), "getprotobyname(\"tcp\") should succeed");
@@ -89,6 +93,7 @@ fn getprotobyname_tcp() {
 
 #[test]
 fn getprotobyname_udp() {
+    let _guard = PROTOCOL_LOOKUP_LOCK.lock().expect("lock protocol lookup");
     let name = c"udp";
     let entry = unsafe { netdb::getprotobyname(name.as_ptr()) };
     assert!(!entry.is_null(), "getprotobyname(\"udp\") should succeed");

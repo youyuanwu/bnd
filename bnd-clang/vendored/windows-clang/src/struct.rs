@@ -75,6 +75,8 @@ impl Struct {
         let mut bitfield_indices: Vec<usize> = vec![];
         let mut unit_size: i64 = 0;
         let mut remaining_bits: i64 = 0;
+        let mut unit: Option<(usize, i64, i64)> = None;
+        let mut narrowed_bitfield = false;
 
         // Names anonymous aggregate fields in declaration order.
         let mut anonymous_count: usize = 0;
@@ -85,6 +87,10 @@ impl Struct {
         for child in cursor.children() {
             // C++ base subobjects sit at the front of the layout; emit leading fields.
             if child.kind() == CXCursor_CXXBaseSpecifier {
+                if let Some(offset) = child.offset_of_field() {
+                    narrowed_bitfield |=
+                        Self::narrow_partial_bitfield(&mut fields, &mut unit, offset);
+                }
                 unit_size = 0;
                 remaining_bits = 0;
                 base_count += 1;
@@ -111,6 +117,7 @@ impl Struct {
             if matches!(child.kind(), CXCursor_StructDecl | CXCursor_UnionDecl)
                 && child.is_anonymous_record()
             {
+                unit = None;
                 unit_size = 0;
                 remaining_bits = 0;
                 anonymous_count += 1;
@@ -147,6 +154,10 @@ impl Struct {
             // Emit `struct { ... } field;` inline so the reader rebuilds a nested type.
             let decl = child.ty().ty();
             if is_named_instance_record(&decl) {
+                if let Some(offset) = child.offset_of_field() {
+                    narrowed_bitfield |=
+                        Self::narrow_partial_bitfield(&mut fields, &mut unit, offset);
+                }
                 unit_size = 0;
                 remaining_bits = 0;
                 let child_is_union = decl.kind() == CXCursor_UnionDecl;
@@ -164,6 +175,11 @@ impl Struct {
                 let width = child.bit_field_width() as i64;
                 if width <= 0 {
                     // A zero-width bit-field only forces a fresh storage unit.
+                    if let Some(offset) = child.offset_of_field() {
+                        narrowed_bitfield |=
+                            Self::narrow_partial_bitfield(&mut fields, &mut unit, offset);
+                    }
+                    unit = None;
                     unit_size = 0;
                     remaining_bits = 0;
                     continue;
@@ -172,9 +188,15 @@ impl Struct {
                 let size = child.ty().size_of();
                 let member = demacro_member_name(child.name(), parser.macro_defs);
                 if size != unit_size || width > remaining_bits {
+                    let offset = child.offset_of_field();
+                    if let Some(offset) = offset {
+                        narrowed_bitfield |=
+                            Self::narrow_partial_bitfield(&mut fields, &mut unit, offset);
+                    }
                     // New storage units use the bit-field's declared signedness.
                     let ty = child.ty().to_type(parser);
                     bitfield_indices.push(fields.len());
+                    unit = offset.map(|offset| (fields.len(), offset, size * 8));
                     // Anonymous padding consumes bits but gets no accessor.
                     let members = if member.is_empty() {
                         vec![]
@@ -202,6 +224,9 @@ impl Struct {
                 continue;
             }
 
+            if let Some(offset) = child.offset_of_field() {
+                narrowed_bitfield |= Self::narrow_partial_bitfield(&mut fields, &mut unit, offset);
+            }
             unit_size = 0;
             remaining_bits = 0;
 
@@ -232,7 +257,10 @@ impl Struct {
         };
 
         // Record forced over-alignment separately because `ClassLayout` can only lower it.
-        let alignment = if struct_align_bytes > 0 && struct_align_bytes > max_field_align_bytes {
+        let alignment = if packing.is_none()
+            && struct_align_bytes > 0
+            && (struct_align_bytes > max_field_align_bytes || narrowed_bitfield)
+        {
             Some(struct_align_bytes as u16)
         } else {
             None
@@ -280,6 +308,33 @@ impl Struct {
         } else {
             quote! { struct }
         }
+    }
+
+    /// Shrink a bit-field allocation unit when Clang places the following field
+    /// before the end of its declared storage type.
+    fn narrow_partial_bitfield(
+        fields: &mut [Field],
+        unit: &mut Option<(usize, i64, i64)>,
+        next_offset: i64,
+    ) -> bool {
+        let Some((field_index, start, declared_bits)) = unit.take() else {
+            return false;
+        };
+        let occupied_bits = next_offset - start;
+        if occupied_bits <= 0 || occupied_bits >= declared_bits || occupied_bits % 8 != 0 {
+            return false;
+        }
+
+        let bytes = (occupied_bits / 8) as usize;
+        fields[field_index].ty = match bytes {
+            1 => metadata::Type::U8,
+            2 => metadata::Type::U16,
+            4 => metadata::Type::U32,
+            8 => metadata::Type::U64,
+            _ => metadata::Type::ArrayFixed(Box::new(metadata::Type::U8), bytes),
+        };
+        fields[field_index].bitfields.clear();
+        true
     }
 
     /// The record's layout attributes.
