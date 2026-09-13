@@ -294,7 +294,7 @@ Rust APIs and the ABI assertions already covered by bnd's end-to-end tests.
 
 ## Fork Experiment
 
-The repository includes two non-published workspace crates for experiments:
+The repository includes two non-published crates for experiments:
 
 - `bnd-clang`, containing an exact copy of `windows-clang` under
   `bnd-clang/vendored/windows-clang`.
@@ -302,8 +302,11 @@ The repository includes two non-published workspace crates for experiments:
   `bnd-bindgen/vendored/windows-bindgen`.
 
 Each crate records the upstream revision and license in `VENDORED.md`.
-Neither fork replaces the production `windows-bindgen` dependency or the
-current `bnd-winmd` pipeline yet.
+They are excluded from the Cargo workspace until the experiment is ready to
+participate in normal builds. This also prevents `bnd-clang`'s
+`clang-sys/runtime` feature from changing how the production `clang` wrapper
+loads libclang. Neither fork replaces the production `windows-bindgen`
+dependency or the current `bnd-winmd` pipeline yet.
 
 ## Upstream References
 

@@ -1,12 +1,12 @@
 [package]
 name = "bnd-bindgen"
 version = "0.0.0"
-edition.workspace = true
+edition = "2024"
 rust-version = "1.95"
 publish = false
 license = "MIT OR Apache-2.0"
 description = "Experimental bnd fork of windows-bindgen"
-repository.workspace = true
+repository = "https://github.com/youyuanwu/bnd"
 readme = "vendored/windows-bindgen/readme.md"
 
 [lib]
