@@ -19,8 +19,7 @@ fn main() {
         "SimpleTest",
         "--flat",
         "--sys",
-    ])
-    .unwrap();
+    ]);
 
     // Point the linker at the directory containing libsimple.so (built by
     // the simple-impl cdylib crate). Cargo places cdylib output in

@@ -8,9 +8,9 @@ static SIMPLE_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
     bnd_winmd::generate(&path).expect("generate simple winmd")
 });
 
-fn open_index() -> windows_metadata::reader::TypeIndex {
+fn open_index() -> windows_metadata::reader::Index {
     let file = windows_metadata::reader::File::new(SIMPLE_WINMD.clone()).expect("parse winmd");
-    windows_metadata::reader::TypeIndex::new(vec![file])
+    windows_metadata::reader::Index::new(vec![file])
 }
 
 #[test]

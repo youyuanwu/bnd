@@ -408,7 +408,11 @@ fn ctype_to_wintype(ctype: &CType, default_namespace: &str, registry: &TypeRegis
             // If the type is registered (user-defined / extracted), emit a TypeRef.
             if registry.contains(name) {
                 let ns = registry.namespace_for(name, default_namespace);
-                Type::named(&ns, name)
+                if registry.is_value_type(name).unwrap_or(true) {
+                    Type::value_named(&ns, name)
+                } else {
+                    Type::class_named(&ns, name)
+                }
             } else if let Some(resolved) = resolved {
                 // System typedef not in any partition — use the canonical type
                 // that clang resolved during extraction.
@@ -417,7 +421,7 @@ fn ctype_to_wintype(ctype: &CType, default_namespace: &str, registry: &TypeRegis
                 // Record/enum not in registry — emit as TypeRef and
                 // let windows-bindgen report the error with context.
                 let ns = registry.namespace_for(name, default_namespace);
-                Type::named(&ns, name)
+                Type::value_named(&ns, name)
             }
         }
 

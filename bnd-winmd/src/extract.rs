@@ -1407,13 +1407,13 @@ pub fn build_type_registry(
             let ns = namespace_overrides
                 .get(&s.name)
                 .unwrap_or(&partition.namespace);
-            registry.register(&s.name, ns);
+            registry.register(&s.name, ns, true);
         }
         for e in &partition.enums {
             let ns = namespace_overrides
                 .get(&e.name)
                 .unwrap_or(&partition.namespace);
-            registry.register(&e.name, ns);
+            registry.register(&e.name, ns, true);
         }
         for td in &partition.typedefs {
             // First-writer-wins for typedefs: if already registered by an
@@ -1424,7 +1424,12 @@ pub fn build_type_registry(
             let ns = namespace_overrides
                 .get(&td.name)
                 .unwrap_or(&partition.namespace);
-            registry.register(&td.name, ns);
+            let is_delegate = matches!(&td.underlying_type, CType::FnPtr { .. })
+                || matches!(
+                    &td.underlying_type,
+                    CType::Ptr { pointee, .. } if matches!(pointee.as_ref(), CType::FnPtr { .. })
+                );
+            registry.register(&td.name, ns, !is_delegate);
         }
     }
     registry

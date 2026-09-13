@@ -20,15 +20,22 @@ pub fn generate(output_dir: &Path) {
 
     // Step 2: Generate crate source tree via windows-bindgen package mode
     // Both posix and linux namespaces are in the same winmd — no --reference needed.
-    windows_bindgen::bindgen([
-        "--in",
-        linux_winmd.to_str().unwrap(),
-        "--out",
-        output_dir.to_str().unwrap(),
-        "--filter",
-        "libc",
-        "--sys",
-        "--package",
-    ])
-    .unwrap();
+    let manifest_path = output_dir.join("Cargo.toml");
+    let manifest = std::fs::read(&manifest_path).expect("failed to preserve bnd-linux Cargo.toml");
+    let generation = std::panic::catch_unwind(|| {
+        windows_bindgen::bindgen([
+            "--in",
+            linux_winmd.to_str().unwrap(),
+            "--out",
+            output_dir.to_str().unwrap(),
+            "--filter",
+            "libc",
+            "--sys",
+            "--package",
+        ]);
+    });
+    std::fs::write(manifest_path, manifest).expect("failed to restore bnd-linux Cargo.toml");
+    if let Err(payload) = generation {
+        std::panic::resume_unwind(payload);
+    }
 }

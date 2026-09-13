@@ -8,9 +8,9 @@ static MULTI_WINMD: LazyLock<Vec<u8>> = LazyLock::new(|| {
     bnd_winmd::generate(&path).expect("generate multi winmd")
 });
 
-fn open_multi_index() -> windows_metadata::reader::TypeIndex {
+fn open_multi_index() -> windows_metadata::reader::Index {
     let file = windows_metadata::reader::File::new(MULTI_WINMD.clone()).expect("parse multi winmd");
-    windows_metadata::reader::TypeIndex::new(vec![file])
+    windows_metadata::reader::Index::new(vec![file])
 }
 
 #[test]
