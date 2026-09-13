@@ -11,10 +11,17 @@ This crate contains an experimental fork of `windows-clang`.
 | Vendored directory | `vendored/windows-clang` |
 | License | MIT OR Apache-2.0 |
 
-The vendored directory is an unmodified copy of the upstream crate at the
+The vendored directory started as an exact copy of the upstream crate at the
 recorded revision, including its original manifest, README, and license
 files. The bnd package manifest lives one level above it and points its
 library target at the vendored source.
 
 Local experiments should modify files under `vendored/windows-clang` so the
 fork remains easy to compare with upstream.
+
+## Local changes
+
+- Runtime libclang loading is optional behind the bnd package's `runtime`
+  feature. Workspace builds use the linked libclang selected by `clang-sys`,
+  avoiding feature unification with the existing `clang` wrapper and keeping
+  binding regeneration deterministic.

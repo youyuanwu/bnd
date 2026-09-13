@@ -1,7 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bnd-macros", "bnd-winmd", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib", "tests/bnd-linux-tests"]
-exclude = ["bnd-bindgen", "bnd-clang"]
+members = ["bnd-bindgen", "bnd-clang", "bnd-macros", "bnd-winmd", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-zlib", "tests/bnd-linux-tests"]
 
 package.edition = "2024"
 package.authors = [ "youyuanwu@outlook.com" ]
