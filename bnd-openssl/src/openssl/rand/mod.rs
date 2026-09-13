@@ -32,6 +32,12 @@ windows_link::link!("crypto" "C" fn RAND_priv_bytes_ex(ctx : *mut super::types::
 windows_link::link!("crypto" "C" fn RAND_pseudo_bytes(buf : *mut u8, num : i32) -> i32);
 windows_link::link!("crypto" "C" fn RAND_seed(buf : *const core::ffi::c_void, num : i32));
 #[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn RAND_set0_private(ctx : *mut super::types:: OSSL_LIB_CTX, rand : *mut super::types:: EVP_RAND_CTX) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn RAND_set0_public(ctx : *mut super::types:: OSSL_LIB_CTX, rand : *mut super::types:: EVP_RAND_CTX) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn RAND_set1_random_provider(ctx : *mut super::types:: OSSL_LIB_CTX, p : *mut super::types:: OSSL_PROVIDER) -> i32);
+#[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn RAND_set_DRBG_type(ctx : *mut super::types:: OSSL_LIB_CTX, drbg : *const i8, propq : *const i8, cipher : *const i8, digest : *const i8) -> i32);
 #[cfg(feature = "types")]
 windows_link::link!("crypto" "C" fn RAND_set_rand_engine(engine : *mut super::types:: ENGINE) -> i32);
@@ -41,6 +47,8 @@ windows_link::link!("crypto" "C" fn RAND_set_rand_method(meth : *const super::ty
 windows_link::link!("crypto" "C" fn RAND_set_seed_source_type(ctx : *mut super::types:: OSSL_LIB_CTX, seed : *const i8, propq : *const i8) -> i32);
 windows_link::link!("crypto" "C" fn RAND_status() -> i32);
 windows_link::link!("crypto" "C" fn RAND_write_file(file : *const i8) -> i32);
+pub const OSSL_PROV_RANDOM_PRIVATE: i32 = 1i32;
+pub const OSSL_PROV_RANDOM_PUBLIC: i32 = 0i32;
 pub const RAND_DRBG_STRENGTH: i32 = 256i32;
 #[repr(C, packed(8))]
 #[derive(Clone, Copy)]

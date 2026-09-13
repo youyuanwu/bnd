@@ -32,6 +32,7 @@ windows_link::link!("crypto" "C" fn SHA512_Init(c : *mut SHA512_CTX) -> i32);
 windows_link::link!("crypto" "C" fn SHA512_Transform(c : *mut SHA512_CTX, data : *const u8));
 windows_link::link!("crypto" "C" fn SHA512_Update(c : *mut SHA512_CTX, data : *const core::ffi::c_void, len : u64) -> i32);
 pub const SHA224_DIGEST_LENGTH: i32 = 28i32;
+pub const SHA256_192_DIGEST_LENGTH: i32 = 24i32;
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct SHA256_CTX {

@@ -623,8 +623,8 @@ fn extract_struct_from_entity(
 ///
 /// Non-bitfield fields pass through unchanged.
 ///
-/// `field_offsets` is updated in parallel: merged groups keep the first
-/// field's offset entry; extra entries are removed.
+/// `field_offsets` is updated in parallel: merged groups use their clang
+/// bit offset converted to bytes; extra entries are removed.
 fn flatten_bitfields(
     fields: Vec<FieldDef>,
     struct_name: &str,
@@ -646,13 +646,12 @@ fn flatten_bitfields(
                        result: &mut Vec<FieldDef>,
                        new_offsets: &mut Vec<Option<usize>>,
                        new_sizes: &mut Vec<usize>,
-                       field_offsets: &[Option<usize>],
                        group_index: &mut u32,
                        struct_name: &str| {
         if group.is_empty() {
             return;
         }
-        let (first_idx, first) = group[0];
+        let (_, first) = group[0];
         let group_start = first.bitfield_offset.unwrap_or(0);
         let (_, last) = group[group.len() - 1];
         let group_end = last.bitfield_offset.unwrap_or(0) + last.bitfield_width.unwrap_or(0);
@@ -660,7 +659,7 @@ fn flatten_bitfields(
 
         let (name, ty) = if group.len() == 1 {
             // Solo bitfield: keep original name, replace type.
-            (first.name.clone(), smallest_int_for_bits(total_bits))
+            (first.name.clone(), storage_type_for_bits(total_bits))
         } else {
             // Merged group: synthetic name, covering type.
             let names: Vec<&str> = group.iter().map(|(_, f)| f.name.as_str()).collect();
@@ -672,7 +671,7 @@ fn flatten_bitfields(
             );
             (
                 format!("_bitfield_{}", *group_index),
-                smallest_int_for_bits(total_bits),
+                storage_type_for_bits(total_bits),
             )
         };
         let merged_size = match &ty {
@@ -680,6 +679,7 @@ fn flatten_bitfields(
             CType::U16 => 2,
             CType::U32 => 4,
             CType::U64 => 8,
+            CType::Array { len, .. } => *len,
             _ => 0,
         };
         *group_index += 1;
@@ -690,8 +690,9 @@ fn flatten_bitfields(
             bitfield_width: None,
             bitfield_offset: None,
         });
-        // Keep the first field's offset for the merged group.
-        new_offsets.push(field_offsets.get(first_idx).copied().flatten());
+        // Bitfield offsets are reported in bits; retain the group's byte
+        // offset so padding calculations can align surrounding fields.
+        new_offsets.push(Some(group_start / 8));
         new_sizes.push(merged_size);
         group.clear();
     };
@@ -708,7 +709,6 @@ fn flatten_bitfields(
                         &mut result,
                         &mut new_offsets,
                         &mut new_sizes,
-                        field_offsets,
                         &mut group_index,
                         struct_name,
                     );
@@ -723,7 +723,6 @@ fn flatten_bitfields(
                 &mut result,
                 &mut new_offsets,
                 &mut new_sizes,
-                field_offsets,
                 &mut group_index,
                 struct_name,
             );
@@ -743,7 +742,6 @@ fn flatten_bitfields(
         &mut result,
         &mut new_offsets,
         &mut new_sizes,
-        field_offsets,
         &mut group_index,
         struct_name,
     );
@@ -753,13 +751,21 @@ fn flatten_bitfields(
     result
 }
 
-/// Return the smallest unsigned integer CType that can hold `bits` bits.
-fn smallest_int_for_bits(bits: usize) -> CType {
-    match bits {
-        0..=8 => CType::U8,
-        9..=16 => CType::U16,
-        17..=32 => CType::U32,
-        _ => CType::U64,
+/// Return storage whose size exactly covers `bits`.
+///
+/// C may place a non-bitfield immediately after a partial allocation unit,
+/// so rounding a 24-bit field up to `u32` can shift every following field.
+fn storage_type_for_bits(bits: usize) -> CType {
+    let bytes = bits.div_ceil(8).max(1);
+    match bytes {
+        1 => CType::U8,
+        2 => CType::U16,
+        4 => CType::U32,
+        8 => CType::U64,
+        len => CType::Array {
+            element: Box::new(CType::U8),
+            len,
+        },
     }
 }
 
@@ -1422,4 +1428,55 @@ pub fn build_type_registry(
         }
     }
     registry
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn partial_bitfield_uses_exact_byte_storage() {
+        assert_eq!(
+            storage_type_for_bits(24),
+            CType::Array {
+                element: Box::new(CType::U8),
+                len: 3,
+            }
+        );
+    }
+
+    #[test]
+    fn flattened_bitfield_retains_its_clang_offset_and_size() {
+        let fields = vec![
+            FieldDef {
+                name: "_flags2".into(),
+                ty: CType::I32,
+                bitfield_width: Some(24),
+                bitfield_offset: Some(928),
+            },
+            FieldDef {
+                name: "_short_backupbuf".into(),
+                ty: CType::Array {
+                    element: Box::new(CType::I8),
+                    len: 1,
+                },
+                bitfield_width: None,
+                bitfield_offset: None,
+            },
+        ];
+        let mut offsets = vec![None, Some(119)];
+        let mut sizes = vec![4, 1];
+
+        let flattened = flatten_bitfields(fields, "_IO_FILE", &mut offsets, &mut sizes);
+
+        assert_eq!(
+            flattened[0].ty,
+            CType::Array {
+                element: Box::new(CType::U8),
+                len: 3,
+            }
+        );
+        assert_eq!(offsets, vec![Some(116), Some(119)]);
+        assert_eq!(sizes, vec![3, 1]);
+    }
 }

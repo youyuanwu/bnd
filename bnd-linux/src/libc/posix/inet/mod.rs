@@ -98,6 +98,7 @@ pub const IPPROTO_RAW: u32 = 255u32;
 pub const IPPROTO_ROUTING: u32 = 43u32;
 pub const IPPROTO_RSVP: u32 = 46u32;
 pub const IPPROTO_SCTP: u32 = 132u32;
+pub const IPPROTO_SMC: u32 = 256u32;
 pub const IPPROTO_TCP: u32 = 6u32;
 pub const IPPROTO_TP: u32 = 29u32;
 pub const IPPROTO_UDP: u32 = 17u32;

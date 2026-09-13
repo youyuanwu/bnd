@@ -88,6 +88,7 @@ impl Default for __locale_struct {
 pub type __locale_t = *mut __locale_struct;
 pub const __struct_tm_defined: i32 = 1i32;
 pub const __timer_t_defined: i32 = 1i32;
+pub const __timeval_defined: i32 = 1i32;
 pub type clock_t = super::types::__clock_t;
 pub type clockid_t = super::types::__clockid_t;
 #[repr(C, packed(8))]
@@ -99,6 +100,13 @@ pub struct itimerspec {
 }
 pub type locale_t = __locale_t;
 pub type timer_t = super::types::__timer_t;
+#[repr(C, packed(8))]
+#[cfg(feature = "posix_types")]
+#[derive(Clone, Copy, Default)]
+pub struct timeval {
+    pub tv_sec: super::types::__time_t,
+    pub tv_usec: super::types::__suseconds_t,
+}
 #[repr(C, packed(8))]
 #[derive(Clone, Copy)]
 pub struct tm {

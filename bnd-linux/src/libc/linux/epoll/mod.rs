@@ -40,6 +40,7 @@ pub const EPOLL_CTL_ADD: i32 = 1i32;
 pub const EPOLL_CTL_DEL: i32 = 2i32;
 pub const EPOLL_CTL_MOD: i32 = 3i32;
 pub type EPOLL_EVENTS = u32;
+pub const EPOLL_IOC_TYPE: i32 = 138i32;
 pub const _SYS_EPOLL_H: i32 = 1i32;
 #[repr(C, packed(8))]
 #[derive(Clone, Copy)]
@@ -74,4 +75,12 @@ impl Default for epoll_event {
     fn default() -> Self {
         unsafe { core::mem::zeroed() }
     }
+}
+#[repr(C, packed(4))]
+#[derive(Clone, Copy, Default)]
+pub struct epoll_params {
+    pub busy_poll_usecs: u32,
+    pub busy_poll_budget: u16,
+    pub prefer_busy_poll: u8,
+    pub __pad: u8,
 }
