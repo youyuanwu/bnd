@@ -22,24 +22,9 @@ jobs:
       with:
         components: rustfmt, clippy, llvm-tools
 
+    - uses: taiki-e/install-action@just
+
     - uses: taiki-e/install-action@cargo-llvm-cov
 
-    - name: Run cargo check
-      run: cargo check
-
-    - name: Run cargo fmt
-      run: cargo fmt --all -- --check
-    
-    - name: Run cargo clippy
-      run: cargo clippy --all-targets -- -D warnings
-    
-    - name: Run cargo build
-      run: cargo build --all-targets
-
-    - name: Run cargo test
-      run: cargo test --all -- --nocapture
-
-    - name: Check no uncommitted changes
-      run: |
-        git diff --exit-code
-        git diff --cached --exit-code
+    - name: Run CI
+      run: just ci
