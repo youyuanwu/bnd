@@ -1,0 +1,23 @@
+[package]
+name = "bnd-linux-clang"
+version = "0.0.0"
+edition.workspace = true
+description = "Staging crate for bnd-linux bindings generated through bnd-clang"
+authors.workspace = true
+repository.workspace = true
+license.workspace = true
+publish = false
+
+[dependencies]
+bnd-macros.workspace = true
+
+[dev-dependencies]
+libc = "0.2"
+
+[features]
+default = ["linux_epoll", "linux_eventfd"]
+Foundation = []
+# generated features
+linux = ["Foundation"]
+linux_epoll = ["linux"]
+linux_eventfd = ["linux"]

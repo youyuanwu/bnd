@@ -1,5 +1,7 @@
 use std::path::Path;
 
+pub mod clang;
+
 /// Generate the bnd-linux source tree at `output_dir`.
 ///
 /// 1. Runs bnd-winmd on `bnd-linux.toml` (merged posix + linux config) to
