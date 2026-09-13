@@ -6,6 +6,7 @@ pub struct Library;
 
 impl Library {
     pub fn new() -> Result<Self, Error> {
+        #[cfg(feature = "runtime")]
         load().map_err(|e| Error::new(&format!("failed to load libclang: {e}"), "", 0, 0))?;
         Ok(Self)
     }
@@ -17,7 +18,10 @@ impl Library {
 
 impl Drop for Library {
     fn drop(&mut self) {
-        _ = unload();
+        #[cfg(feature = "runtime")]
+        {
+            _ = unload();
+        }
     }
 }
 

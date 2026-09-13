@@ -302,11 +302,12 @@ The repository includes two non-published crates for experiments:
   `bnd-bindgen/vendored/windows-bindgen`.
 
 Each crate records the upstream revision and license in `VENDORED.md`.
-They participate in normal workspace builds. Because `bnd-clang` enables
-`clang-sys/runtime`, the existing `clang` wrapper enables its matching
-`runtime` feature and loads libclang from `Clang::new()`. Neither fork
-replaces the production `windows-bindgen` dependency or the current
-`bnd-winmd` pipeline yet.
+They participate in normal workspace builds. `bnd-clang` makes
+`clang-sys/runtime` optional and leaves it disabled for workspace builds, so
+both Clang frontends use the same linked libclang selected at build time.
+This avoids runtime discovery selecting a different libclang and changing
+generated ABI output. Neither fork replaces the production
+`windows-bindgen` dependency or the current `bnd-winmd` pipeline yet.
 
 ## Upstream References
 
