@@ -1,0 +1,13 @@
+[package]
+name = "e2e-clang-zlib"
+version = "0.1.0"
+edition.workspace = true
+publish = false
+
+[build-dependencies]
+windows-clang = { package = "bnd-clang", path = "../../bnd-clang" }
+windows-rdl = { version = "0.100", default-features = false }
+windows-bindgen = { package = "bnd-bindgen", path = "../../bnd-bindgen" }
+
+[dependencies]
+bnd-macros.workspace = true

@@ -315,11 +315,21 @@ falling back to RDL's Windows platform default. Integration coverage ports
 the `multi` fixture through C headers, RDL, WinMD, generated Rust, and linked
 runtime calls. The `simple` fixture covers LP64 fields, over-aligned records,
 anonymous records and arrays, bitfields, and unsupported integer typedefs.
+The zlib experiment exercises real Linux system headers in two ordered
+partitions, resolves the second partition against metadata from the first,
+and compiles and runs the generated Rust bindings against `libz`.
+Its generated layouts and linked calls match the active Linux ABI, but its
+source API is not identical to `bnd-winmd`: inline declarations such as
+`typedef struct z_stream_s { ... } z_stream` are emitted directly as
+`z_stream`, while `bnd-winmd` retains `z_stream_s` and projects `z_stream`
+as a wrapper. The same difference applies to `gz_header`.
 
 These experiments remove the scalar-width, C-calling-convention, and
-partial-bitfield blockers from the fork. Configuration, injection, and
-cross-crate generation gaps remain. Neither fork replaces the production
-`windows-bindgen` dependency or the current `bnd-winmd` pipeline yet.
+partial-bitfield blockers from the fork. They also prove the partition and
+reference primitives needed by a future configuration wrapper, but no
+general TOML orchestration exists yet. Injection and cross-crate generation
+gaps remain. Neither fork replaces the production `windows-bindgen`
+dependency or the current `bnd-winmd` pipeline yet.
 
 ## Upstream References
 
