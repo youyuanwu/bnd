@@ -26,3 +26,6 @@ syn = { version = "2", default-features = false, features = ["full", "parsing", 
 quote = { version = "1", default-features = false }
 proc-macro2 = { version = "1", default-features = false }
 clang-sys = { version = "1.8.1", features = ["clang_18_0"] }
+
+[dev-dependencies]
+tempfile.workspace = true

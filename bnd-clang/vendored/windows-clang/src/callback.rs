@@ -69,7 +69,9 @@ impl Callback {
 
         // clang erases x64 conventions from the type, so recover non-default ones from tokens.
         let calling_convention =
-            detect_callback_calling_convention(&tokens, &source_name, parser.macro_defs);
+            detect_callback_calling_convention(&tokens, &source_name, parser.macro_defs).or_else(
+                || (cursor.language() == CXLanguage_C).then_some(CallingConvention::Cdecl),
+            );
 
         Ok(Some(Self {
             name,
