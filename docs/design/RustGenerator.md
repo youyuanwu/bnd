@@ -13,6 +13,10 @@ libclang wrapper) for C header parsing, plus the
 [`windows-metadata`](https://crates.io/crates/windows-metadata) crate for
 winmd emission.
 
+A later assessment of replacing this pipeline with the upstream
+`windows-clang` and RDL stack is documented in
+[WindowsClangEvaluation.md](WindowsClangEvaluation.md).
+
 ---
 
 ## Architecture

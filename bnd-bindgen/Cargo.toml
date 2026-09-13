@@ -1,0 +1,25 @@
+[package]
+name = "bnd-bindgen"
+version = "0.0.0"
+edition.workspace = true
+rust-version = "1.95"
+publish = false
+license = "MIT OR Apache-2.0"
+description = "Experimental bnd fork of windows-bindgen"
+repository.workspace = true
+readme = "vendored/windows-bindgen/readme.md"
+
+[lib]
+path = "vendored/windows-bindgen/src/lib.rs"
+
+[dependencies]
+windows-default = { version = "0.100", default-features = false }
+windows-metadata = { version = "0.100", default-features = false }
+proc-macro2 = { version = "1", default-features = false }
+quote = { version = "1", default-features = false }
+
+[dev-dependencies]
+windows-link = { version = "0.100", default-features = false }
+
+[package.metadata.docs.rs]
+targets = []
