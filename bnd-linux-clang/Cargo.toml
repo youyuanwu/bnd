@@ -13,11 +13,22 @@ bnd-macros.workspace = true
 
 [dev-dependencies]
 libc = "0.2"
+tempfile.workspace = true
 
 [features]
-default = ["linux_epoll", "linux_eventfd"]
+default = [
+    "__sigset_t",
+    "epoll",
+    "eventfd",
+    "sendfile",
+    "struct_timespec",
+    "types",
+]
 Foundation = []
 # generated features
-linux = ["Foundation"]
-linux_epoll = ["linux"]
-linux_eventfd = ["linux"]
+__sigset_t = ["Foundation"]
+epoll = ["Foundation", "__sigset_t", "struct_timespec", "types"]
+eventfd = ["Foundation"]
+sendfile = ["Foundation", "types"]
+struct_timespec = ["Foundation", "types"]
+types = ["Foundation"]

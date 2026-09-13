@@ -1024,7 +1024,7 @@ impl Clang {
         }
 
         // Keep out-of-scope declarations only when referenced from an in-scope root.
-        if !self.scope.is_empty() {
+        if !self.scope.is_empty() || !self.scope_headers.is_empty() {
             sweep_unreferenced(&mut collectors, &scope_in);
         }
 
@@ -1231,7 +1231,7 @@ impl Clang {
         for (_, (child, extern_c)) in chosen {
             let stem = header_stem_of(&child).expect("filtered above");
             // Keep a partition in-scope if any contributing cursor is in-scope.
-            if !self.scope.is_empty() {
+            if !self.scope.is_empty() || !self.scope_headers.is_empty() {
                 let in_scope = self.scope_headers.contains(&stem)
                     || header_path_of(&child).is_none_or(|p| header_in_scope(&p, &self.scope));
                 scope_in

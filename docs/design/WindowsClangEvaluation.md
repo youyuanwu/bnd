@@ -325,14 +325,16 @@ source API is not identical to `bnd-winmd`: inline declarations such as
 as a wrapper. The same difference applies to `gz_header`.
 
 `bnd-linux-gen` also contains an incremental direct-Clang path for the
-`eventfd` and `epoll` partitions. It emits separate RDL files, supplies the
-first partition's metadata as a reference to the second, then compiles both
-into one WinMD. The non-published `bnd-linux-clang` staging crate compiles
-both generated modules into a checked-in namespace-based source tree with the
-local `bnd-bindgen` fork and exercises them together against libc. A
-golden-file test ensures regeneration is deterministic. The production
-`generate` path remains unchanged and continues to use `bnd-winmd` until the
-required Linux partitions have equivalent coverage.
+`sys/types.h`, `sys/eventfd.h`, `sys/epoll.h`, and `sys/sendfile.h` surface.
+Like the windows-rs Win32 pipeline, it parses one combined translation unit,
+emits temporary RDL files per defining header under a single flat `libc`
+namespace, and compiles them into one canonical WinMD. A packaging-only
+metadata remap then turns header ownership into Rust module boundaries such
+as `libc::types` and `libc::sendfile`. The non-published `bnd-linux-clang`
+staging crate checks in those generated modules and exercises them together
+against libc. A golden-file test covers the WinMD and Rust source tree. The
+production `generate` path remains unchanged and continues to use `bnd-winmd`
+until the required Linux surface has equivalent coverage.
 
 These experiments remove the scalar-width, C-calling-convention, and
 partial-bitfield blockers from the fork. They also prove the partition and

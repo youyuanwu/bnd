@@ -1,8 +1,10 @@
 windows_link::link!("c" "C" fn epoll_create(__size : i32) -> i32);
 windows_link::link!("c" "C" fn epoll_create1(__flags : i32) -> i32);
 windows_link::link!("c" "C" fn epoll_ctl(__epfd : i32, __op : i32, __fd : i32, __event : *mut epoll_event) -> i32);
-windows_link::link!("c" "C" fn epoll_pwait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32, __ss : *const __sigset_t) -> i32);
-windows_link::link!("c" "C" fn epoll_pwait2(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : *const timespec, __ss : *const __sigset_t) -> i32);
+#[cfg(feature = "__sigset_t")]
+windows_link::link!("c" "C" fn epoll_pwait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32, __ss : *const super::__sigset_t::__sigset_t) -> i32);
+#[cfg(all(feature = "__sigset_t", feature = "struct_timespec", feature = "types"))]
+windows_link::link!("c" "C" fn epoll_pwait2(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : *const super::struct_timespec::timespec, __ss : *const super::__sigset_t::__sigset_t) -> i32);
 windows_link::link!("c" "C" fn epoll_wait(__epfd : i32, __events : *mut epoll_event, __maxevents : i32, __timeout : i32) -> i32);
 pub const EPOLLERR: EPOLL_EVENTS = 8;
 pub const EPOLLET: EPOLL_EVENTS = 2147483648;
@@ -25,16 +27,6 @@ pub const EPOLL_CTL_DEL: i32 = 2;
 pub const EPOLL_CTL_MOD: i32 = 3;
 pub type EPOLL_EVENTS = u32;
 pub const EPOLL_IOC_TYPE: i32 = 138;
-#[repr(C)]
-#[derive(Clone, Copy)]
-pub struct __sigset_t {
-    pub __val: [u64; 16],
-}
-impl Default for __sigset_t {
-    fn default() -> Self {
-        unsafe { core::mem::zeroed() }
-    }
-}
 #[repr(C)]
 #[derive(Clone, Copy)]
 pub union epoll_data_t {
@@ -66,10 +58,4 @@ pub struct epoll_params {
     pub busy_poll_budget: u16,
     pub prefer_busy_poll: u8,
     pub __pad: u8,
-}
-#[repr(C)]
-#[derive(Clone, Copy, Default)]
-pub struct timespec {
-    pub tv_sec: i64,
-    pub tv_nsec: i64,
 }

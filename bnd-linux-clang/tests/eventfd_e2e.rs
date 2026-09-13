@@ -1,4 +1,4 @@
-use bnd_linux_clang::libc::linux::eventfd;
+use bnd_linux_clang::libc::eventfd;
 
 #[test]
 fn eventfd_create_close() {

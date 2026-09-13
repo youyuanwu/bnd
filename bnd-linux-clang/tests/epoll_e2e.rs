@@ -1,6 +1,6 @@
 #![allow(clippy::unnecessary_mut_passed)]
 
-use bnd_linux_clang::libc::linux::{epoll, eventfd};
+use bnd_linux_clang::libc::{epoll, eventfd};
 
 #[test]
 fn epoll_waits_for_generated_eventfd() {
