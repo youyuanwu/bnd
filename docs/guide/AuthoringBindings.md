@@ -1,252 +1,249 @@
-# Authoring Bindings with bnd-winmd
+# Authoring Bindings with the Direct-Clang Pipeline
 
-Generate Rust FFI bindings for any C library using `bnd-winmd` and
-`windows-bindgen`. This guide is for **external users** who depend on
-`bnd-winmd` as a library in their own project.
+This guide shows external users how to generate Rust FFI bindings from C
+headers with `bnd-clang`, `windows-rdl`, and `bnd-bindgen`.
 
-For adding a new bindings crate **inside this repo**, see
+For adding a generator and product crate inside this repository, see
 [ContributingBindings.md](ContributingBindings.md).
 
-We'll use a hypothetical library called **zstd** as a running example.
+## Pipeline
 
----
-
-## Overview
-
+```text
+C headers -> bnd-clang -> RDL -> windows-rdl -> canonical WinMD
+                                                  |
+                                                  v
+                                             bnd-bindgen
+                                                  |
+                                                  v
+                                             Rust bindings
 ```
-C headers ──→ bnd-winmd ──→ .winmd ──→ windows-bindgen ──→ Rust FFI module
-```
 
-You need two things:
-1. A **TOML config** describing which headers to parse
-2. A **`build.rs`** (or standalone script) that runs the pipeline
+`bnd-clang` is the package name of this repository's maintained
+`windows-clang` fork; its Rust library name is `windows_clang`.
+`bnd-bindgen` similarly exposes the `windows_bindgen` library.
 
----
+## Dependency sources
 
-## Step 1: Add dependencies
+`bnd-clang` and `bnd-bindgen` are currently non-published fork packages.
+External projects must use them from a local checkout/vendor directory or a
+Git dependency pinned to a specific bnd commit. Do not substitute upstream
+`windows-clang` or `windows-bindgen` without validating the Linux ABI,
+bitfield, alignment, package-generation, and external-reference behavior
+described in the fork `VENDORED.md` files.
+
+A local-checkout setup can use:
 
 ```toml
 [dependencies]
-bnd-macros = "0.0.1"
+bnd-macros = { path = "../bnd/bnd-macros" }
 
 [build-dependencies]
-bnd-winmd = "0.1"
-windows-bindgen = "0.66"
+windows-clang = { package = "bnd-clang", path = "../bnd/bnd-clang" }
+windows-rdl = { version = "0.100", default-features = false }
+windows-bindgen = { package = "bnd-bindgen", path = "../bnd/bnd-bindgen" }
 ```
 
----
+The path values are examples; adjust them for your checkout. If you use Git
+dependencies instead, pin all bnd packages to the same commit.
 
-## Step 2: Write the TOML config
+## Minimal flat binding
 
-Create `bnd-winmd.toml` in your crate root:
-
-```toml
-# Optional: extra include search paths
-# include_paths = ["/usr/include/x86_64-linux-gnu"]
-
-# Optional: clang arguments applied to all partitions
-# clang_args = ["-DFOO=1"]
-
-[output]
-name = "zstd"
-file = "zstd.winmd"
-
-[[partition]]
-namespace = "zstd"
-library = "zstd"
-headers = ["zstd.h"]
-traverse = ["zstd.h"]
-```
-
-| Field | Meaning |
-|---|---|
-| `name` | Assembly name — becomes the top-level Rust module name |
-| `file` | Intermediate `.winmd` filename |
-| `namespace` | WinMD namespace → Rust module path. Use dots for nesting (`zstd.dict`) |
-| `library` | Shared library for `#[link(name = "...")]` |
-| `headers` | Headers to `#include` (parsed by clang) |
-| `traverse` | Headers whose declarations are **extracted**. Others provide types only |
-| `include_paths` | (top-level) Extra include search paths, also injected as `-I` flags |
-| `clang_args` | (top-level) Extra clang arguments for all partitions (e.g. `-DFOO`, `-Wno-...`) |
-
-### Multiple partitions
-
-Split across headers or shared libraries with additional `[[partition]]` entries:
-
-```toml
-[[partition]]
-namespace = "zstd.compress"
-library = "zstd"
-headers = ["zstd.h"]
-traverse = ["zstd.h"]
-
-[[partition]]
-namespace = "zstd.dict"
-library = "zstd"
-headers = ["zstd.h", "zdict.h"]
-traverse = ["zdict.h"]
-```
-
-### Per-partition clang arguments
-
-Individual partitions can specify extra clang flags via `clang_args`.
-These are appended after the top-level `clang_args`:
-
-```toml
-# Global: applied to all partitions
-clang_args = ["-D_GNU_SOURCE"]
-
-[[partition]]
-namespace = "linux.mount"
-library = "c"
-headers = ["sys/mount.h"]
-traverse = ["sys/mount.h"]
-# Partition-specific: appended after global args
-clang_args = ["-D_LINUX_MOUNT_H"]
-```
-
-### Cross-library type imports
-
-If your library's headers reference types from another library that already
-has a `bnd-*` crate (e.g. POSIX types), use `[[type_import]]` to import
-those types instead of re-extracting them:
-
-```toml
-[[type_import]]
-winmd = "path/to/bnd-linux.winmd"
-namespace = "libc"
-```
-
-| Field | Meaning |
-|---|---|
-| `winmd` | Path to the external `.winmd` file (relative to the TOML file) |
-| `namespace` | Root namespace filter — only types under this namespace are imported |
-
-Imported types are emitted as cross-crate references in the generated
-bindings (e.g. `bnd_linux::libc::posix::…`). Pass `--reference <crate>` to
-`windows-bindgen` for each external crate.
-
----
-
-## Step 3: Generate bindings
-
-### Option A: Flat mode (single output file)
-
-In `build.rs`:
+The following `build.rs` parses `zstd.h`, writes RDL and WinMD to `OUT_DIR`,
+then generates a single Rust file:
 
 ```rust
-use std::path::Path;
+use std::path::PathBuf;
 
 fn main() {
-    println!("cargo:rustc-link-lib=zstd");
+    let out = PathBuf::from(std::env::var_os("OUT_DIR").unwrap());
+    let rdl = out.join("zstd.rdl");
+    let winmd = out.join("zstd.winmd");
+    let bindings = out.join("bindings.rs");
 
-    let winmd = bnd_winmd::run(Path::new("bnd-winmd.toml"), None).unwrap();
-    windows_bindgen::bindgen([
-        "--in",  winmd.to_str().unwrap(),
-        "--out", "src/bindings.rs",
-        "--filter", "zstd",
-        "--flat",
-        "--sys",
-    ]).unwrap();
+    windows_clang::clang()
+        .input("/usr/include/zstd.h")
+        .args(["-x", "c", "-std=c11"])
+        .filter("zstd.h")
+        .namespace("zstd")
+        .library("zstd")
+        .output(&rdl)
+        .write()
+        .expect("generate zstd RDL");
+
+    windows_rdl::reader()
+        .input(&rdl)
+        .output(&winmd)
+        .write()
+        .expect("compile zstd WinMD");
+
+    let mut bindgen = windows_bindgen::Bindgen::new();
+    bindgen
+        .input(&winmd)
+        .output(&bindings)
+        .filter("zstd")
+        .flat()
+        .sys()
+        .write();
+
+    println!("cargo:rustc-link-lib=dylib=zstd");
+    println!("cargo:rerun-if-changed=/usr/include/zstd.h");
 }
 ```
 
-Then in `src/lib.rs`:
+Load the generated file from the crate:
 
 ```rust
-extern crate bnd_macros as windows_link;
+#![allow(
+    non_snake_case,
+    non_upper_case_globals,
+    non_camel_case_types,
+    dead_code,
+    clippy::all
+)]
 
-mod bindings;
+mod bindings {
+    include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+}
+
 pub use bindings::*;
-```
-
-The `extern crate` alias makes `windows_link::link!` (emitted by
-`windows-bindgen`) resolve to `bnd_macros::link!`. See
-[BndMacros.md](../design/BndMacros.md) for details on the two available
-macros (`link!` and `link_raw!`).
-
-### Option B: Package mode (feature-gated sub-modules)
-
-For multi-partition configs, use `--package` to generate a module tree:
-
-```rust
-use std::path::Path;
-
-fn main() {
-    println!("cargo:rustc-link-lib=zstd");
-
-    let winmd = bnd_winmd::run(Path::new("bnd-winmd.toml"), None).unwrap();
-    windows_bindgen::bindgen([
-        "--in",  winmd.to_str().unwrap(),
-        "--out", env!("CARGO_MANIFEST_DIR"),
-        "--filter", "zstd",
-        "--sys",
-        "--package",
-    ]).unwrap();
-}
-```
-
-This writes `src/zstd/*/mod.rs` and appends Cargo features. Your
-`Cargo.toml` needs a marker:
-
-```toml
-[features]
-Foundation = []
-# generated features
-```
-
-And `src/lib.rs`:
-
-```rust
 extern crate bnd_macros as windows_link;
-
-pub mod zstd;
 ```
 
-The `extern crate` alias makes `windows_link::link!` (emitted by
-`windows-bindgen`) resolve to `bnd_macros::link!`. The module name must
-match the `name` field in the TOML config.
+The `windows_link` alias satisfies the link macro emitted by sys-mode
+`bnd-bindgen`.
 
----
+The active
+[`e2e-clang-simple`](../../tests/e2e-clang-simple/build.rs) and
+[`e2e-clang-zlib`](../../tests/e2e-clang-zlib/build.rs) packages are complete
+examples of this pattern.
 
-## Step 4: Use the bindings
+## Multiple header owners and metadata references
+
+Use separate Clang passes when a header should reference types emitted by an
+earlier pass:
 
 ```rust
-use my_crate::zstd;
+windows_clang::clang()
+    .input("types.h")
+    .args(["-x", "c", "-std=c11"])
+    .namespace("Example.Types")
+    .library("example")
+    .output("types.rdl")
+    .write()
+    .expect("generate types RDL");
 
-let v = unsafe { zstd::ZSTD_versionNumber() };
-assert!(v > 0);
+windows_rdl::reader()
+    .input("types.rdl")
+    .output("types.winmd")
+    .write()
+    .expect("compile types WinMD");
+
+windows_clang::clang()
+    .input("api.h")
+    .reference("types.winmd")
+    .args(["-x", "c", "-std=c11"])
+    .filter("api.h")
+    .namespace("Example.Api")
+    .library("example")
+    .output("api.rdl")
+    .write()
+    .expect("generate API RDL");
+
+windows_rdl::reader()
+    .inputs(["types.rdl", "api.rdl"])
+    .output("example.winmd")
+    .write()
+    .expect("compile combined WinMD");
 ```
 
-All function bindings are `unsafe` — they call directly into the C library.
+Supply every external WinMD reference at both stages:
 
----
+1. `windows_clang::clang().reference(...)` so the header frontend keeps the
+   referenced declarations externally owned.
+2. `windows_rdl::reader().reference(...)` so RDL compilation can resolve the
+   emitted TypeRefs.
 
-## Traverse tips
+The active
+[`e2e-clang-multi`](../../tests/e2e-clang-multi/build.rs) package demonstrates
+the two-pass form. Production OpenSSL generation demonstrates references to
+another product's canonical WinMD.
 
-- Start with just the main header in `traverse`.
-- If bnd-winmd reports unresolved type references, add the header that
-  defines each missing type to `traverse` (or add a `[[type_import]]` for
-  types from an external library).
-- Use `RUST_LOG=bnd_winmd=debug` to see what is extracted/skipped.
-- Use `RUST_LOG=bnd_winmd=trace` to see every type that was parsed but
-  excluded by the traverse filter — search for `out-of-scope`:
-  ```sh
-  RUST_LOG=bnd_winmd=trace bnd-winmd config.toml 2>&1 | grep "out-of-scope" | grep "my_type"
-  ```
-- Use `bnd-winmd --dry-run config.toml` to validate config without
-  writing output — prints partition stats and checks all type refs.
+## Canonical WinMD and package mode
 
-## Common issues
+For a checked-in bindings product, follow the production convention:
 
-| Problem | Fix |
-|---|---|
-| "N unresolved type reference(s) found" | Add the header defining each type to `traverse`, or add a `[[type_import]]` for types from an external winmd |
-| "partition extracted 0 types" | Check `headers` and `traverse` paths in the partition config |
-| Variadic function warnings | Expected — variadic functions are auto-skipped |
-| Wrong library linked | Check `library` in partition and `build.rs` link directives |
+1. Parse one coherent translation unit.
+2. Emit RDL by defining header with `write_by_header()`.
+3. Compile all RDL into one canonical WinMD whose types share one flat root
+   namespace.
+4. Derive defining-header ownership from the RDL files.
+5. Remap a temporary copy of the metadata to header-owned namespaces.
+6. Run `bnd-bindgen` in package mode against the remapped copy.
 
-## Prerequisites
+Package generation uses the builder APIs:
 
-- **libclang** — `apt install libclang-dev` (or equivalent)
-- The target C library's development headers installed
+```rust
+let mut bindgen = windows_bindgen::Bindgen::new();
+bindgen
+    .input("example.remapped.winmd")
+    .output("path/to/product-crate")
+    .filter("example")
+    .sys()
+    .package()
+    .package_feature_root("example")
+    .write();
+```
+
+The temporary remapped WinMD is only a code-generation input. The canonical
+flat WinMD is the metadata contract to check in and use as an external
+reference.
+
+See
+[`bnd-linux-gen/src/clang.rs`](../../bnd-linux-gen/src/clang.rs) for
+defining-header package generation and
+[`bnd-openssl-gen/src/clang.rs`](../../bnd-openssl-gen/src/clang.rs) for
+external metadata and Rust-route handling.
+
+## External Rust ownership routes
+
+WinMD identifies a referenced type by metadata namespace and name, not by
+Cargo crate. When generated Rust must use a type owned by another crate, add
+an exact route before `write()`:
+
+```rust
+bindgen.external_reference(
+    "libc.tm",
+    "bnd_linux::libc::struct_tm",
+);
+```
+
+Route all external types used by the generated surface and include the
+referenced WinMD as a bindgen input. Exact routes are preferable when one
+flat metadata namespace maps to several defining-header Rust modules.
+
+## Builder policy
+
+- Use `.args(...)` for language mode, target, include directories, and
+  preprocessor definitions.
+- Use `.filter(...)` for a simple source-path suffix filter.
+- Use `.scope_headers(...)` and `write_by_header()` when package ownership
+  follows defining headers.
+- Use `.library(...)`, `.libraries(...)`, and `.header_libraries(...)` to
+  preserve native library ownership.
+- Use `.reference(...)` for metadata ownership; do not re-emit externally
+  owned declarations locally.
+- Keep the canonical WinMD namespace flat. Rust module ownership is a
+  code-generation concern handled by remapping and package mode.
+
+## Prerequisites and validation
+
+- A compatible libclang development package.
+- Development headers and shared libraries for the target C API.
+- The Rust toolchain required by the selected bnd commit.
+
+At minimum, validate:
+
+- generated metadata signatures and native library mappings;
+- Rust sizes, alignments, offsets, constants, and callbacks;
+- real native calls through the generated bindings;
+- deterministic regeneration when artifacts are checked in.

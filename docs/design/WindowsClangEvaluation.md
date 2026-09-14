@@ -335,9 +335,9 @@ promoted into production:
   crates against their native libraries.
 
 The temporary staging product crates used during evaluation were removed
-after cutover. `bnd-winmd` was not removed: it remains a standalone
-TOML-driven tool with its fixture tests, but it is no longer the production
-Linux or OpenSSL generator.
+after cutover. The standalone `bnd-winmd` implementation and its TOML-driven
+fixture packages were subsequently retired after the direct-Clang path also
+absorbed their meaningful validation coverage.
 
 `openssl/err.h` is included in production. Its macro-expanded named nested
 LHASH union receives a generated flat name, and source-less record projection

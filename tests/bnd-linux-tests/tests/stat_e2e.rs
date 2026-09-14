@@ -5,7 +5,7 @@ use bnd_linux::libc::{fcntl, struct_stat, struct_timespec, unistd};
 use std::ffi::CString;
 
 fn tmp_path(name: &str) -> CString {
-    CString::new(format!("/tmp/bnd_winmd_e2e_{name}_{}", std::process::id())).unwrap()
+    CString::new(format!("/tmp/bnd_linux_e2e_{name}_{}", std::process::id())).unwrap()
 }
 
 #[test]

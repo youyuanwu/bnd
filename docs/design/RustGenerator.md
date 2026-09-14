@@ -1,9 +1,12 @@
-# Design: Pure-Rust C Header → WinMD Pipeline
+# Historical Design: Pure-Rust C Header → WinMD Pipeline
 
-> **Scope:** This document describes the standalone `bnd-winmd` library,
-> CLI, and fixture architecture. `bnd-winmd` remains supported and its
-> fixture tests remain active, but production `bnd-linux` and `bnd-openssl`
-> now use the direct `bnd-clang` → RDL/WinMD → `bnd-bindgen` pipeline.
+> **Historical status:** This document records the retired standalone
+> `bnd-winmd` library, CLI, and fixture architecture. The referenced source,
+> TOML configurations, and legacy E2E packages have been removed and the
+> implementation/status sections below are not current instructions. See
+> [AuthoringBindings.md](../guide/AuthoringBindings.md) and
+> [Testing.md](Testing.md) for the active direct
+> `bnd-clang` → RDL/WinMD → `bnd-bindgen` pipeline.
 
 ## Context
 
@@ -54,9 +57,10 @@ C/C++ Headers
 
 ---
 
-## Implementation Status
+## Historical Implementation Status
 
-> **Status: standalone tool implemented and tested.** Clippy clean.
+> **Status at archival:** the standalone tool was implemented and tested
+> before retirement.
 
 ### What Is Implemented
 
@@ -340,7 +344,7 @@ The writer hardcodes `ELEMENT_TYPE_VALUETYPE` for all named types. Options:
 - ✅ Opaque typedef handling
 - ✅ PtrConst workaround
 - ⬜ Bitfield emission (`NativeBitfieldAttribute`)
-- ✅ Cross-WinMD type imports ([design doc](CrossWinmdReferences.md))
+- ✅ Cross-WinMD type imports ([design doc](features/CrossWinmdReferences.md))
 - ⬜ COM interfaces (needs ELEMENT_TYPE_CLASS)
 - ⬜ Nested types
 

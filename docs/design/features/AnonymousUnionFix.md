@@ -1,5 +1,12 @@
 # Anonymous Union/Struct Members Fix
 
+> **Historical implementation record:** The fix description and file names
+> below refer to the retired `bnd-winmd` extractor. The behavior remains
+> covered by the active direct-Clang metadata and runtime tests in
+> [`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
+
 ## Problem
 
 C11 anonymous struct/union members (no field name, no tag) were
@@ -45,9 +52,9 @@ Extended `extract_struct_inner()` to also process anonymous
 `fpstate`/`__fpstate_word` anonymous union. The bnd-linux sources
 and winmd were regenerated.
 
-## Tests
+## Historical Tests
 
-`tests/fixtures/simple/simple.h` has `HasAnonUnion`:
+The removed legacy simple fixture defined `HasAnonUnion`:
 ```c
 typedef struct {
     int before;

@@ -72,6 +72,8 @@ fn generates_partitioned_zlib_types() {
     assert!(has("Zlib", "gz_header"));
     assert!(has("Zlib", "alloc_func"));
     assert!(has("Zlib", "free_func"));
+    assert!(has("Zlib", "in_func"));
+    assert!(has("Zlib", "out_func"));
     assert!(has("Zlib", "Apis"));
     assert!(!has("Zlib", "uLong"));
     assert!(!has("Zlib", "Bytef"));
@@ -87,15 +89,34 @@ fn generates_zlib_constants_and_functions() {
     let methods: Vec<_> = apis.methods().collect();
     let method_names: Vec<_> = methods.iter().map(|method| method.name()).collect();
 
-    for constant in ["Z_OK", "Z_STREAM_END", "Z_DEFLATED"] {
+    for constant in [
+        "Z_OK",
+        "Z_STREAM_END",
+        "Z_NEED_DICT",
+        "Z_NO_FLUSH",
+        "Z_FINISH",
+        "Z_DEFLATED",
+        "Z_NULL",
+        "Z_NO_COMPRESSION",
+        "Z_BEST_SPEED",
+        "Z_BEST_COMPRESSION",
+        "Z_DEFAULT_STRATEGY",
+    ] {
         assert!(fields.contains(&constant), "missing constant {constant}");
     }
     assert!(type_fields.contains(&"MAX_WBITS"));
     for function in [
         "zlibVersion",
         "compress",
+        "compress2",
         "uncompress",
         "compressBound",
+        "deflateInit_",
+        "inflateInit_",
+        "deflate",
+        "deflateEnd",
+        "inflate",
+        "inflateEnd",
         "crc32",
         "adler32",
     ] {

@@ -3,9 +3,16 @@
 ## Summary
 
 `__int128` and `unsigned __int128` cannot be represented in WinMD.
-bnd-winmd skips any type that resolves to a 128-bit integer and logs
-a warning. Typedef chains (e.g. `typedef __int128 __s128; typedef
-__s128 s128;`) are also skipped recursively.
+The maintained `bnd-clang` fork omits typedefs that canonically resolve to
+128-bit integer or floating-point types, including chained aliases such as
+`typedef __int128 __s128; typedef __s128 s128;`. Functions and records that
+depend on unrepresentable value types are also omitted rather than emitted
+with an incorrect ABI.
+
+Active coverage is in
+[`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+and
+[`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
 
 ## Why It Cannot Be Mapped
 
@@ -53,35 +60,29 @@ calling convention at the FFI boundary.
 
 ## Current Behavior
 
-1. `map_clang_type` encounters `TypeKind::Int128` or `TypeKind::UInt128`
-2. Returns `bail!` with a descriptive message
-3. Caller (`collect_typedefs`, `collect_structs`) catches the error and
-   logs a `warn!` — the containing typedef or struct field is skipped
-4. Typedef chains resolve recursively: `typedef __s128 s128` calls
-   `map_clang_type` on the canonical type, which hits the same bail
+The direct frontend checks the canonical Clang type while collecting
+typedefs. `CXType_Int128`, `CXType_UInt128`, `CXType_Float128`, and C complex
+types are not emitted. A later dependency pass prevents functions, callbacks,
+records, and aliases from referring to the omitted definitions.
+
+The generated-Rust E2E asserts that direct and chained 128-bit aliases are
+absent.
 
 ## Workarounds for Downstream Consumers
 
-If a struct contains an `__int128` field and the consumer accepts the
-alignment trade-off, use `[[inject_type]]`:
+Do not replace an exposed `__int128` value with a same-sized Rust struct:
+SysV register classification and alignment can still differ.
 
-```toml
-[[inject_type]]
-namespace = "my.types"
-name = "__int128"
-kind = "struct"
-size = 16
-align = 8    # best available; true alignment is 16
-```
+Prefer one of:
 
-This gives size=16 with align=8 — usable for opaque storage but not
-for arithmetic or correct ABI on function boundaries.
+- omit APIs that expose the type;
+- add a C shim with a representable parameter/result ABI;
+- keep the value behind an opaque pointer when the native API already uses
+  pointer indirection.
 
 ## Possible Future Fixes
 
-- **Patch windows-bindgen** to emit `#[repr(C, align(N))]` when the
-  packing size exceeds the natural field alignment. This is the
-  correct fix but requires an upstream change.
-- **Post-process generated Rust** to replace `packed(16)` with
-  `align(16)`. Fragile and version-dependent.
 - **Upstream ECMA-335 extension** for 128-bit types. Unlikely.
+- **Generator-specific wrapper metadata** paired with C shims. This can
+  expose a representable ABI but is not a transparent mapping of native
+  `__int128`.

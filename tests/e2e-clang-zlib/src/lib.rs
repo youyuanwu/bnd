@@ -41,6 +41,12 @@ mod tests {
 
     #[test]
     fn generated_compression_roundtrips() {
+        let bound = unsafe { compressBound(1000) };
+        assert!(
+            (1000..2000).contains(&bound),
+            "compressBound(1000) returned {bound}"
+        );
+
         let original = b"The quick brown fox jumps over the lazy dog";
         let mut compressed = vec![0; unsafe { compressBound(original.len() as uLong) } as usize];
         let mut compressed_len = compressed.len() as uLong;
@@ -78,5 +84,8 @@ mod tests {
         assert_eq!(std::mem::align_of::<z_stream>(), 8);
         assert_eq!(std::mem::size_of::<gz_header>(), 80);
         assert_eq!(std::mem::align_of::<gz_header>(), 8);
+
+        let gz_file = gzFile_s::default();
+        let _ = (gz_file.have, gz_file.next, gz_file.pos);
     }
 }

@@ -118,5 +118,5 @@ The earlier `bnd-winmd` production path used nested
 direct-Clang cutover changed canonical Linux metadata to flat `libc` and
 made defining-header Rust ownership explicit through exact bindgen routes.
 
-The old design remains relevant only as implementation history for the
-standalone `bnd-winmd` tool and its fixtures.
+The old design remains relevant only as history for the retired standalone
+implementation and its removed fixtures.

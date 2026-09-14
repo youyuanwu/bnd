@@ -1,7 +1,16 @@
 # Anonymous Struct Used as Array Element Not Extracted
 
-**Component:** bnd-winmd  
-**Status:** Partially fixed — 1D arrays fixed; 2D arrays produce wrong layout (upstream windows-bindgen limitation)
+> **Historical implementation record:** This bug and its file references
+> describe the retired `bnd-winmd` extractor and an older upstream bindgen.
+> The active direct-Clang pipeline covers one- and two-dimensional anonymous
+> record arrays in
+> [`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
+
+**Historical component:** bnd-winmd
+**Status at archival:** Partially fixed — 1D arrays fixed; 2D arrays
+produced wrong layout with the then-upstream windows-bindgen.
 
 ## Problem
 

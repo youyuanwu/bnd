@@ -1,8 +1,14 @@
 # Debugging & Validation Features
 
+> **Historical status:** These CLI/logging features belonged to the retired
+> `bnd-winmd` implementation. The commands and configuration concepts below
+> are no longer available. Current authoring uses the Rust builders documented
+> in [AuthoringBindings.md](../../guide/AuthoringBindings.md), with active
+> pipeline coverage in [Testing.md](../Testing.md).
+
 ## 1. Silent Extraction Warning
 
-**Status:** Implemented
+**Historical status:** Implemented before retirement
 
 After extraction, warns if a partition produced zero types (0 structs,
 enums, functions, typedefs, and constants). Catches misconfigured
@@ -14,7 +20,7 @@ WARN  partition extracted 0 types — check headers and traverse paths  namespac
 
 ## 2. `--dry-run` Mode
 
-**Status:** Implemented
+**Historical status:** Implemented before retirement
 
 ```
 bnd-winmd --dry-run config.toml
@@ -36,7 +42,7 @@ INFO  validation passed
 
 ## 3. Registry Summary Log
 
-**Status:** Implemented
+**Historical status:** Implemented before retirement
 
 After building the type registry, logs total types, partition count,
 injected count (from `[[inject_type]]`), and imported count (from
@@ -48,7 +54,7 @@ INFO  type registry built  types=342 partitions=8 injected=3 imported=45
 
 ## 4. Duplicate Type Summary
 
-**Status:** Implemented
+**Historical status:** Implemented before retirement
 
 After the dedup pass, logs an `info`-level summary when duplicates
 were dropped, with a hint to see details at `warn` level:
@@ -60,7 +66,7 @@ INFO  deduplicated types across partitions  dropped=3 (set RUST_LOG=warn for det
 
 ## 5. Out-of-Scope Type Trace
 
-**Status:** Implemented
+**Historical status:** Implemented before retirement
 
 At `trace` level, logs every struct, enum, function, and typedef that
 is parsed from a header but excluded because it doesn't belong to a
@@ -82,4 +88,3 @@ RUST_LOG=bnd_winmd=trace bnd-winmd config.toml 2>&1 | grep "out-of-scope" | grep
 
 Forward declarations are not traced (they are silently skipped before
 the scope check).
-

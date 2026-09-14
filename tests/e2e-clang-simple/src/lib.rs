@@ -20,6 +20,10 @@ mod tests {
     fn generated_basic_api_compiles_and_runs() {
         assert_eq!(MAX_DEPTH, 42);
         assert_eq!(std::mem::size_of::<Rect>(), 16);
+        assert_eq!(std::mem::align_of::<Rect>(), 4);
+        assert_eq!(COLOR_RED, 0u32);
+        assert_eq!(COLOR_GREEN, 1u32);
+        assert_eq!(COLOR_BLUE, 2u32);
 
         unsafe {
             let bounds = Rect {
@@ -28,11 +32,17 @@ mod tests {
                 width: 640,
                 height: 480,
             };
+            assert_eq!(bounds.x, 1);
+            assert_eq!(bounds.y, 2);
+            assert_eq!(bounds.width, 640);
+            assert_eq!(bounds.height, 480);
+
             let mut widget = Widget::default();
 
             assert_eq!(create_widget(c"simple".as_ptr(), bounds, &mut widget), 0);
             assert_eq!(widget.values, [1, 2, 640, 480]);
             assert!(widget_is_visible(&widget));
+            assert!(!widget_is_visible(std::ptr::null()));
             destroy_widget(&mut widget);
         }
     }
@@ -40,7 +50,9 @@ mod tests {
     #[test]
     fn generated_record_layouts_match_c() {
         assert_eq!(std::mem::size_of::<Value>(), 4);
+        assert_eq!(std::mem::align_of::<Value>(), 4);
         assert_eq!(std::mem::size_of::<NetAddr>(), 20);
+        assert_eq!(std::mem::size_of::<NetAddr_0>(), 16);
         assert_eq!(std::mem::size_of::<MacroNestedUnion_0>(), 8);
         assert_eq!(std::mem::align_of::<MacroNestedUnion_0>(), 8);
         assert_eq!(std::mem::size_of::<MacroNestedUnion>(), 8);
@@ -55,9 +67,64 @@ mod tests {
     }
 
     #[test]
+    fn generated_unions_support_alias_reads() {
+        let value = Value { f: 1.0 };
+        unsafe {
+            assert_eq!(value.f, 1.0);
+            assert_eq!(value.i, 0x3f80_0000);
+            assert_eq!(value.bytes, 1.0_f32.to_ne_bytes());
+        }
+
+        let mut address = NetAddr::default();
+        address.addr.dwords = [0x0403_0201, 0x0807_0605, 0x0c0b_0a09, 0x100f_0e0d];
+        unsafe {
+            assert_eq!(address.addr.bytes[0], 0x01);
+            assert_eq!(address.addr.bytes[15], 0x10);
+            assert_eq!(address.addr.words[0], 0x0201);
+        }
+        address.scope_id = 42;
+        assert_eq!(address.scope_id, 42);
+    }
+
+    #[test]
+    fn generated_c11_anonymous_union_matches_c() {
+        assert_eq!(std::mem::offset_of!(HasAnonUnion, before), 0);
+        assert_eq!(std::mem::offset_of!(HasAnonUnion, after), 8);
+        assert_eq!(std::mem::size_of::<HasAnonUnion_0>(), 4);
+
+        let mut value = HasAnonUnion::default();
+        value.Anonymous.x = 42;
+        assert_eq!(unsafe { value.Anonymous.y }, f32::from_bits(42));
+    }
+
+    #[test]
     fn generated_anonymous_arrays_match_c() {
+        assert_eq!(std::mem::size_of::<WithAnon2DArrayField_0>(), 4);
         assert_eq!(std::mem::size_of::<WithAnon2DArrayField>(), 132);
+        let mut matrix = WithAnon2DArrayField::default();
+        matrix.tc_rxq[0][0].base = 1;
+        matrix.tc_rxq[3][7].nb_queue = 255;
+        matrix.count = 32;
+        assert_eq!(matrix.tc_rxq[0][0].base, 1);
+        assert_eq!(matrix.tc_rxq[3][7].nb_queue, 255);
+        assert_eq!(matrix.count, 32);
+
+        assert_eq!(std::mem::size_of::<WithAnonArrayField_0>(), 8);
         assert_eq!(std::mem::size_of::<WithAnonArrayField>(), 36);
+        let mut entries = WithAnonArrayField::default();
+        entries.entries[0].id = 42;
+        entries.entries[0].mask = 0xdead;
+        entries.count = 4;
+        assert_eq!(entries.entries[0].id, 42);
+        assert_eq!(entries.entries[0].mask, 0xdead);
+        assert_eq!(entries.count, 4);
+    }
+
+    #[test]
+    fn generated_bitfield_enum_values_match_c() {
+        assert_eq!(BF_KIND_NONE, 0u32);
+        assert_eq!(BF_KIND_FLAG, 1u32);
+        assert_eq!(BF_KIND_VALUE, 2u32);
     }
 
     #[test]

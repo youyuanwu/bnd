@@ -1,5 +1,12 @@
 # Design: C Header → WinMD Pipeline (Linux, No MIDL)
 
+> **Historical status:** This proposal predates the implemented Rust
+> generators and documents an abandoned C#/ClangSharp direction for the
+> retired `bnd-winmd` concept. Commands, layouts, and file names below are not
+> current instructions. See
+> [AuthoringBindings.md](../guide/AuthoringBindings.md) for the active
+> direct-Clang pipeline.
+
 ## Goal
 
 Build a cross-platform pipeline (**bnd-winmd**) that takes arbitrary C/C++ header files

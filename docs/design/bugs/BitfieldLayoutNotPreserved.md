@@ -1,5 +1,13 @@
 # Bitfield Layout Not Preserved
 
+> **Historical implementation record:** The workaround and paths below
+> describe the retired `bnd-winmd` extractor. The maintained `bnd-clang` fork
+> now coalesces bitfields, preserves exact partial allocation-unit storage,
+> and is covered by
+> [`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
+
 ## Problem
 
 Bitfield fields are emitted as full-width typed fields, producing
@@ -151,4 +159,5 @@ bitfields packing into 4 bytes) plus a pointer and int field.
 `flatten_bitfields` merges `kind` + `flags` into `_bitfield_0: u32`.
 Generated Rust struct is 16 bytes, matching C sizeof.
 
-Test: `test_bitfield_enum_extracted` in `tests/e2e-simple/src/lib.rs`.
+Historical coverage was in the removed `tests/e2e-simple` package. Current
+coverage is linked in the status banner above.

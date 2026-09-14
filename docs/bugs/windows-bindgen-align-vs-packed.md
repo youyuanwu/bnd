@@ -1,5 +1,13 @@
 # windows-bindgen Uses `packed(N)` Where `align(N)` Is Needed — ⚠️ Upstream
 
+> **Historical status:** This record describes the retired `bnd-winmd`
+> padding workaround and an older upstream bindgen. The maintained direct
+> pipeline represents forced alignment in RDL and verifies the resulting Rust
+> ABI in
+> [`bnd-clang/tests/linux_simple.rs`](../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../tests/e2e-clang-simple/src/lib.rs).
+
 ## Summary
 
 windows-bindgen interprets WinMD `ClassLayout` packing values as
@@ -9,7 +17,7 @@ alignment floor — the generated Rust struct has correct size but wrong
 alignment semantics. Fields of that type embedded in other structs are
 placed at the wrong offset.
 
-**Status**: Workaround in bnd-winmd (explicit `_pad_N` fields).
+**Status at archival**: Workaround in bnd-winmd (explicit `_pad_N` fields).
 Should be reported upstream to `microsoft/windows-rs`.
 
 **Component**: `windows-bindgen` 0.66.0

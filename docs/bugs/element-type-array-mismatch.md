@@ -1,5 +1,13 @@
 # ELEMENT_TYPE_ARRAY Blob Mismatch Between windows-metadata Writer and windows-bindgen Reader
 
+> **Historical status:** This records an incompatibility in the former
+> `windows-metadata` 0.59 / `windows-bindgen` 0.66 path and the retired
+> `bnd-winmd` workaround. The active direct frontend decays C array parameters
+> in
+> [`canon.rs`](../../bnd-clang/vendored/windows-clang/src/canon.rs), while
+> direct metadata/E2E coverage is documented in
+> [Testing.md](../design/Testing.md).
+
 ## Summary
 
 `windows-metadata` (writer) and `windows-bindgen` (reader) disagree on the

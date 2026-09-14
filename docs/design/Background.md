@@ -1,5 +1,11 @@
 # Background: How win32metadata Generates .winmd from C Headers
 
+> **Historical status:** This background research informed earlier generator
+> proposals, including the retired `bnd-winmd` design. References to that
+> implementation below are historical, not current repository guidance. See
+> [WindowsClangEvaluation.md](WindowsClangEvaluation.md) for the later
+> direct-Clang decision and outcome.
+
 ## Overview
 
 The [microsoft/win32metadata](https://github.com/microsoft/win32metadata) project produces

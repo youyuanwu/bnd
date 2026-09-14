@@ -1,5 +1,12 @@
 # Injected Types — User-Declared Type Overrides
 
+> **Historical status:** TOML `inject_type` was specific to the retired
+> `bnd-winmd` implementation. The referenced configuration and legacy tests
+> were removed. Current generators express header policy in Rust and use RDL
+> or a native C shim for declarations that cannot be projected directly; see
+> [AuthoringBindings.md](../../guide/AuthoringBindings.md) and the active
+> [direct-Clang tests](../../../bnd-clang/tests/linux_simple.rs).
+
 ## Problem
 
 bnd-winmd's clang extractor cannot handle certain C type patterns:
@@ -94,11 +101,15 @@ whose element type matches the requested alignment:
 
 `size` must be a multiple of `align`.
 
-## Tests
+## Historical Tests
 
-Covered in `tests/fixtures/simple/simple.toml` and `tests/e2e-simple`:
+The removed simple TOML fixture and legacy `e2e-simple` package covered:
 
 - **Injected enum** — `Priority` with 3 variants, correct values
 - **Injected typedef** — `handle_t` as `u64`
 - **Injected opaque struct** — `OpaqueCtx` with `size=32, align=8`
 - **Conflict resolution** — `Color` injected but extracted version wins
+
+There is no direct replacement for TOML injection. Active direct-Clang
+coverage for the underlying enum, layout, and unsupported-type behavior is
+linked in the status banner above.
