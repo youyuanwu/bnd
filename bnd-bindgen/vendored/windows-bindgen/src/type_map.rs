@@ -35,12 +35,13 @@ impl TypeMap {
                 for (name, types) in &reader[namespace] {
                     if let Some(filter_rule) = filter.includes_type_name(TypeName(namespace, name))
                     {
-                        // A longer rule string means a more specific (fully-qualified) path.
-                        // Skip types already owned by a reference whose rule is more specific
-                        // (longer) than the filter rule that matched this type.
+                        // Explicit external routes always own matching types. Implicit references
+                        // retain the existing behavior where only a more-specific route wins.
                         if references
                             .matching_rule(TypeName(namespace, name))
-                            .is_some_and(|reference_rule| reference_rule.len() > filter_rule.len())
+                            .is_some_and(|(reference_rule, force_external)| {
+                                force_external || reference_rule.len() > filter_rule.len()
+                            })
                         {
                             continue;
                         }

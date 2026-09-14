@@ -559,6 +559,8 @@ pub struct Clang {
     library: String,
     /// Per-symbol DLL overrides recovered from SDK import libraries.
     libraries: HashMap<String, String>,
+    /// Per-defining-header library overrides used by flat per-header output.
+    header_libraries: HashMap<String, String>,
     filter: Vec<String>,
     target: Option<String>,
     /// Header directory segments treated as roots for the reachability sweep.
@@ -588,6 +590,8 @@ pub struct Clang {
 struct HeaderPass<'a> {
     /// Flat namespace root every partition emits into (`Windows.Win32`).
     root: &'a str,
+    /// Types supplied by external metadata references.
+    ref_map: &'a HashMap<String, String>,
     /// Resolution-winmd type-name membership for `ABI::Windows::*` declarations.
     winrt_types: &'a HashSet<String>,
 }
@@ -756,6 +760,23 @@ impl Clang {
     {
         self.libraries
             .extend(libraries.into_iter().map(|(k, v)| (k.into(), v.into())));
+        self
+    }
+
+    /// Adds defining-header -> library overrides for flat per-header output.
+    ///
+    /// Explicit per-symbol mappings added with [`libraries`](Self::libraries) take precedence.
+    pub fn header_libraries<I, H, V>(&mut self, libraries: I) -> &mut Self
+    where
+        I: IntoIterator<Item = (H, V)>,
+        H: AsRef<str>,
+        V: Into<String>,
+    {
+        self.header_libraries.extend(
+            libraries.into_iter().map(|(header, library)| {
+                (header_stem_to_namespace(header.as_ref()), library.into())
+            }),
+        );
         self
     }
 
@@ -1066,8 +1087,10 @@ impl Clang {
         // Per-partition root flag for the reachability sweep.
         let mut scope_in: BTreeMap<String, bool> = BTreeMap::new();
 
+        let ref_map = build_ref_map(&reference, root);
         let pass = HeaderPass {
             root,
+            ref_map: &ref_map,
             winrt_types: &winrt_types,
         };
 
@@ -1234,7 +1257,11 @@ impl Clang {
         scope_in: &mut BTreeMap<String, bool>,
         eval: MacroEval<'_>,
     ) -> Result<(), Error> {
-        let HeaderPass { root, winrt_types } = *pass;
+        let HeaderPass {
+            root,
+            ref_map,
+            winrt_types,
+        } = *pass;
         // Abort on diagnostics in emitted headers; tolerate transitive-only include errors
         // so interop headers can survive broken C++/WinRT projection includes.
         for diag in tu.diagnostics() {
@@ -1325,7 +1352,6 @@ impl Clang {
             buckets.entry(stem).or_default().push((child, extern_c));
         }
 
-        let empty_ref: HashMap<String, String> = HashMap::new();
         let empty_symbols: HashSet<String> = HashSet::new();
         let mut all_opaque: Vec<(String, String)> = vec![];
         // Macro constants are per-bucket values but are deduplicated globally.
@@ -1333,11 +1359,21 @@ impl Clang {
 
         for (stem, cursors) in buckets {
             let collector = collectors.entry(stem.clone()).or_default();
+            let mut libraries = self.libraries.clone();
+            if let Some(library) = self.header_libraries.get(&stem) {
+                for (cursor, _) in &cursors {
+                    if cursor.kind() == CXCursor_FunctionDecl {
+                        libraries
+                            .entry(cursor.name())
+                            .or_insert_with(|| library.clone());
+                    }
+                }
+            }
             let mut parser = Parser::new(
                 root,
                 &self.library,
-                &self.libraries,
-                &empty_ref,
+                &libraries,
+                ref_map,
                 &tag_rename,
                 &enum_merge,
                 &macro_defs,

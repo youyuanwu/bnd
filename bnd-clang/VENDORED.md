@@ -58,3 +58,7 @@ fork remains easy to compare with upstream.
   exact occupied byte span and the enclosing record's native alignment.
 - Explicit `scope_headers` activate the per-header reachability sweep without
   requiring an unrelated directory scope.
+- Flat per-header output preserves namespaces from referenced WinMD types and
+  accepts generic defining-header library overrides.
+- Function declarations enumerate their direct Clang arguments so parameter
+  declarations nested under function-pointer return types are not duplicated.

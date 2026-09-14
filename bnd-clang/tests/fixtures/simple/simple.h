@@ -30,6 +30,7 @@ typedef int FunctionType(void* context);
 typedef struct {
     FunctionType* callback;
 } FunctionTable;
+FunctionType* get_function_type(int selector);
 typedef void (*SignalHandler)(int);
 typedef SignalHandler SignalHandlerAlias;
 #define TEST_SIG_DEFAULT ((SignalHandler)0)

@@ -343,6 +343,31 @@ Rust source tree. The production `generate` path remains unchanged and
 continues to use `bnd-winmd` until the required Linux surface has equivalent
 coverage.
 
+`bnd-openssl-gen` now applies the same staged architecture to OpenSSL. One
+GNU C11 translation unit emits defining-header-owned RDL under a flat
+canonical `openssl` namespace. The generator supplies
+`bnd-linux-clang.winmd` as an explicit reference to both the Clang builder
+and the RDL reader, then uses RDL ownership to create temporary packaging
+metadata for 17 generated modules. The canonical checked-in WinMD is never
+remapped.
+
+The local `bnd-bindgen` fork adds generic external-reference routing because
+upstream `--in` makes external metadata available but does not encode the
+Rust crate/module that owns it. OpenSSL's POSIX TypeRefs therefore generate
+as `bnd_linux_clang::libc::*` paths without source rewriting or a local
+`libc` module. Functions default to `crypto`, while definitions owned by
+`openssl/ssl.h` and `openssl/tls1.h` route to `ssl`. Checked-in Rust, WinMD,
+and manifest freshness is tested, and the staging crate mirrors all 28
+production runtime tests.
+
+`openssl/err.h` remains excluded: its
+`lhash_st_ERR_STRING_DATA::dummy` inline union projects as a by-value
+`core::ffi::c_void`, which cannot derive the traits required by generated
+Rust. The existing `generate-openssl` entry point already reaches both
+production and staged outputs through the generator binary. Production
+`bnd-openssl` remains on `bnd-winmd`; this experiment did not perform a
+production cutover.
+
 These experiments remove the scalar-width, C-calling-convention,
 partial-bitfield, compiler `va_list`, unsupported extended numeric, and
 package-feature blockers from the fork. They also prove the partition and

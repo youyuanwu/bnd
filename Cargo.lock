@@ -149,13 +149,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "bnd-openssl-clang"
+version = "0.0.0"
+dependencies = [
+ "bnd-linux-clang",
+ "bnd-macros",
+]
+
+[[package]]
 name = "bnd-openssl-gen"
 version = "0.1.0"
 dependencies = [
+ "bnd-bindgen",
+ "bnd-clang",
  "bnd-winmd",
  "tempfile",
  "tracing-subscriber",
  "windows-bindgen",
+ "windows-metadata",
+ "windows-rdl",
 ]
 
 [[package]]

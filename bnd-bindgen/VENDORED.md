@@ -23,6 +23,13 @@ the fork remains easy to compare with upstream.
 
 - Package feature dependencies can use an explicitly configured root
   namespace without flattening its Rust module hierarchy.
+- Metadata filters can be routed to caller-provided external Rust crate or
+  module prefixes with the repeatable `Bindgen::external_reference` builder
+  method. Routed types are excluded from local package output and Cargo
+  feature gates; malformed and overlapping routes are rejected. Ownership
+  follows the configured filter: an exact type route does not absorb that
+  type's named dependencies, while a namespace route owns every matching type
+  in that namespace.
 - Namespace path segments use Rust keyword escaping, allowing header-derived
   modules such as `libc::r#in` to be referenced from sibling modules.
 - String constants in portable `libc` sys packages use inline

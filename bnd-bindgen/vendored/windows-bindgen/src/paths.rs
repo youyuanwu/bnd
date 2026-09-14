@@ -76,7 +76,7 @@ impl Config<'_> {
                 self.references.contains(type_name)
             }
         } {
-            path.push_str(&reference.name);
+            path.push_str(&reference.rust_path);
             path.push_str("::");
             path.parse().unwrap()
         } else {
