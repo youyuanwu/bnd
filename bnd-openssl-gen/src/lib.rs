@@ -1,5 +1,7 @@
 use std::path::Path;
 
+pub mod clang;
+
 const EXTERNAL_NAMESPACE: &str = "__bnd_linux";
 
 /// Generate the bnd-openssl source tree at `output_dir`.

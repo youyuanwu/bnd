@@ -1,0 +1,273 @@
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_cleanup_local(key : *mut CRYPTO_THREAD_LOCAL) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_compare_id(a : CRYPTO_THREAD_ID, b : CRYPTO_THREAD_ID) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_get_current_id() -> CRYPTO_THREAD_ID);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_get_local(key : *mut CRYPTO_THREAD_LOCAL) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_init_local(key : *mut CRYPTO_THREAD_LOCAL, cleanup : *mut u8) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_lock_free(lock : *mut CRYPTO_RWLOCK));
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_lock_new() -> *mut CRYPTO_RWLOCK);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_read_lock(lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_run_once(once : *mut CRYPTO_ONCE, init : *mut u8) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_set_local(key : *mut CRYPTO_THREAD_LOCAL, val : *mut core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_unlock(lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_THREAD_write_lock(lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_aligned_alloc(num : usize, align : usize, freeptr : *mut *mut core::ffi::c_void, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_alloc_ex_data(class_index : i32, obj : *mut core::ffi::c_void, ad : *mut super::types::CRYPTO_EX_DATA, idx : i32) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_add(val : *mut i32, amount : i32, ret : *mut i32, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_add64(val : *mut u64, op : u64, ret : *mut u64, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_and(val : *mut u64, op : u64, ret : *mut u64, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_load(val : *mut u64, ret : *mut u64, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_load_int(val : *mut i32, ret : *mut i32, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_or(val : *mut u64, op : u64, ret : *mut u64, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_atomic_store(dst : *mut u64, val : u64, lock : *mut CRYPTO_RWLOCK) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_clear_free(ptr : *mut core::ffi::c_void, num : usize, file : *const i8, line : i32));
+windows_link::link!("crypto" "C" fn CRYPTO_clear_realloc(addr : *mut core::ffi::c_void, old_num : usize, num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_dup_ex_data(class_index : i32, to : *mut super::types::CRYPTO_EX_DATA, from : *const super::types::CRYPTO_EX_DATA) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_free(ptr : *mut core::ffi::c_void, file : *const i8, line : i32));
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_free_ex_data(class_index : i32, obj : *mut core::ffi::c_void, ad : *mut super::types::CRYPTO_EX_DATA));
+windows_link::link!("crypto" "C" fn CRYPTO_free_ex_index(class_index : i32, idx : i32) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_get_ex_data(ad : *const super::types::CRYPTO_EX_DATA, idx : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_get_ex_new_index(class_index : i32, argl : i64, argp : *mut core::ffi::c_void, new_func : CRYPTO_EX_new, dup_func : CRYPTO_EX_dup, free_func : CRYPTO_EX_free) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_get_mem_functions(malloc_fn : *mut CRYPTO_malloc_fn, realloc_fn : *mut CRYPTO_realloc_fn, free_fn : *mut CRYPTO_free_fn));
+windows_link::link!("crypto" "C" fn CRYPTO_malloc(num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn CRYPTO_memcmp(in_a : *const core::ffi::c_void, in_b : *const core::ffi::c_void, len : usize) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_memdup(str : *const core::ffi::c_void, siz : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_new_ex_data(class_index : i32, obj : *mut core::ffi::c_void, ad : *mut super::types::CRYPTO_EX_DATA) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_realloc(addr : *mut core::ffi::c_void, num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_actual_size(ptr : *mut core::ffi::c_void) -> usize);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_allocated(ptr : *const core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_clear_free(ptr : *mut core::ffi::c_void, num : usize, file : *const i8, line : i32));
+windows_link::link!("crypto" "C" fn CRYPTO_secure_free(ptr : *mut core::ffi::c_void, file : *const i8, line : i32));
+windows_link::link!("crypto" "C" fn CRYPTO_secure_malloc(num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_malloc_done() -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_malloc_init(sz : usize, minsize : usize) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_malloc_initialized() -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_used() -> usize);
+windows_link::link!("crypto" "C" fn CRYPTO_secure_zalloc(num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn CRYPTO_set_ex_data(ad : *mut super::types::CRYPTO_EX_DATA, idx : i32, val : *mut core::ffi::c_void) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_set_mem_functions(malloc_fn : CRYPTO_malloc_fn, realloc_fn : CRYPTO_realloc_fn, free_fn : CRYPTO_free_fn) -> i32);
+windows_link::link!("crypto" "C" fn CRYPTO_strdup(str : *const i8, file : *const i8, line : i32) -> *mut i8);
+windows_link::link!("crypto" "C" fn CRYPTO_strndup(str : *const i8, s : usize, file : *const i8, line : i32) -> *mut i8);
+windows_link::link!("crypto" "C" fn CRYPTO_zalloc(num : usize, file : *const i8, line : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_INIT_free(settings : *mut super::types::OPENSSL_INIT_SETTINGS));
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_INIT_new() -> *mut super::types::OPENSSL_INIT_SETTINGS);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_INIT_set_config_appname(settings : *mut super::types::OPENSSL_INIT_SETTINGS, config_appname : *const i8) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_INIT_set_config_file_flags(settings : *mut super::types::OPENSSL_INIT_SETTINGS, flags : u64));
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_INIT_set_config_filename(settings : *mut super::types::OPENSSL_INIT_SETTINGS, config_filename : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_atexit(handler : *mut u8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_buf2hexstr(buf : *const u8, buflen : i64) -> *mut i8);
+windows_link::link!("crypto" "C" fn OPENSSL_buf2hexstr_ex(str : *mut i8, str_n : usize, strlength : *mut usize, buf : *const u8, buflen : usize, sep : i8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_cleanse(ptr : *mut core::ffi::c_void, len : usize));
+windows_link::link!("crypto" "C" fn OPENSSL_cleanup());
+windows_link::link!("crypto" "C" fn OPENSSL_die(assertion : *const i8, file : *const i8, line : i32));
+windows_link::link!("crypto" "C" fn OPENSSL_fork_child());
+windows_link::link!("crypto" "C" fn OPENSSL_fork_parent());
+windows_link::link!("crypto" "C" fn OPENSSL_fork_prepare());
+windows_link::link!("crypto" "C" fn OPENSSL_gmtime(timer : *const bnd_linux_clang::libc::time_t::time_t, result : *mut bnd_linux_clang::libc::struct_tm::tm) -> *mut bnd_linux_clang::libc::struct_tm::tm);
+windows_link::link!("crypto" "C" fn OPENSSL_gmtime_adj(tm : *mut bnd_linux_clang::libc::struct_tm::tm, offset_day : i32, offset_sec : i64) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_gmtime_diff(pday : *mut i32, psec : *mut i32, from : *const bnd_linux_clang::libc::struct_tm::tm, to : *const bnd_linux_clang::libc::struct_tm::tm) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_hexchar2int(c : u8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_hexstr2buf(str : *const i8, buflen : *mut i64) -> *mut u8);
+windows_link::link!("crypto" "C" fn OPENSSL_hexstr2buf_ex(buf : *mut u8, buf_n : usize, buflen : *mut usize, str : *const i8, sep : i8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_info(r#type : i32) -> *const i8);
+windows_link::link!("crypto" "C" fn OPENSSL_init());
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_init_crypto(opts : u64, settings : *const super::types::OPENSSL_INIT_SETTINGS) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_isservice() -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_issetugid() -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_strcasecmp(s1 : *const i8, s2 : *const i8) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_strlcat(dst : *mut i8, src : *const i8, siz : usize) -> usize);
+windows_link::link!("crypto" "C" fn OPENSSL_strlcpy(dst : *mut i8, src : *const i8, siz : usize) -> usize);
+windows_link::link!("crypto" "C" fn OPENSSL_strncasecmp(s1 : *const i8, s2 : *const i8, n : usize) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_strnlen(str : *const i8, maxlen : usize) -> usize);
+windows_link::link!("crypto" "C" fn OPENSSL_strtoul(str : *const i8, endptr : *mut *mut i8, base : i32, num : *mut u64) -> i32);
+windows_link::link!("crypto" "C" fn OPENSSL_thread_stop());
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OPENSSL_thread_stop_ex(ctx : *mut super::types::OSSL_LIB_CTX));
+windows_link::link!("crypto" "C" fn OPENSSL_version_build_metadata() -> *const i8);
+windows_link::link!("crypto" "C" fn OPENSSL_version_major() -> u32);
+windows_link::link!("crypto" "C" fn OPENSSL_version_minor() -> u32);
+windows_link::link!("crypto" "C" fn OPENSSL_version_patch() -> u32);
+windows_link::link!("crypto" "C" fn OPENSSL_version_pre_release() -> *const i8);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_free(param0 : *mut super::types::OSSL_LIB_CTX));
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_get0_global_default() -> *mut super::types::OSSL_LIB_CTX);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_get_conf_diagnostics(ctx : *mut super::types::OSSL_LIB_CTX) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_get_data(ctx : *mut super::types::OSSL_LIB_CTX, index : i32) -> *mut core::ffi::c_void);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_load_config(ctx : *mut super::types::OSSL_LIB_CTX, config_file : *const i8) -> i32);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_new() -> *mut super::types::OSSL_LIB_CTX);
+#[cfg(all(feature = "core", feature = "types"))]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_new_child(handle : *const super::core::OSSL_CORE_HANDLE, r#in : *const super::types::OSSL_DISPATCH) -> *mut super::types::OSSL_LIB_CTX);
+#[cfg(all(feature = "core", feature = "types"))]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_new_from_dispatch(handle : *const super::core::OSSL_CORE_HANDLE, r#in : *const super::types::OSSL_DISPATCH) -> *mut super::types::OSSL_LIB_CTX);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_set0_default(libctx : *mut super::types::OSSL_LIB_CTX) -> *mut super::types::OSSL_LIB_CTX);
+#[cfg(feature = "types")]
+windows_link::link!("crypto" "C" fn OSSL_LIB_CTX_set_conf_diagnostics(ctx : *mut super::types::OSSL_LIB_CTX, value : i32));
+windows_link::link!("crypto" "C" fn OSSL_sleep(millis : u64));
+windows_link::link!("crypto" "C" fn OpenSSL_version(r#type : i32) -> *const i8);
+windows_link::link!("crypto" "C" fn OpenSSL_version_num() -> u64);
+pub const CRYPTO_EX_INDEX_APP: i32 = 13;
+pub const CRYPTO_EX_INDEX_BIO: i32 = 12;
+pub const CRYPTO_EX_INDEX_DH: i32 = 6;
+pub const CRYPTO_EX_INDEX_DRBG: i32 = 15;
+pub const CRYPTO_EX_INDEX_DSA: i32 = 7;
+pub const CRYPTO_EX_INDEX_EC_KEY: i32 = 8;
+pub const CRYPTO_EX_INDEX_ENGINE: i32 = 10;
+pub const CRYPTO_EX_INDEX_EVP_PKEY: i32 = 17;
+pub const CRYPTO_EX_INDEX_OSSL_LIB_CTX: i32 = 16;
+pub const CRYPTO_EX_INDEX_RAND_DRBG: i32 = 15;
+pub const CRYPTO_EX_INDEX_RSA: i32 = 9;
+pub const CRYPTO_EX_INDEX_SSL: i32 = 0;
+pub const CRYPTO_EX_INDEX_SSL_CTX: i32 = 1;
+pub const CRYPTO_EX_INDEX_SSL_SESSION: i32 = 2;
+pub const CRYPTO_EX_INDEX_UI: i32 = 11;
+pub const CRYPTO_EX_INDEX_UI_METHOD: i32 = 14;
+pub const CRYPTO_EX_INDEX_X509: i32 = 3;
+pub const CRYPTO_EX_INDEX_X509_STORE: i32 = 4;
+pub const CRYPTO_EX_INDEX_X509_STORE_CTX: i32 = 5;
+pub const CRYPTO_EX_INDEX__COUNT: i32 = 18;
+#[cfg(feature = "types")]
+pub type CRYPTO_EX_dup = Option<
+    unsafe extern "C" fn(
+        to: *mut super::types::CRYPTO_EX_DATA,
+        from: *const super::types::CRYPTO_EX_DATA,
+        from_d: *mut *mut core::ffi::c_void,
+        idx: i32,
+        argl: i64,
+        argp: *mut core::ffi::c_void,
+    ) -> i32,
+>;
+#[cfg(feature = "types")]
+pub type CRYPTO_EX_free = Option<
+    unsafe extern "C" fn(
+        parent: *mut core::ffi::c_void,
+        ptr: *mut core::ffi::c_void,
+        ad: *mut super::types::CRYPTO_EX_DATA,
+        idx: i32,
+        argl: i64,
+        argp: *mut core::ffi::c_void,
+    ),
+>;
+#[cfg(feature = "types")]
+pub type CRYPTO_EX_new = Option<
+    unsafe extern "C" fn(
+        parent: *mut core::ffi::c_void,
+        ptr: *mut core::ffi::c_void,
+        ad: *mut super::types::CRYPTO_EX_DATA,
+        idx: i32,
+        argl: i64,
+        argp: *mut core::ffi::c_void,
+    ),
+>;
+pub const CRYPTO_LOCK: i32 = 1;
+pub type CRYPTO_ONCE = bnd_linux_clang::libc::pthreadtypes::pthread_once_t;
+pub const CRYPTO_ONCE_STATIC_INIT: i32 = 0;
+pub const CRYPTO_READ: i32 = 4;
+pub type CRYPTO_RWLOCK = core::ffi::c_void;
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct CRYPTO_THREADID {
+    pub dummy: i32,
+}
+pub type CRYPTO_THREAD_ID = bnd_linux_clang::libc::pthreadtypes::pthread_t;
+pub type CRYPTO_THREAD_LOCAL = bnd_linux_clang::libc::pthreadtypes::pthread_key_t;
+pub const CRYPTO_UNLOCK: i32 = 2;
+pub const CRYPTO_WRITE: i32 = 8;
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct CRYPTO_dynlock {
+    pub dummy: i32,
+}
+pub type CRYPTO_free_fn =
+    Option<unsafe extern "C" fn(addr: *mut core::ffi::c_void, file: *const i8, line: i32)>;
+pub type CRYPTO_malloc_fn =
+    Option<unsafe extern "C" fn(num: usize, file: *const i8, line: i32) -> *mut core::ffi::c_void>;
+pub type CRYPTO_realloc_fn = Option<
+    unsafe extern "C" fn(
+        addr: *mut core::ffi::c_void,
+        num: usize,
+        file: *const i8,
+        line: i32,
+    ) -> *mut core::ffi::c_void,
+>;
+pub const OPENSSL_BUILT_ON: i32 = 2;
+pub const OPENSSL_CFLAGS: i32 = 1;
+pub const OPENSSL_CPU_INFO: i32 = 9;
+pub const OPENSSL_DIR: i32 = 4;
+pub const OPENSSL_ENGINES_DIR: i32 = 5;
+pub const OPENSSL_FULL_VERSION_STRING: i32 = 7;
+pub const OPENSSL_INFO_CONFIG_DIR: i32 = 1001;
+pub const OPENSSL_INFO_CPU_SETTINGS: i32 = 1008;
+pub const OPENSSL_INFO_DIR_FILENAME_SEPARATOR: i32 = 1005;
+pub const OPENSSL_INFO_DSO_EXTENSION: i32 = 1004;
+pub const OPENSSL_INFO_ENGINES_DIR: i32 = 1002;
+pub const OPENSSL_INFO_LIST_SEPARATOR: i32 = 1006;
+pub const OPENSSL_INFO_MODULES_DIR: i32 = 1003;
+pub const OPENSSL_INFO_SEED_SOURCE: i32 = 1007;
+pub const OPENSSL_INFO_WINDOWS_CONTEXT: i32 = 1009;
+pub const OPENSSL_INIT_ADD_ALL_CIPHERS: i32 = 4;
+pub const OPENSSL_INIT_ADD_ALL_DIGESTS: i32 = 8;
+pub const OPENSSL_INIT_ASYNC: i32 = 256;
+pub const OPENSSL_INIT_ATFORK: i32 = 131072;
+pub const OPENSSL_INIT_ENGINE_AFALG: i32 = 32768;
+pub const OPENSSL_INIT_ENGINE_ALL_BUILTIN: i64 = 30208;
+pub const OPENSSL_INIT_ENGINE_CAPI: i32 = 8192;
+pub const OPENSSL_INIT_ENGINE_CRYPTODEV: i32 = 4096;
+pub const OPENSSL_INIT_ENGINE_DYNAMIC: i32 = 1024;
+pub const OPENSSL_INIT_ENGINE_OPENSSL: i32 = 2048;
+pub const OPENSSL_INIT_ENGINE_PADLOCK: i32 = 16384;
+pub const OPENSSL_INIT_ENGINE_RDRAND: i32 = 512;
+pub const OPENSSL_INIT_LOAD_CONFIG: i32 = 64;
+pub const OPENSSL_INIT_LOAD_CRYPTO_STRINGS: i32 = 2;
+pub const OPENSSL_INIT_NO_ADD_ALL_CIPHERS: i32 = 16;
+pub const OPENSSL_INIT_NO_ADD_ALL_DIGESTS: i32 = 32;
+pub const OPENSSL_INIT_NO_ATEXIT: i32 = 524288;
+pub const OPENSSL_INIT_NO_LOAD_CONFIG: i32 = 128;
+pub const OPENSSL_INIT_NO_LOAD_CRYPTO_STRINGS: i32 = 1;
+pub const OPENSSL_MODULES_DIR: i32 = 8;
+pub const OPENSSL_PLATFORM: i32 = 3;
+pub const OPENSSL_VERSION: i32 = 0;
+pub const OPENSSL_VERSION_STRING: i32 = 6;
+pub const OPENSSL_WINCTX: i32 = 10;
+pub const SSLEAY_BUILT_ON: i32 = 2;
+pub const SSLEAY_CFLAGS: i32 = 1;
+pub const SSLEAY_DIR: i32 = 4;
+pub const SSLEAY_PLATFORM: i32 = 3;
+pub const SSLEAY_VERSION: i32 = 0;
+pub const SSLEAY_VERSION_NUMBER: i64 = 810549328;
+#[repr(C)]
+#[cfg(feature = "types")]
+#[derive(Clone, Copy, Default)]
+pub struct crypto_ex_data_st {
+    pub ctx: *mut super::types::OSSL_LIB_CTX,
+    pub sk: *mut core::ffi::c_void,
+}
+pub type sk_void_compfunc = Option<
+    unsafe extern "C" fn(
+        a: *const *const core::ffi::c_void,
+        b: *const *const core::ffi::c_void,
+    ) -> i32,
+>;
+pub type sk_void_copyfunc =
+    Option<unsafe extern "C" fn(a: *const core::ffi::c_void) -> *mut core::ffi::c_void>;
+pub type sk_void_freefunc = Option<unsafe extern "C" fn(a: *mut core::ffi::c_void)>;
+#[repr(C)]
+#[derive(Clone, Copy, Default)]
+pub struct stack_st_void(pub u8);

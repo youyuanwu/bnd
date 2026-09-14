@@ -146,6 +146,64 @@ To regenerate:
 cargo run -p bnd-openssl-gen
 ```
 
+### Staged Direct-Clang Architecture
+
+The repository also contains `bnd-openssl-clang`, a non-published staging
+crate generated alongside the production crate. It evaluates the vendored
+`bnd-clang` and `bnd-bindgen` pipeline without changing `bnd-openssl`, its
+`bnd-winmd` generator, or its checked-in bindings. No production cutover has
+occurred.
+
+The staged metadata path is:
+
+```text
+one GNU C11 OpenSSL translation unit
+              |
+              | bnd-linux-clang.winmd reference
+              v
+     bnd-clang, RDL by defining header
+              |
+              | bnd-linux-clang.winmd reference
+              v
+ windows-rdl, flat canonical `openssl` WinMD
+              |
+              | RDL-derived ownership
+              v
+ temporary package-remapped WinMD
+              |
+              | generic external Rust routes
+              v
+ bnd-openssl-clang/src/openssl/**
+```
+
+The Linux WinMD reference is supplied at both the Clang and RDL stages so
+POSIX declarations remain external `libc` TypeRefs. The checked-in canonical
+WinMD has one flat `openssl` namespace. Defining-header ownership is used only
+to create temporary package metadata and the 17 generated Rust modules:
+`asn1`, `bio`, `bn`, `buffer`, `comp`, `conf`, `conftypes`, `core`, `crypto`,
+`evp`, `rand`, `rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`.
+
+Passing both WinMD files through upstream `--in` resolves metadata references,
+but does not encode which Rust crate and module owns an external type. The
+generic `bnd-bindgen` external-reference routing API maps those types to
+`bnd_linux_clang::libc::*`, excludes local copies and feature gates, and keeps
+the concrete OpenSSL/Linux routes in `bnd-openssl-gen`.
+
+Native functions default to `crypto`; functions defined by `openssl/ssl.h`
+and `openssl/tls1.h` route to `ssl`. Metadata assertions check the complete
+generated routing. The staged crate checks in its Rust modules, canonical
+WinMD, and generated manifest features; its freshness test compares all three
+and repeats generation to check determinism.
+
+The staged crate mirrors the production suite's 28 runtime tests. The
+`openssl/err.h` probe remains excluded because
+`lhash_st_ERR_STRING_DATA::dummy` projects as a by-value
+`core::ffi::c_void`, which cannot derive `Clone`, `Copy`, or `Default`.
+
+The existing `just generate-openssl` target already generates Linux first and
+then invokes the `bnd-openssl-gen` binary, which now refreshes both production
+and staged OpenSSL outputs. No Just target change is needed.
+
 ---
 
 ## Config

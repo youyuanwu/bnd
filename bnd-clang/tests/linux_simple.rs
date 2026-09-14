@@ -87,6 +87,41 @@ fn collapses_pointer_to_function_type_typedef() {
 }
 
 #[test]
+fn preserves_callback_parameters() {
+    let index = open_index();
+    let invoke = index
+        .expect("SimpleTest", "CompareFunc")
+        .methods()
+        .find(|method| method.name() == "Invoke")
+        .expect("CompareFunc Invoke method");
+
+    assert_eq!(
+        invoke.signature(&[]).types,
+        [
+            windows_metadata::Type::PtrConst(Box::new(windows_metadata::Type::Void), 1),
+            windows_metadata::Type::PtrConst(Box::new(windows_metadata::Type::Void), 1),
+        ]
+    );
+}
+
+#[test]
+fn function_returning_callback_pointer_has_only_its_own_parameters() {
+    let index = open_index();
+    let method = index
+        .expect("SimpleTest", "Apis")
+        .methods()
+        .find(|method| method.name() == "get_function_type")
+        .expect("get_function_type method");
+    let signature = method.signature(&[]);
+
+    assert_eq!(signature.types, [windows_metadata::Type::I32]);
+    assert_eq!(
+        signature.return_type,
+        windows_metadata::Type::class_named("SimpleTest", "FunctionType")
+    );
+}
+
+#[test]
 fn generates_union_and_anonymous_records() {
     let index = open_index();
 

@@ -92,6 +92,7 @@ pub struct Bindgen {
     rustfmt: Option<String>,
     layout: Layout,
     package_feature_root: Option<String>,
+    external_references: Vec<ReferenceStage>,
     style: Style,
     dead_code: bool,
 }
@@ -348,6 +349,27 @@ impl Bindgen {
         self
     }
 
+    /// Routes metadata types matched by `filter` to an external Rust crate or module prefix.
+    ///
+    /// The filter uses the same namespace and type syntax as [`Bindgen::filter`]. Routed types
+    /// remain available as dependencies of generated APIs, but are not generated in this output
+    /// package or represented by local Cargo feature gates.
+    ///
+    /// ```
+    /// # let mut builder = windows_bindgen::Bindgen::new();
+    /// builder.external_reference("Vendor.Types", "vendor_bindings::types");
+    /// ```
+    #[track_caller]
+    pub fn external_reference(&mut self, filter: &str, rust_path_prefix: &str) -> &mut Self {
+        validate_external_reference_filter(filter);
+        validate_rust_path_prefix(rust_path_prefix);
+        self.external_references.push(ReferenceStage::external(
+            rust_path_prefix.trim(),
+            filter.trim(),
+        ));
+        self
+    }
+
     fn is_package_feature_root(&self, namespace: &str) -> bool {
         is_flat_container(namespace) || self.package_feature_root.as_deref() == Some(namespace)
     }
@@ -533,7 +555,7 @@ impl Bindgen {
         report_timing(&self.output, "metadata", phase.elapsed());
 
         let phase = std::time::Instant::now();
-        let mut references: Vec<ReferenceStage> = Vec::new();
+        let mut references = self.external_references.clone();
 
         if !sys {
             // Register implicit references to sibling windows-* crates present in metadata.
@@ -874,6 +896,65 @@ fn namespace_feature(namespace: &str) -> String {
     }
 }
 
+#[track_caller]
+fn validate_external_reference_filter(filter: &str) {
+    let filter = filter.trim();
+    assert!(
+        !filter.is_empty(),
+        "external reference filter must not be empty"
+    );
+    assert!(
+        !filter.starts_with('!'),
+        "external reference filter must include metadata, not exclude it"
+    );
+
+    let entries = filter_parser::parse_filter_entry(filter);
+    assert!(
+        !entries.is_empty()
+            && entries.iter().all(|entry| entry
+                .segments
+                .iter()
+                .all(|segment| !segment.trim().is_empty())),
+        "external reference filter is malformed: `{filter}`"
+    );
+}
+
+#[track_caller]
+fn validate_rust_path_prefix(path: &str) {
+    let path = path.trim();
+    assert!(
+        !path.is_empty(),
+        "external reference Rust path prefix must not be empty"
+    );
+
+    let tokens = path
+        .parse::<proc_macro2::TokenStream>()
+        .unwrap_or_else(|_| panic!("invalid external reference Rust path prefix: `{path}`"));
+    let mut tokens = tokens.into_iter();
+
+    loop {
+        let Some(proc_macro2::TokenTree::Ident(ident)) = tokens.next() else {
+            panic!("invalid external reference Rust path prefix: `{path}`");
+        };
+        assert!(
+            ident != "_",
+            "invalid external reference Rust path prefix: `{path}`"
+        );
+
+        let Some(first_colon) = tokens.next() else {
+            break;
+        };
+        let Some(second_colon) = tokens.next() else {
+            panic!("invalid external reference Rust path prefix: `{path}`");
+        };
+        assert!(
+            matches!(first_colon, proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == ':')
+                && matches!(second_colon, proc_macro2::TokenTree::Punct(ref punct) if punct.as_char() == ':'),
+            "invalid external reference Rust path prefix: `{path}`"
+        );
+    }
+}
+
 /// Prepend reference entries so they take precedence.
 fn prepend_default_refs(refs: &mut Vec<ReferenceStage>, crate_name: &str, paths: &[&str]) {
     refs.splice(
@@ -881,7 +962,7 @@ fn prepend_default_refs(refs: &mut Vec<ReferenceStage>, crate_name: &str, paths:
         paths
             .iter()
             .rev()
-            .map(|path| ReferenceStage::new(crate_name, path)),
+            .map(|path| ReferenceStage::implicit(crate_name, path)),
     );
 }
 
@@ -966,6 +1047,28 @@ mod tests {
             builder.package_feature("Company.Network.Socket"),
             "Network_Socket"
         );
+    }
+
+    #[test]
+    fn external_reference_builder_is_repeatable() {
+        let mut builder = Bindgen::new();
+        builder
+            .external_reference("Vendor.Types", "vendor_bindings::types")
+            .external_reference("Vendor.Values", "vendor_bindings::values");
+
+        assert_eq!(builder.external_references.len(), 2);
+    }
+
+    #[test]
+    #[should_panic(expected = "external reference filter must not be empty")]
+    fn empty_external_reference_filter_panics() {
+        Bindgen::new().external_reference("", "vendor_bindings");
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid external reference Rust path prefix")]
+    fn malformed_external_reference_path_panics() {
+        Bindgen::new().external_reference("Vendor.Types", "vendor-bindings::types");
     }
 
     #[test]

@@ -262,11 +262,7 @@ pub(crate) fn parse_params(
     parser: &mut Parser<'_>,
 ) -> Vec<Param> {
     let mut params = vec![];
-    let mut param_idx = 0usize;
-    for child in cursor.children() {
-        if child.kind() != CXCursor_ParmDecl {
-            continue;
-        }
+    for (param_idx, child) in cursor.arguments().into_iter().enumerate() {
         let mut name = child.name();
         if name.is_empty() || is_midl_synthetic_param_name(&name) {
             name = format!("param{param_idx}");
@@ -300,7 +296,6 @@ pub(crate) fn parse_params(
         {
             annotation.array = Some(ArrayInfo::CountConst(n));
         }
-        param_idx += 1;
         params.push(Param {
             name,
             ty,

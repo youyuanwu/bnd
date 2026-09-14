@@ -16,6 +16,9 @@ pub(crate) fn resolve_typedef(cursor: &Type, parser: &mut Parser<'_>) -> metadat
     if let Some(ty) = semantic_scalar(&name) {
         return ty;
     }
+    if let Some(ns) = parser.ref_map.get(&name) {
+        return metadata::Type::value_named(ns, &name);
+    }
 
     // String normalisation and the flat collapses are gated to the per-header scrape: a
     // namespaced scrape (WebView2) resolves `PCWSTR`/`PCSTR` through a reference winmd where they
@@ -31,9 +34,7 @@ pub(crate) fn resolve_typedef(cursor: &Type, parser: &mut Parser<'_>) -> metadat
 
     // Namespaced scrape: resolve through the reference metadata. A local typedef is emitted by
     // name; an external one is scheduled for a follow-up pass.
-    if let Some(ns) = parser.ref_map.get(&name) {
-        metadata::Type::value_named(ns, &name)
-    } else if let Some(ty) = interface_alias(cursor, parser) {
+    if let Some(ty) = interface_alias(cursor, parser) {
         ty
     } else if let Some(ty) = universal_alias(parser.namespace, &name) {
         ty

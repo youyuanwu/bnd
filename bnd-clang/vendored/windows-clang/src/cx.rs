@@ -309,6 +309,19 @@ impl Cursor {
         children
     }
 
+    pub fn arguments(&self) -> Vec<Self> {
+        let count = unsafe { clang_Cursor_getNumArguments(self.0) };
+        if count >= 0 {
+            return (0..count)
+                .map(|index| Self(unsafe { clang_Cursor_getArgument(self.0, index as u32) }))
+                .collect();
+        }
+        self.children()
+            .into_iter()
+            .filter(|child| child.kind() == CXCursor_ParmDecl)
+            .collect()
+    }
+
     pub fn kind(&self) -> CXCursorKind {
         unsafe { clang_getCursorKind(self.0) }
     }
@@ -877,16 +890,11 @@ impl Type {
                 {
                     return metadata::Type::value_named(NUMERICS_NAMESPACE, num);
                 }
-                let ns = if parser.header_root.is_some() {
-                    // In flat mode, headers select files but all records share one namespace.
-                    parser.namespace.to_string()
-                } else {
-                    parser
-                        .ref_map
-                        .get(&name)
-                        .map_or(parser.namespace, |s| s.as_str())
-                        .to_string()
-                };
+                let ns = parser
+                    .ref_map
+                    .get(&name)
+                    .map_or(parser.namespace, String::as_str)
+                    .to_string();
                 let definition = decl.definition();
                 if self.kind() == CXType_Record
                     && parser.header_root.is_none()

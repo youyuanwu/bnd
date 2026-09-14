@@ -105,6 +105,89 @@ fn header_scope_keeps_only_roots_and_reachable_types() {
 }
 
 #[test]
+fn header_scope_resolves_types_from_reference_metadata() {
+    let temp = tempfile::tempdir().expect("create temporary output directory");
+    let dependency = temp.path().join("dependency.h");
+    let root = temp.path().join("root.h");
+    let dependency_rdl = temp.path().join("dependency-source.rdl");
+    let dependency_winmd = temp.path().join("dependency.winmd");
+    let output = temp.path().join("rdl");
+    std::fs::write(
+        &dependency,
+        "typedef struct Shared { int value; } Shared;\n",
+    )
+    .expect("write dependency fixture");
+    std::fs::write(
+        &root,
+        "#include \"dependency.h\"\nvoid consume(Shared* value);\n",
+    )
+    .expect("write root fixture");
+
+    windows_clang::clang()
+        .input(&dependency)
+        .args(["-x", "c", "-std=c11"])
+        .namespace("External")
+        .library("simple")
+        .output(&dependency_rdl)
+        .write()
+        .expect("generate dependency RDL");
+    windows_rdl::reader()
+        .input(&dependency_rdl)
+        .output(&dependency_winmd)
+        .write()
+        .expect("compile dependency metadata");
+
+    windows_clang::clang()
+        .input(&root)
+        .reference(&dependency_winmd)
+        .args(["-x", "c", "-std=c11"])
+        .arg(format!("-I{}", temp.path().display()))
+        .namespace("Root")
+        .library("simple")
+        .scope_header("root.h")
+        .output(&output)
+        .write_by_header()
+        .expect("generate header-scoped RDL");
+
+    let root = std::fs::read_to_string(output.join("root.rdl")).expect("read root RDL");
+    assert!(root.contains("External::Shared"));
+    assert!(!output.join("dependency.rdl").exists());
+}
+
+#[test]
+fn header_scope_assigns_libraries_by_defining_header() {
+    let temp = tempfile::tempdir().expect("create temporary output directory");
+    let dependency = temp.path().join("dependency.h");
+    let root = temp.path().join("root.h");
+    let output = temp.path().join("rdl");
+    std::fs::write(&dependency, "void dependency(void);\n").expect("write dependency fixture");
+    std::fs::write(
+        &root,
+        "#include \"dependency.h\"\nvoid root_function(void);\n",
+    )
+    .expect("write root fixture");
+
+    windows_clang::clang()
+        .input(&root)
+        .args(["-x", "c", "-std=c11"])
+        .arg(format!("-I{}", temp.path().display()))
+        .namespace("Libraries")
+        .library("default")
+        .libraries([("root_function", "explicit")])
+        .header_libraries([("root.h", "root"), ("dependency.h", "dependency")])
+        .scope_headers(["root.h", "dependency.h"])
+        .output(&output)
+        .write_by_header()
+        .expect("generate per-header libraries");
+
+    let root = std::fs::read_to_string(output.join("root.rdl")).expect("read root RDL");
+    let dependency =
+        std::fs::read_to_string(output.join("dependency.rdl")).expect("read dependency RDL");
+    assert!(root.contains("#[library(\"explicit\")]"));
+    assert!(dependency.contains("#[library(\"dependency\")]"));
+}
+
+#[test]
 fn symbol_filter_keeps_function_type_typedef_dependency() {
     let temp = tempfile::tempdir().expect("create temporary output directory");
     let header = temp.path().join("callbacks.h");
