@@ -76,7 +76,8 @@ pub type DSA_METHOD = dsa_method;
 pub type EC_KEY = ec_key_st;
 pub type EC_KEY_METHOD = ec_key_method_st;
 pub type ENGINE = engine_st;
-pub type ERR_STATE = err_state_st;
+#[cfg(feature = "err")]
+pub type ERR_STATE = super::err::err_state_st;
 pub type EVP_ASYM_CIPHER = evp_asym_cipher_st;
 pub type EVP_CIPHER = evp_cipher_st;
 pub type EVP_CIPHER_CTX = evp_cipher_ctx_st;
@@ -255,9 +256,6 @@ pub struct ec_key_st(pub u8);
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct engine_st(pub u8);
-#[repr(C)]
-#[derive(Clone, Copy, Default)]
-pub struct err_state_st(pub u8);
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
 pub struct evp_Encode_Ctx_st(pub u8);

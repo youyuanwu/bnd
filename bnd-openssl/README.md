@@ -46,6 +46,7 @@ Generation refreshes `src/openssl/`, generated Cargo features, and
 |---|---|---|
 | `types` | — | ~130 opaque typedefs (`EVP_MD`, `SSL`, `BIO`, `BIGNUM`, …) |
 | `crypto` | `libcrypto` | Version queries, `CRYPTO_malloc`/`CRYPTO_free` |
+| `err` | `libcrypto` | Error queue inspection, creation, and formatting |
 | `rand` | `libcrypto` | `RAND_bytes`, `RAND_status` |
 | `bn` | `libcrypto` | `BN_new`, `BN_set_word`, `BN_bn2hex` |
 | `evp` | `libcrypto` | `EVP_DigestInit_ex`, `EVP_sha256`, `EVP_MAX_MD_SIZE` |
@@ -54,8 +55,8 @@ Generation refreshes `src/openssl/`, generated Cargo features, and
 | `ssl` | `libssl` | `SSL_CTX_new`, `SSL_new`, `TLS_client_method`, `SSL_ERROR_*` |
 
 The complete generated defining-header module set is `asn1`, `bio`, `bn`,
-`buffer`, `comp`, `conf`, `conftypes`, `core`, `crypto`, `evp`, `rand`,
-`rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`. Each module has a
+`buffer`, `comp`, `conf`, `conftypes`, `core`, `crypto`, `err`, `evp`,
+`rand`, `rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`. Each module has a
 same-named Cargo feature; the default feature dependency closure enables
 the complete current generated surface.
 

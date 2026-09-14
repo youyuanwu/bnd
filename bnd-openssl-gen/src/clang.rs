@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 const ROOT_HEADERS: &[&str] = &[
     "openssl/types.h",
     "openssl/crypto.h",
+    "openssl/err.h",
     "openssl/rand.h",
     "openssl/bn.h",
     "openssl/evp.h",
@@ -12,10 +13,6 @@ const ROOT_HEADERS: &[&str] = &[
     "openssl/ssl.h",
     "openssl/tls1.h",
 ];
-
-// `openssl/err.h` is intentionally excluded: its
-// `lhash_st_ERR_STRING_DATA::dummy` inline union projects as a by-value
-// `core::ffi::c_void`, which cannot derive Clone, Copy, or Default.
 
 const EXTERNAL_REFERENCE_ROUTES: &[(&str, &str)] = &[
     ("FILE", "bnd_linux::libc::file"),
@@ -561,6 +558,37 @@ mod tests {
                 ),
             ]
         );
+        let error_strings = index.expect("openssl", "lhash_st_ERR_STRING_DATA");
+        assert_eq!(
+            error_strings
+                .fields()
+                .map(|field| (field.name().to_string(), field.ty()))
+                .collect::<Vec<_>>(),
+            [(
+                "dummy".to_string(),
+                windows_metadata::Type::value_named("openssl", "lhash_st_ERR_STRING_DATA_0"),
+            )]
+        );
+        let error_strings_dummy = index.expect("openssl", "lhash_st_ERR_STRING_DATA_0");
+        assert!(
+            error_strings_dummy
+                .flags()
+                .contains(windows_metadata::TypeAttributes::ExplicitLayout)
+        );
+        assert_eq!(
+            error_strings_dummy
+                .fields()
+                .map(|field| (field.name().to_string(), field.ty()))
+                .collect::<Vec<_>>(),
+            [
+                (
+                    "d1".to_string(),
+                    windows_metadata::Type::PtrMut(Box::new(windows_metadata::Type::Void), 1,),
+                ),
+                ("d2".to_string(), windows_metadata::Type::U64),
+                ("d3".to_string(), windows_metadata::Type::I32),
+            ]
+        );
 
         let remapped = open_index(&remapped);
         assert_surface(
@@ -584,6 +612,22 @@ mod tests {
                 &["CRYPTO_THREADID"][..],
                 &["OPENSSL_VERSION", "OPENSSL_VERSION_STRING"][..],
                 &["CRYPTO_free", "CRYPTO_malloc", "OpenSSL_version"][..],
+            ),
+            (
+                "openssl.err",
+                &[
+                    "ERR_STRING_DATA",
+                    "err_state_st",
+                    "lhash_st_ERR_STRING_DATA",
+                    "lhash_st_ERR_STRING_DATA_0",
+                ][..],
+                &["ERR_LIB_NONE", "ERR_TXT_STRING"][..],
+                &[
+                    "ERR_clear_error",
+                    "ERR_get_error",
+                    "ERR_new",
+                    "ERR_set_error",
+                ][..],
             ),
             (
                 "openssl.rand",
