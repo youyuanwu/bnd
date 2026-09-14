@@ -67,13 +67,13 @@ fn read_sources(root: &Path, files: &BTreeSet<PathBuf>) -> BTreeMap<PathBuf, Vec
 }
 
 #[test]
-fn clang_generated_artifacts_are_up_to_date() {
+fn generated_artifacts_are_up_to_date() {
     let workspace_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
-    let checked_in = workspace_dir.join("bnd-openssl-clang");
+    let checked_in = workspace_dir.join("bnd-openssl");
     let target = workspace_dir.join("target");
     std::fs::create_dir_all(&target).expect("create target directory");
     let temp = tempfile::Builder::new()
-        .prefix("bnd-openssl-clang-freshness-")
+        .prefix("bnd-openssl-freshness-")
         .tempdir_in(target)
         .expect("create temporary staged crate");
 
@@ -85,7 +85,7 @@ fn clang_generated_artifacts_are_up_to_date() {
     )
     .expect("write staged manifest prefix");
 
-    bnd_openssl_gen::clang::generate(temp.path());
+    bnd_openssl_gen::generate(temp.path());
 
     let checked_in_src = checked_in.join("src/openssl");
     let generated_src = temp.path().join("src/openssl");
@@ -128,16 +128,16 @@ fn clang_generated_artifacts_are_up_to_date() {
         "generated OpenSSL bindings contain a local libc path"
     );
     for path in [
-        "bnd_linux_clang::libc::file::FILE",
-        "bnd_linux_clang::libc::netdb::hostent",
-        "bnd_linux_clang::libc::pthreadtypes::pthread_key_t",
-        "bnd_linux_clang::libc::pthreadtypes::pthread_once_t",
-        "bnd_linux_clang::libc::pthreadtypes::pthread_t",
-        "bnd_linux_clang::libc::struct_timeval::timeval",
-        "bnd_linux_clang::libc::struct_tm::tm",
-        "bnd_linux_clang::libc::time_t::time_t",
-        "bnd_linux_clang::libc::types::off_t",
-        "bnd_linux_clang::libc::types::ssize_t",
+        "bnd_linux::libc::file::FILE",
+        "bnd_linux::libc::netdb::hostent",
+        "bnd_linux::libc::pthreadtypes::pthread_key_t",
+        "bnd_linux::libc::pthreadtypes::pthread_once_t",
+        "bnd_linux::libc::pthreadtypes::pthread_t",
+        "bnd_linux::libc::struct_timeval::timeval",
+        "bnd_linux::libc::struct_tm::tm",
+        "bnd_linux::libc::time_t::time_t",
+        "bnd_linux::libc::types::off_t",
+        "bnd_linux::libc::types::ssize_t",
     ] {
         assert!(
             generated_text.contains(path),
@@ -165,13 +165,13 @@ fn clang_generated_artifacts_are_up_to_date() {
         changed.join("\n  ")
     );
 
-    let expected_winmd = std::fs::read(checked_in.join("winmd/bnd-openssl-clang.winmd"))
+    let expected_winmd = std::fs::read(checked_in.join("winmd/bnd-openssl.winmd"))
         .expect("read checked-in OpenSSL WinMD");
-    let actual_winmd = std::fs::read(temp.path().join("winmd/bnd-openssl-clang.winmd"))
+    let actual_winmd = std::fs::read(temp.path().join("winmd/bnd-openssl.winmd"))
         .expect("read generated OpenSSL WinMD");
     assert!(
         expected_winmd == actual_winmd,
-        "bnd-openssl-clang.winmd is out of date ({})",
+        "bnd-openssl.winmd is out of date ({})",
         first_difference(&expected_winmd, &actual_winmd)
     );
 
@@ -179,14 +179,14 @@ fn clang_generated_artifacts_are_up_to_date() {
         std::fs::read_to_string(temp.path().join("Cargo.toml")).expect("read generated Cargo.toml");
     assert!(
         checked_in_manifest == generated_manifest,
-        "bnd-openssl-clang Cargo.toml is out of date ({})",
+        "bnd-openssl Cargo.toml is out of date ({})",
         first_difference(
             checked_in_manifest.as_bytes(),
             generated_manifest.as_bytes()
         )
     );
 
-    bnd_openssl_gen::clang::generate(temp.path());
+    bnd_openssl_gen::generate(temp.path());
 
     let regenerated_files = collect_files(&generated_src);
     assert_eq!(
@@ -194,7 +194,7 @@ fn clang_generated_artifacts_are_up_to_date() {
         "a second generation changed the OpenSSL source file list"
     );
     let regenerated_sources = read_sources(&generated_src, &regenerated_files);
-    let regenerated_winmd = std::fs::read(temp.path().join("winmd/bnd-openssl-clang.winmd"))
+    let regenerated_winmd = std::fs::read(temp.path().join("winmd/bnd-openssl.winmd"))
         .expect("read regenerated OpenSSL WinMD");
     let regenerated_manifest =
         std::fs::read_to_string(temp.path().join("Cargo.toml")).expect("read regenerated manifest");

@@ -1,7 +1,6 @@
 //! End-to-end tests for Netdb bindings against real libc.
 
-use bnd_linux::libc::posix::netdb;
-use bnd_linux::libc::posix::socket;
+use bnd_linux::libc::{netdb, socket, socket_type};
 use std::sync::Mutex;
 
 static PROTOCOL_LOOKUP_LOCK: Mutex<()> = Mutex::new(());
@@ -107,7 +106,7 @@ fn getaddrinfo_localhost() {
     let node = c"127.0.0.1";
     let mut hints = netdb::addrinfo::default();
     hints.ai_family = socket::PF_INET;
-    hints.ai_socktype = socket::SOCK_STREAM as i32;
+    hints.ai_socktype = socket_type::SOCK_STREAM as i32;
 
     let mut result: *mut netdb::addrinfo = core::ptr::null_mut();
     let rc = unsafe {
@@ -123,7 +122,7 @@ fn getaddrinfo_localhost() {
 
     let ai = unsafe { &*result };
     assert_eq!(ai.ai_family, socket::PF_INET);
-    assert_eq!(ai.ai_socktype, socket::SOCK_STREAM as i32);
+    assert_eq!(ai.ai_socktype, socket_type::SOCK_STREAM as i32);
 
     unsafe { netdb::freeaddrinfo(result) };
 }

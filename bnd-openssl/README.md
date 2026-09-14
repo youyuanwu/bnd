@@ -1,10 +1,46 @@
 # bnd-openssl
 
-Rust FFI bindings for OpenSSL 3.x (`libssl` + `libcrypto`), auto-generated from OpenSSL headers via [`bnd-winmd`](../bnd-winmd/) and [`windows-bindgen`](https://crates.io/crates/windows-bindgen).
+Rust FFI bindings for OpenSSL 3.x (`libssl` + `libcrypto`), generated
+through the production direct-Clang pipeline:
 
-**Do not edit `src/openssl/` by hand** — run `cargo run -p bnd-openssl-gen` to regenerate.
+```text
+OpenSSL headers -> bnd-clang -> defining-header RDL -> flat openssl WinMD
+                -> temporary package remap -> bnd-bindgen -> Rust
+```
 
-## Modules
+The checked-in canonical metadata is `winmd/bnd-openssl.winmd`, with one
+flat `openssl` namespace. Defining headers become Rust modules and
+same-named Cargo features such as `bio`, `crypto`, `ssl`, and `types`.
+The default feature set remains `bio`, `bn`, `crypto`, `evp`, `rand`,
+`sha`, `ssl`, and `types`; generated dependency features enable additional
+header modules when required.
+
+OpenSSL metadata references the canonical
+`../bnd-linux/winmd/bnd-linux.winmd` at both the Clang and RDL stages.
+External POSIX types are owned by `bnd-linux` and generate as exact paths
+such as `bnd_linux::libc::file::FILE`,
+`bnd_linux::libc::struct_tm::tm`, and
+`bnd_linux::libc::types::off_t`. They are not duplicated in this crate.
+
+## Regenerating
+
+Regenerate Linux first because OpenSSL consumes its canonical WinMD:
+
+```sh
+just generate-openssl
+```
+
+Equivalent commands from the repository root are:
+
+```sh
+cargo run -p bnd-linux-gen
+cargo run -p bnd-openssl-gen
+```
+
+Generation refreshes `src/openssl/`, generated Cargo features, and
+`winmd/bnd-openssl.winmd`. Do not edit generated files manually.
+
+## Default API Modules
 
 | Module | Library | APIs |
 |---|---|---|
@@ -17,7 +53,11 @@ Rust FFI bindings for OpenSSL 3.x (`libssl` + `libcrypto`), auto-generated from 
 | `bio` | `libcrypto` | `BIO_new`, `BIO_read`, `BIO_write`, memory BIOs |
 | `ssl` | `libssl` | `SSL_CTX_new`, `SSL_new`, `TLS_client_method`, `SSL_ERROR_*` |
 
-Each module is a Cargo feature (all enabled by default).
+The complete generated defining-header module set is `asn1`, `bio`, `bn`,
+`buffer`, `comp`, `conf`, `conftypes`, `core`, `crypto`, `evp`, `rand`,
+`rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`. Each module has a
+same-named Cargo feature; the default feature dependency closure enables
+the complete current generated surface.
 
 ## Prerequisites
 

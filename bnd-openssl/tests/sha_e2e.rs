@@ -14,7 +14,7 @@ fn sha256_one_shot() {
     unsafe {
         let data = b"hello";
         let mut hash = [0u8; 32];
-        let ret = sha::SHA256(data.as_ptr(), data.len() as u64, hash.as_mut_ptr());
+        let ret = sha::SHA256(data.as_ptr(), data.len(), hash.as_mut_ptr());
         assert!(!ret.is_null(), "SHA256 should return non-null");
 
         // Known SHA-256 of "hello"
@@ -32,7 +32,7 @@ fn sha1_one_shot() {
     unsafe {
         let data = b"hello";
         let mut hash = [0u8; 20];
-        let ret = sha::SHA1(data.as_ptr(), data.len() as u64, hash.as_mut_ptr());
+        let ret = sha::SHA1(data.as_ptr(), data.len(), hash.as_mut_ptr());
         assert!(!ret.is_null(), "SHA1 should return non-null");
 
         // Known SHA-1 of "hello"

@@ -32,6 +32,14 @@ fn ssl_error_constants() {
 #[test]
 fn ssl_new_free() {
     unsafe {
+        let _: unsafe extern "C" fn(
+            *mut bnd_openssl::openssl::types::SSL,
+            i32,
+            bnd_linux::libc::types::off_t,
+            usize,
+            i32,
+        ) -> bnd_linux::libc::types::ssize_t = ssl::SSL_sendfile;
+
         let method = ssl::TLS_client_method();
         let ctx = ssl::SSL_CTX_new(method);
         assert!(!ctx.is_null());

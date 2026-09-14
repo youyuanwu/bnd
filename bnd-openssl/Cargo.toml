@@ -9,18 +9,35 @@ license.workspace = true
 readme = "README.md"
 
 [dependencies]
-bnd-linux = { path = "../bnd-linux", features = ["posix_time", "posix_stdio", "posix_pthread", "posix_types"] }
+bnd-linux = { path = "../bnd-linux", default-features = false, features = [
+    "file",
+    "netdb",
+    "pthreadtypes",
+    "struct_timeval",
+    "struct_tm",
+    "time_t",
+    "types",
+] }
 bnd-macros.workspace = true
 
 [features]
 default = ["bio", "bn", "crypto", "evp", "rand", "sha", "ssl", "types"]
 Foundation = []
 # generated features
-bio = ["Foundation"]
-bn = ["Foundation"]
-crypto = ["Foundation"]
-evp = ["Foundation"]
-rand = ["Foundation"]
-sha = ["Foundation"]
-ssl = ["Foundation"]
-types = ["Foundation"]
+asn1 = ["types"]
+bio = ["core", "types"]
+bn = ["crypto", "types"]
+buffer = []
+comp = []
+conf = ["conftypes"]
+conftypes = ["conf", "types"]
+core = ["types"]
+crypto = ["core", "types"]
+evp = ["asn1", "bio", "core", "types", "x509"]
+rand = ["types"]
+rsa = ["asn1", "types", "x509"]
+sha = []
+ssl = ["bio", "comp", "core", "tls1", "types"]
+tls1 = ["types"]
+types = ["asn1", "buffer", "conf", "conftypes", "core", "crypto", "rand", "rsa", "x509"]
+x509 = ["asn1", "types"]

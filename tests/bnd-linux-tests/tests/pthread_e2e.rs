@@ -1,7 +1,7 @@
 //! End-to-end tests for pthread bindings against real libc.
 #![allow(clippy::unnecessary_mut_passed)]
 
-use bnd_linux::libc::posix::pthread;
+use bnd_linux::libc::{pthread, pthreadtypes};
 
 #[test]
 fn pthread_constants() {
@@ -41,7 +41,7 @@ fn pthread_equal_self() {
 #[test]
 fn mutex_init_lock_unlock_destroy() {
     unsafe {
-        let mut mutex: pthread::pthread_mutex_t = core::mem::zeroed();
+        let mut mutex: pthreadtypes::pthread_mutex_t = core::mem::zeroed();
         let ret = pthread::pthread_mutex_init(&mut mutex, core::ptr::null());
         assert_eq!(ret, 0, "pthread_mutex_init should succeed");
 
@@ -59,7 +59,7 @@ fn mutex_init_lock_unlock_destroy() {
 #[test]
 fn mutex_trylock() {
     unsafe {
-        let mut mutex: pthread::pthread_mutex_t = core::mem::zeroed();
+        let mut mutex: pthreadtypes::pthread_mutex_t = core::mem::zeroed();
         pthread::pthread_mutex_init(&mut mutex, core::ptr::null());
 
         let ret = pthread::pthread_mutex_trylock(&mut mutex);
@@ -77,7 +77,7 @@ fn mutex_trylock() {
 #[test]
 fn rwlock_read_write() {
     unsafe {
-        let mut rwlock: pthread::pthread_rwlock_t = core::mem::zeroed();
+        let mut rwlock: pthreadtypes::pthread_rwlock_t = core::mem::zeroed();
         let ret = pthread::pthread_rwlock_init(&mut rwlock, core::ptr::null());
         assert_eq!(ret, 0);
 
@@ -100,7 +100,7 @@ fn rwlock_read_write() {
 #[test]
 fn pthread_key_create_delete() {
     unsafe {
-        let mut key: pthread::pthread_key_t = 0;
+        let mut key: pthreadtypes::pthread_key_t = 0;
         let ret = pthread::pthread_key_create(&mut key, core::ptr::null_mut());
         assert_eq!(ret, 0, "pthread_key_create should succeed");
 
@@ -122,8 +122,7 @@ fn pthread_key_create_delete() {
 
 #[test]
 fn pthread_create_join() {
-    // pthread_create's start_routine is emitted as *const isize (opaque function pointer).
-    // We transmute a Rust extern "C" fn into that type.
+    // pthread_create's start_routine is emitted as an opaque byte pointer.
     unsafe extern "C" fn thread_fn(arg: *mut core::ffi::c_void) -> *mut core::ffi::c_void {
         // Double the input value
         let val = arg as usize;
@@ -131,11 +130,10 @@ fn pthread_create_join() {
     }
 
     unsafe {
-        let mut tid: pthread::pthread_t = 0;
+        let mut tid: pthreadtypes::pthread_t = 0;
         let arg = 21usize as *mut core::ffi::c_void;
 
-        // Cast function pointer to *mut isize (the WinMD/bnd-winmd representation)
-        let start_routine: *mut isize = thread_fn as *mut isize;
+        let start_routine = thread_fn as *mut u8;
 
         let ret = pthread::pthread_create(&mut tid, core::ptr::null(), start_routine, arg);
         assert_eq!(ret, 0, "pthread_create should succeed");
@@ -150,7 +148,7 @@ fn pthread_create_join() {
 #[test]
 fn pthread_attr_init_destroy() {
     unsafe {
-        let mut attr: pthread::pthread_attr_t = core::mem::zeroed();
+        let mut attr: pthreadtypes::pthread_attr_t = core::mem::zeroed();
         let ret = pthread::pthread_attr_init(&mut attr);
         assert_eq!(ret, 0, "pthread_attr_init should succeed");
 
@@ -171,7 +169,7 @@ fn pthread_attr_init_destroy() {
 #[test]
 fn spinlock_lock_unlock() {
     unsafe {
-        let mut lock: pthread::pthread_spinlock_t = 0;
+        let mut lock: pthreadtypes::pthread_spinlock_t = 0;
         let ret = pthread::pthread_spin_init(&mut lock, 0); // PTHREAD_PROCESS_PRIVATE
         assert_eq!(ret, 0);
 
@@ -188,9 +186,9 @@ fn spinlock_lock_unlock() {
 #[test]
 fn struct_sizes() {
     // Verify key struct sizes match x86_64 glibc expectations
-    assert_eq!(core::mem::size_of::<pthread::pthread_mutex_t>(), 40);
-    assert_eq!(core::mem::size_of::<pthread::pthread_cond_t>(), 48);
-    assert_eq!(core::mem::size_of::<pthread::pthread_rwlock_t>(), 56);
-    assert_eq!(core::mem::size_of::<pthread::pthread_attr_t>(), 56);
-    assert_eq!(core::mem::size_of::<pthread::pthread_barrier_t>(), 32);
+    assert_eq!(core::mem::size_of::<pthreadtypes::pthread_mutex_t>(), 40);
+    assert_eq!(core::mem::size_of::<pthreadtypes::pthread_cond_t>(), 48);
+    assert_eq!(core::mem::size_of::<pthreadtypes::pthread_rwlock_t>(), 56);
+    assert_eq!(core::mem::size_of::<pthreadtypes::pthread_attr_t>(), 56);
+    assert_eq!(core::mem::size_of::<pthreadtypes::pthread_barrier_t>(), 32);
 }

@@ -1,5 +1,11 @@
 # Work In Progress
 
+> **Historical tracker:** Most entries below record work completed in the
+> standalone `bnd-winmd` pipeline and the pre-cutover Linux/OpenSSL layouts.
+> Current production architecture is documented in
+> [design/BndLinux.md](design/BndLinux.md) and
+> [design/systesting/Openssl.md](design/systesting/Openssl.md).
+
 ## Blockers — Core Features
 
 ### 1. ~~Union support~~ ✅

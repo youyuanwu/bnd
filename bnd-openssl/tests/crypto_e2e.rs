@@ -28,6 +28,11 @@ fn openssl_version_string_starts_with_openssl() {
 #[test]
 fn openssl_version_num_nonzero() {
     unsafe {
+        let _: unsafe extern "C" fn(
+            *const bnd_linux::libc::time_t::time_t,
+            *mut bnd_linux::libc::struct_tm::tm,
+        ) -> *mut bnd_linux::libc::struct_tm::tm = crypto::OPENSSL_gmtime;
+
         let num = crypto::OpenSSL_version_num();
         assert!(num > 0, "OpenSSL_version_num should be nonzero");
     }

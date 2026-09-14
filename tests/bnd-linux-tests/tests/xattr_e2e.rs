@@ -1,4 +1,4 @@
-use bnd_linux::libc::linux::xattr;
+use bnd_linux::libc::xattr;
 use std::ffi::CString;
 
 fn with_tmpfile(suffix: &str, f: impl FnOnce(&CString)) {
@@ -27,7 +27,7 @@ fn setxattr_getxattr_roundtrip() {
                 path.as_ptr(),
                 name.as_ptr(),
                 value.as_ptr() as *const _,
-                value.len() as u64,
+                value.len(),
                 0,
             )
         };
@@ -39,7 +39,7 @@ fn setxattr_getxattr_roundtrip() {
                 path.as_ptr(),
                 name.as_ptr(),
                 buf.as_mut_ptr() as *mut _,
-                buf.len() as u64,
+                buf.len(),
             )
         };
         assert_eq!(n, value.len() as i64);
@@ -58,15 +58,13 @@ fn listxattr_contains_attr() {
                 path.as_ptr(),
                 name.as_ptr(),
                 value.as_ptr() as *const _,
-                value.len() as u64,
+                value.len(),
                 0,
             );
         }
 
         let mut buf = [0u8; 256];
-        let n = unsafe {
-            xattr::listxattr(path.as_ptr(), buf.as_mut_ptr() as *mut _, buf.len() as u64)
-        };
+        let n = unsafe { xattr::listxattr(path.as_ptr(), buf.as_mut_ptr() as *mut _, buf.len()) };
         assert!(n > 0, "listxattr returned {n}");
 
         let list = String::from_utf8_lossy(&buf[..n as usize]);
@@ -88,7 +86,7 @@ fn removexattr_removes_attr() {
                 path.as_ptr(),
                 name.as_ptr(),
                 value.as_ptr() as *const _,
-                value.len() as u64,
+                value.len(),
                 0,
             );
         }
@@ -103,7 +101,7 @@ fn removexattr_removes_attr() {
                 path.as_ptr(),
                 name.as_ptr(),
                 buf.as_mut_ptr() as *mut _,
-                buf.len() as u64,
+                buf.len(),
             )
         };
         assert!(n < 0, "getxattr should fail after removexattr");

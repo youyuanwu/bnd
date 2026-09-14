@@ -1,4 +1,4 @@
-use bnd_linux::libc::linux::inotify;
+use bnd_linux::libc::inotify;
 
 #[test]
 fn inotify_init1_returns_valid_fd() {
