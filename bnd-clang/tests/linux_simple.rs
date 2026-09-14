@@ -145,6 +145,28 @@ fn generates_union_and_anonymous_records() {
         ["addr", "scope_id"]
     );
 
+    let macro_nested = index.expect("SimpleTest", "MacroNestedUnion");
+    let dummy = macro_nested.fields().next().expect("dummy field");
+    assert_eq!(dummy.name(), "dummy");
+    assert_eq!(
+        dummy.ty(),
+        windows_metadata::Type::value_named("SimpleTest", "MacroNestedUnion_0")
+    );
+
+    let macro_union = index.expect("SimpleTest", "MacroNestedUnion_0");
+    assert!(
+        macro_union
+            .flags()
+            .contains(windows_metadata::TypeAttributes::ExplicitLayout)
+    );
+    assert_eq!(
+        macro_union
+            .fields()
+            .map(|field| field.name())
+            .collect::<Vec<_>>(),
+        ["d1", "d2", "d3"]
+    );
+
     let anonymous = index.expect("SimpleTest", "HasAnonUnion");
     assert_eq!(
         anonymous

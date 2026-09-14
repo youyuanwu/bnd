@@ -16,6 +16,8 @@ pub mod conftypes;
 pub mod core;
 #[cfg(feature = "crypto")]
 pub mod crypto;
+#[cfg(feature = "err")]
+pub mod err;
 #[cfg(feature = "evp")]
 pub mod evp;
 #[cfg(feature = "rand")]

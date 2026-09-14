@@ -858,7 +858,17 @@ impl Type {
                 }
                 let decl = self.ty();
                 let tag_name = decl.name();
-                if self.kind() == CXType_Record && decl.file_name().is_empty() {
+                // Macro-expanded records may be source-less but still have a generated name.
+                // Unnamed compiler builtins remain opaque.
+                let has_projected_name = if is_anonymous_name(&tag_name) {
+                    parser.tag_rename.contains_key(&decl.location_id())
+                } else {
+                    parser.tag_rename.contains_key(&tag_name)
+                };
+                if self.kind() == CXType_Record
+                    && decl.file_name().is_empty()
+                    && !has_projected_name
+                {
                     return metadata::Type::Void;
                 }
                 // Anonymous spellings need the declaration-location rename key.

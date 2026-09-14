@@ -339,9 +339,9 @@ after cutover. `bnd-winmd` was not removed: it remains a standalone
 TOML-driven tool with its fixture tests, but it is no longer the production
 Linux or OpenSSL generator.
 
-`openssl/err.h` remains excluded because its inline LHASH union projects as
-a by-value `core::ffi::c_void`, which cannot derive the traits required by
-generated Rust.
+`openssl/err.h` is included in production. Its macro-expanded named nested
+LHASH union receives a generated flat name, and source-less record projection
+retains that name so the enclosing field has the correct by-value union type.
 
 ## Upstream References
 

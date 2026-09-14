@@ -41,6 +41,11 @@ mod tests {
     fn generated_record_layouts_match_c() {
         assert_eq!(std::mem::size_of::<Value>(), 4);
         assert_eq!(std::mem::size_of::<NetAddr>(), 20);
+        assert_eq!(std::mem::size_of::<MacroNestedUnion_0>(), 8);
+        assert_eq!(std::mem::align_of::<MacroNestedUnion_0>(), 8);
+        assert_eq!(std::mem::size_of::<MacroNestedUnion>(), 8);
+        assert_eq!(std::mem::align_of::<MacroNestedUnion>(), 8);
+        assert_eq!(std::mem::offset_of!(MacroNestedUnion, dummy), 0);
         assert_eq!(std::mem::size_of::<HasAnonUnion>(), 12);
         assert_eq!(std::mem::size_of::<WithBitfield>(), 16);
         assert_eq!(std::mem::align_of::<WithBitfield>(), 8);

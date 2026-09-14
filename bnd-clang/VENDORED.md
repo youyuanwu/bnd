@@ -37,6 +37,9 @@ fork remains easy to compare with upstream.
 - Compiler `va_list` records and typedef chains are projected as opaque
   pointers, matching their decayed C parameter ABI without exposing
   compiler-private record layouts.
+- Macro-expanded records without a source-file cursor retain an assigned
+  generated name, allowing named nested records to remain concrete while
+  unnamed compiler builtins stay opaque.
 - Deferred macro probes use C `__auto_type` or C++ `constexpr auto` so
   expression macros retain native signedness and pointer-sized typedef
   identity in either language mode.

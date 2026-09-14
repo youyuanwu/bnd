@@ -8,11 +8,10 @@
 ## Goal
 
 Validate the production generator against **real OpenSSL 3.x headers** —
-`<openssl/types.h>`, `<openssl/crypto.h>`, `<openssl/rand.h>`,
+`<openssl/types.h>`, `<openssl/crypto.h>`, `<openssl/err.h>`, `<openssl/rand.h>`,
 `<openssl/bn.h>`, `<openssl/evp.h>`, `<openssl/sha.h>`, `<openssl/bio.h>`,
-`<openssl/ssl.h>`, and `<openssl/tls1.h>`. `<openssl/err.h>` is also probed
-but remains excluded. This exercises
-the pipeline against a large, widely-used C library with:
+`<openssl/ssl.h>`, and `<openssl/tls1.h>`. This exercises the pipeline against
+a large, widely-used C library with:
 
 - **~130 opaque typedef-to-incomplete-struct** patterns (`SSL *`, `EVP_MD_CTX *`,
   `BIO *`, `BIGNUM *`, etc.) — all pointers to forward-declared structs
@@ -58,15 +57,14 @@ scaling from a small single-library API to a large two-library ecosystem.
 ### Scope Decision: Subset vs Full
 
 OpenSSL has 133 headers and ~5800 functions. Production does not attempt full
-coverage. It targets nine root headers that exercise the interesting patterns
-while remaining testable; `err.h` remains excluded due to the LHASH inline
-union:
+coverage. It targets ten root headers that exercise the interesting patterns
+while remaining testable:
 
 | Header group | Library | Key pattern exercised |
 |---|---|---|
 | `openssl/types.h` | — | 120 opaque typedefs (no functions) |
 | `openssl/crypto.h` | `crypto` | Version query, memory functions |
-| `openssl/err.h` | `crypto` | ~~Skipped (LHASH macro issue)~~ |
+| `openssl/err.h` | `crypto` | Error queue APIs and a macro-defined named nested union |
 | `openssl/rand.h` | `crypto` | Random bytes, simple int-returning API |
 | `openssl/bn.h` | `crypto` | Opaque BIGNUM pointers, alloc/free |
 | `openssl/evp.h` | `crypto` | Digest + cipher via opaque contexts, `const EVP_MD *` returns |
@@ -92,7 +90,7 @@ all active headers -> RDL by defining header
                    -> temporary defining-header remap
                    -> bnd-openssl/src/openssl/<header-module>/
 
-crypto.h, rand.h, bn.h, evp.h, sha.h, bio.h -> libcrypto
+crypto.h, err.h, rand.h, bn.h, evp.h, sha.h, bio.h -> libcrypto
 ssl.h, tls1.h                               -> libssl
 ```
 
@@ -168,9 +166,9 @@ one GNU C11 OpenSSL translation unit
 The Linux WinMD reference is supplied at both the Clang and RDL stages so
 POSIX declarations remain external `libc` TypeRefs. The checked-in canonical
 WinMD has one flat `openssl` namespace. Defining-header ownership is used only
-to create temporary package metadata and the 17 generated Rust modules:
+to create temporary package metadata and the 18 generated Rust modules:
 `asn1`, `bio`, `bn`, `buffer`, `comp`, `conf`, `conftypes`, `core`, `crypto`,
-`evp`, `rand`, `rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`.
+`err`, `evp`, `rand`, `rsa`, `sha`, `ssl`, `tls1`, `types`, and `x509`.
 
 Passing both WinMD files through upstream `--in` resolves metadata references,
 but does not encode which Rust crate and module owns an external type. The
@@ -184,10 +182,10 @@ generated routing. The production crate checks in its Rust modules, canonical
 WinMD, and generated manifest features; its freshness test compares all three
 and repeats generation to check determinism.
 
-The production crate runs 28 runtime tests. The `openssl/err.h` probe remains
-excluded because
-`lhash_st_ERR_STRING_DATA::dummy` projects as a by-value
-`core::ffi::c_void`, which cannot derive `Clone`, `Copy`, or `Default`.
+The production crate includes native runtime and ABI tests for every default
+API area. `openssl/err.h` is active: source-less named nested records resolve
+through their generated names, so `lhash_st_ERR_STRING_DATA::dummy` references
+the emitted union instead of projecting as by-value `core::ffi::c_void`.
 
 The former direct-Clang staging crate was removed after this pipeline was
 promoted into `bnd-openssl`.
@@ -646,10 +644,10 @@ Phase 4: Err attempted → skipped  ← LHASH macro generates unresolvable types
 
 ## Known Limitations
 
-### err partition (LHASH macro)
+### Resolved production limitation: err partition (LHASH macro)
 
 `openssl/err.h` uses the `DEFINE_LHASH_OF_INTERNAL(ERR_STRING_DATA)` macro,
-which expands to a struct containing an inline anonymous union field:
+which expands to a struct containing a named nested union field:
 
 ```c
 struct lhash_st_ERR_STRING_DATA {
@@ -664,17 +662,17 @@ winmd. windows-bindgen then panics with `"type not found:
 openssl.err.lh_ERR_STRING_DATA_dummy"`. Adding `openssl/lhash.h` to the
 traverse makes it worse (introduces `lh_OPENSSL_STRING_dummy`).
 
-The production direct-Clang probe reaches the same unsupported shape through
-a different path: the inline union projects as a by-value
-`core::ffi::c_void`, which cannot derive the traits required by generated
-Rust. A future generic structural fix is still needed. For the historical
+The production direct-Clang frontend assigns a generated flat name to this
+nested union. Record type projection preserves that generated name even when
+libclang reports no source file for the macro-expanded declaration, producing
+a normal by-value union field with the native layout. For the historical
 `bnd-winmd` implementation, the possible fixes were:
 - (a) Emit inline anonymous union/struct types as standalone types, or
 - (b) Skip structs that contain unresolvable inline type references
 
-The production root-header list excludes `openssl/err.h` with an explanatory
-comment. Error-handling APIs (`ERR_get_error`, `ERR_clear_error`, etc.) remain
-unavailable until this is resolved.
+The production root-header list includes `openssl/err.h`; error-handling APIs
+such as `ERR_get_error` and `ERR_clear_error` are generated in the `err`
+module.
 
 ---
 

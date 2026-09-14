@@ -53,6 +53,19 @@ typedef struct {
     unsigned int scope_id;
 } NetAddr;
 
+// Macro-expanded named nested union. Clang reports no source file for the
+// field's union declaration even though the nested definition is emitted.
+typedef struct MacroNestedUnion MacroNestedUnion;
+#define DEFINE_NESTED_UNION(name) \
+    struct name { \
+        union name##_dummy { \
+            void *d1; \
+            unsigned long d2; \
+            int d3; \
+        } dummy; \
+    };
+DEFINE_NESTED_UNION(MacroNestedUnion)
+
 // Functions
 int create_widget(const char* name, Rect bounds, Widget* out);
 void destroy_widget(Widget* w);
