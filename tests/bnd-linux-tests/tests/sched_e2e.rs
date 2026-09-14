@@ -1,6 +1,6 @@
 //! End-to-end tests for sched bindings against real libc.
 
-use bnd_linux::libc::posix::sched;
+use bnd_linux::libc::{cpu_set::cpu_set_t, sched, struct_sched_param::sched_param};
 
 #[test]
 fn sched_constants() {
@@ -41,7 +41,7 @@ fn sched_getscheduler_self() {
 fn cpu_set_t_size() {
     // cpu_set_t should hold __CPU_SETSIZE (1024) bits = 128 bytes
     assert_eq!(
-        core::mem::size_of::<sched::cpu_set_t>(),
+        core::mem::size_of::<cpu_set_t>(),
         128,
         "cpu_set_t should be 128 bytes"
     );
@@ -50,7 +50,7 @@ fn cpu_set_t_size() {
 #[test]
 fn sched_param_size() {
     assert_eq!(
-        core::mem::size_of::<sched::sched_param>(),
+        core::mem::size_of::<sched_param>(),
         4,
         "sched_param should be 4 bytes (single i32)"
     );

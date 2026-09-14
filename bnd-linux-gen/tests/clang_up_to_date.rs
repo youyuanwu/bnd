@@ -19,14 +19,14 @@ fn collect_files_recursive(base: &Path, dir: &Path, files: &mut Vec<PathBuf>) {
 }
 
 #[test]
-fn clang_generated_sources_are_up_to_date() {
+fn generated_artifacts_are_up_to_date() {
     let workspace_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("..");
-    let checked_in = workspace_dir.join("bnd-linux-clang");
+    let checked_in = workspace_dir.join("bnd-linux");
     let temp = tempfile::tempdir().unwrap();
     let manifest = std::fs::read_to_string(checked_in.join("Cargo.toml")).unwrap();
     std::fs::write(temp.path().join("Cargo.toml"), manifest).unwrap();
 
-    bnd_linux_gen::clang::generate(temp.path());
+    bnd_linux_gen::generate(temp.path());
 
     let checked_in_src = checked_in.join("src/libc");
     let generated_src = temp.path().join("src/libc");
@@ -34,24 +34,64 @@ fn clang_generated_sources_are_up_to_date() {
     let generated_files = collect_files(&generated_src);
     assert_eq!(checked_in_files, generated_files);
 
-    for path in checked_in_files {
-        let expected = std::fs::read_to_string(checked_in_src.join(&path)).unwrap();
-        let actual = std::fs::read_to_string(generated_src.join(&path)).unwrap();
+    for path in &checked_in_files {
+        let expected = std::fs::read_to_string(checked_in_src.join(path)).unwrap();
+        let actual = std::fs::read_to_string(generated_src.join(path)).unwrap();
         assert_eq!(expected, actual, "{} is out of date", path.display());
     }
 
-    let expected = std::fs::read(checked_in.join("winmd/bnd-linux-clang.winmd"))
-        .expect("read checked-in WinMD");
-    let actual = std::fs::read(temp.path().join("winmd/bnd-linux-clang.winmd"))
-        .expect("read generated WinMD");
-    assert_eq!(expected, actual, "bnd-linux-clang.winmd is out of date");
+    let expected =
+        std::fs::read(checked_in.join("winmd/bnd-linux.winmd")).expect("read checked-in WinMD");
+    let actual =
+        std::fs::read(temp.path().join("winmd/bnd-linux.winmd")).expect("read generated WinMD");
+    assert_eq!(expected, actual, "bnd-linux.winmd is out of date");
 
     let expected =
         std::fs::read_to_string(checked_in.join("Cargo.toml")).expect("read checked-in Cargo.toml");
     let actual =
         std::fs::read_to_string(temp.path().join("Cargo.toml")).expect("read generated Cargo.toml");
+    assert_eq!(expected, actual, "bnd-linux Cargo.toml is out of date");
+
+    let first_sources: Vec<_> = generated_files
+        .iter()
+        .map(|path| {
+            (
+                path.clone(),
+                std::fs::read(generated_src.join(path)).unwrap(),
+            )
+        })
+        .collect();
+    let first_winmd = std::fs::read(temp.path().join("winmd/bnd-linux.winmd")).unwrap();
+    let first_manifest = std::fs::read(temp.path().join("Cargo.toml")).unwrap();
+
+    bnd_linux_gen::generate(temp.path());
+
     assert_eq!(
-        expected, actual,
-        "bnd-linux-clang Cargo.toml is out of date"
+        generated_files,
+        collect_files(&generated_src),
+        "a second generation changed the Linux source file list"
+    );
+    let second_sources: Vec<_> = generated_files
+        .iter()
+        .map(|path| {
+            (
+                path.clone(),
+                std::fs::read(generated_src.join(path)).unwrap(),
+            )
+        })
+        .collect();
+    assert_eq!(
+        first_sources, second_sources,
+        "a second generation changed Linux Rust sources"
+    );
+    assert_eq!(
+        first_winmd,
+        std::fs::read(temp.path().join("winmd/bnd-linux.winmd")).unwrap(),
+        "a second generation changed the canonical Linux WinMD"
+    );
+    assert_eq!(
+        first_manifest,
+        std::fs::read(temp.path().join("Cargo.toml")).unwrap(),
+        "a second generation changed the Linux Cargo.toml"
     );
 }

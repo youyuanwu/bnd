@@ -5,6 +5,11 @@ use bnd_openssl::openssl::bio;
 #[test]
 fn bio_new_free() {
     unsafe {
+        let _: unsafe extern "C" fn(
+            *mut bnd_linux::libc::file::FILE,
+            i32,
+        ) -> *mut bnd_openssl::openssl::types::BIO = bio::BIO_new_fp;
+
         let method = bio::BIO_s_mem();
         assert!(!method.is_null(), "BIO_s_mem should return non-null");
         let b = bio::BIO_new(method);

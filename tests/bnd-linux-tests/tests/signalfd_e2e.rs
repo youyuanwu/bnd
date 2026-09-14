@@ -1,4 +1,4 @@
-use bnd_linux::libc::linux::signalfd;
+use bnd_linux::libc::signalfd;
 
 #[test]
 fn signalfd_siginfo_struct_size() {

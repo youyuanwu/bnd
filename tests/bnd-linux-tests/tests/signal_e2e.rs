@@ -1,6 +1,9 @@
 //! End-to-end tests for Signal bindings against real libc.
 
-use bnd_linux::libc::posix::{pthread, signal};
+use bnd_linux::libc::{
+    sigaction as sigaction_constants, siginfo_t, signal, signum_arch, signum_generic, sigset_t,
+    stack_t,
+};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -8,43 +11,43 @@ use bnd_linux::libc::posix::{pthread, signal};
 
 #[test]
 fn sig_constants() {
-    assert_eq!(signal::SIGHUP, 1);
-    assert_eq!(signal::SIGINT, 2);
-    assert_eq!(signal::SIGQUIT, 3);
-    assert_eq!(signal::SIGILL, 4);
-    assert_eq!(signal::SIGTRAP, 5);
-    assert_eq!(signal::SIGABRT, 6);
-    assert_eq!(signal::SIGBUS, 7);
-    assert_eq!(signal::SIGFPE, 8);
-    assert_eq!(signal::SIGKILL, 9);
-    assert_eq!(signal::SIGUSR1, 10);
-    assert_eq!(signal::SIGSEGV, 11);
-    assert_eq!(signal::SIGUSR2, 12);
-    assert_eq!(signal::SIGPIPE, 13);
-    assert_eq!(signal::SIGALRM, 14);
-    assert_eq!(signal::SIGTERM, 15);
-    assert_eq!(signal::SIGCHLD, 17);
-    assert_eq!(signal::SIGCONT, 18);
-    assert_eq!(signal::SIGSTOP, 19);
-    assert_eq!(signal::SIGTSTP, 20);
+    assert_eq!(signum_generic::SIGHUP, 1);
+    assert_eq!(signum_generic::SIGINT, 2);
+    assert_eq!(signum_generic::SIGQUIT, 3);
+    assert_eq!(signum_generic::SIGILL, 4);
+    assert_eq!(signum_generic::SIGTRAP, 5);
+    assert_eq!(signum_generic::SIGABRT, 6);
+    assert_eq!(signum_arch::SIGBUS, 7);
+    assert_eq!(signum_generic::SIGFPE, 8);
+    assert_eq!(signum_generic::SIGKILL, 9);
+    assert_eq!(signum_arch::SIGUSR1, 10);
+    assert_eq!(signum_generic::SIGSEGV, 11);
+    assert_eq!(signum_arch::SIGUSR2, 12);
+    assert_eq!(signum_generic::SIGPIPE, 13);
+    assert_eq!(signum_generic::SIGALRM, 14);
+    assert_eq!(signum_generic::SIGTERM, 15);
+    assert_eq!(signum_arch::SIGCHLD, 17);
+    assert_eq!(signum_arch::SIGCONT, 18);
+    assert_eq!(signum_arch::SIGSTOP, 19);
+    assert_eq!(signum_arch::SIGTSTP, 20);
 }
 
 #[test]
 fn sa_flag_constants() {
-    assert_eq!(signal::SA_NOCLDSTOP, 1);
-    assert_eq!(signal::SA_NOCLDWAIT, 2);
-    assert_eq!(signal::SA_SIGINFO, 4);
-    assert_eq!(signal::SA_ONSTACK, 0x08000000);
-    assert_eq!(signal::SA_RESTART, 0x10000000);
-    assert_ne!(signal::SA_NODEFER, 0);
-    assert_ne!(signal::SA_RESETHAND, 0);
+    assert_eq!(sigaction_constants::SA_NOCLDSTOP, 1);
+    assert_eq!(sigaction_constants::SA_NOCLDWAIT, 2);
+    assert_eq!(sigaction_constants::SA_SIGINFO, 4);
+    assert_eq!(sigaction_constants::SA_ONSTACK, 0x08000000);
+    assert_eq!(sigaction_constants::SA_RESTART, 0x10000000);
+    assert_ne!(sigaction_constants::SA_NODEFER, 0);
+    assert_ne!(sigaction_constants::SA_RESETHAND, 0);
 }
 
 #[test]
 fn sig_block_constants() {
-    assert_eq!(signal::SIG_BLOCK, 0);
-    assert_eq!(signal::SIG_UNBLOCK, 1);
-    assert_eq!(signal::SIG_SETMASK, 2);
+    assert_eq!(sigaction_constants::SIG_BLOCK, 0);
+    assert_eq!(sigaction_constants::SIG_UNBLOCK, 1);
+    assert_eq!(sigaction_constants::SIG_SETMASK, 2);
 }
 
 // ---------------------------------------------------------------------------
@@ -65,7 +68,7 @@ fn sigaction_struct_size() {
 fn sigset_struct_size() {
     // __sigset_t is 128 bytes (1024 bits / 8)
     assert_eq!(
-        std::mem::size_of::<pthread::__sigset_t>(),
+        std::mem::size_of::<sigset_t::sigset_t>(),
         128,
         "__sigset_t should be 128 bytes"
     );
@@ -75,7 +78,7 @@ fn sigset_struct_size() {
 fn siginfo_struct_size() {
     // siginfo_t is 128 bytes on x86-64 Linux
     assert_eq!(
-        std::mem::size_of::<signal::siginfo_t>(),
+        std::mem::size_of::<siginfo_t::siginfo_t>(),
         128,
         "siginfo_t should be 128 bytes"
     );
@@ -85,7 +88,7 @@ fn siginfo_struct_size() {
 fn stack_t_struct_size() {
     // stack_t is 24 bytes on x86-64 (void*, int, size_t with padding)
     assert_eq!(
-        std::mem::size_of::<signal::stack_t>(),
+        std::mem::size_of::<stack_t::stack_t>(),
         24,
         "stack_t should be 24 bytes"
     );
@@ -112,33 +115,33 @@ fn sighandler_type_is_option_fn_pointer() {
 
 #[test]
 fn sigemptyset_and_sigaddset() {
-    let mut set = pthread::__sigset_t::default();
+    let mut set = sigset_t::sigset_t::default();
     let rc = unsafe { signal::sigemptyset(&mut set) };
     assert_eq!(rc, 0, "sigemptyset should succeed");
 
-    let rc = unsafe { signal::sigaddset(&mut set, signal::SIGUSR1) };
+    let rc = unsafe { signal::sigaddset(&mut set, signum_arch::SIGUSR1) };
     assert_eq!(rc, 0, "sigaddset should succeed");
 
-    let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGUSR1) };
+    let ismember = unsafe { signal::sigismember(&set as *const _, signum_arch::SIGUSR1) };
     assert_eq!(ismember, 1, "SIGUSR1 should be in the set");
 
-    let not_member = unsafe { signal::sigismember(&set as *const _, signal::SIGUSR2) };
+    let not_member = unsafe { signal::sigismember(&set as *const _, signum_arch::SIGUSR2) };
     assert_eq!(not_member, 0, "SIGUSR2 should not be in the set");
 }
 
 #[test]
 fn sigfillset_and_sigdelset() {
-    let mut set = pthread::__sigset_t::default();
+    let mut set = sigset_t::sigset_t::default();
     let rc = unsafe { signal::sigfillset(&mut set) };
     assert_eq!(rc, 0, "sigfillset should succeed");
 
-    let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGINT) };
+    let ismember = unsafe { signal::sigismember(&set as *const _, signum_generic::SIGINT) };
     assert_eq!(ismember, 1, "SIGINT should be in a full set");
 
-    let rc = unsafe { signal::sigdelset(&mut set, signal::SIGINT) };
+    let rc = unsafe { signal::sigdelset(&mut set, signum_generic::SIGINT) };
     assert_eq!(rc, 0, "sigdelset should succeed");
 
-    let ismember = unsafe { signal::sigismember(&set as *const _, signal::SIGINT) };
+    let ismember = unsafe { signal::sigismember(&set as *const _, signum_generic::SIGINT) };
     assert_eq!(ismember, 0, "SIGINT should no longer be in the set");
 }
 
@@ -157,14 +160,14 @@ fn raise_and_signal_handler() {
     }
 
     // Install handler for SIGUSR1
-    let prev = unsafe { signal::signal(signal::SIGUSR1, Some(handler)) };
+    let prev = unsafe { signal::signal(signum_arch::SIGUSR1, Some(handler)) };
     assert!(
         prev.is_some() || prev.is_none(),
         "signal() should return previous handler"
     );
 
     // Raise SIGUSR1
-    let rc = unsafe { signal::raise(signal::SIGUSR1) };
+    let rc = unsafe { signal::raise(signum_arch::SIGUSR1) };
     assert_eq!(rc, 0, "raise should succeed");
 
     assert!(
@@ -173,7 +176,7 @@ fn raise_and_signal_handler() {
     );
 
     // Restore default handler
-    unsafe { signal::signal(signal::SIGUSR1, None) };
+    unsafe { signal::signal(signum_arch::SIGUSR1, None) };
 }
 
 // ---------------------------------------------------------------------------
@@ -193,23 +196,24 @@ fn sigaction_install_handler() {
 
     let mut sa = signal::sigaction::default();
     sa.__sigaction_handler.sa_handler = Some(handler);
-    sa.sa_flags = signal::SA_RESTART;
+    sa.sa_flags = sigaction_constants::SA_RESTART;
 
     // Empty the mask
     unsafe {
         signal::sigemptyset(&mut sa.sa_mask);
     }
 
-    let rc = unsafe { signal::sigaction(signal::SIGUSR2, &sa as *const _, core::ptr::null_mut()) };
+    let rc =
+        unsafe { signal::sigaction(signum_arch::SIGUSR2, &sa as *const _, core::ptr::null_mut()) };
     assert_eq!(rc, 0, "sigaction should succeed");
 
     // Raise SIGUSR2
-    let rc = unsafe { signal::raise(signal::SIGUSR2) };
+    let rc = unsafe { signal::raise(signum_arch::SIGUSR2) };
     assert_eq!(rc, 0, "raise should succeed");
 
     assert_eq!(
         RECEIVED_SIG.load(Ordering::SeqCst),
-        signal::SIGUSR2,
+        signum_arch::SIGUSR2,
         "handler should have received SIGUSR2"
     );
 
@@ -218,7 +222,7 @@ fn sigaction_install_handler() {
     unsafe {
         signal::sigemptyset(&mut default_sa.sa_mask);
         signal::sigaction(
-            signal::SIGUSR2,
+            signum_arch::SIGUSR2,
             &default_sa as *const _,
             core::ptr::null_mut(),
         );
@@ -231,28 +235,33 @@ fn sigaction_install_handler() {
 
 #[test]
 fn sigprocmask_block_and_pending() {
-    let mut block_set = pthread::__sigset_t::default();
+    let mut block_set = sigset_t::sigset_t::default();
     unsafe { signal::sigemptyset(&mut block_set) };
-    unsafe { signal::sigaddset(&mut block_set, signal::SIGUSR1) };
+    unsafe { signal::sigaddset(&mut block_set, signum_arch::SIGUSR1) };
 
     // Save old mask and block SIGUSR1
-    let mut old_set = pthread::__sigset_t::default();
-    let rc =
-        unsafe { signal::sigprocmask(signal::SIG_BLOCK, &block_set as *const _, &mut old_set) };
+    let mut old_set = sigset_t::sigset_t::default();
+    let rc = unsafe {
+        signal::sigprocmask(
+            sigaction_constants::SIG_BLOCK,
+            &block_set as *const _,
+            &mut old_set,
+        )
+    };
     assert_eq!(rc, 0, "sigprocmask SIG_BLOCK should succeed");
 
     // Check pending set — SIGUSR1 should NOT be pending yet (not raised)
-    let mut pending = pthread::__sigset_t::default();
+    let mut pending = sigset_t::sigset_t::default();
     let rc = unsafe { signal::sigpending(&mut pending) };
     assert_eq!(rc, 0, "sigpending should succeed");
 
-    let is_pending = unsafe { signal::sigismember(&pending as *const _, signal::SIGUSR1) };
+    let is_pending = unsafe { signal::sigismember(&pending as *const _, signum_arch::SIGUSR1) };
     assert_eq!(is_pending, 0, "SIGUSR1 should not be pending before raise");
 
     // Restore old mask
     let rc = unsafe {
         signal::sigprocmask(
-            signal::SIG_SETMASK,
+            sigaction_constants::SIG_SETMASK,
             &old_set as *const _,
             core::ptr::null_mut(),
         )

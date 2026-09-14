@@ -1,4 +1,4 @@
-use bnd_linux::libc::linux::sendfile;
+use bnd_linux::libc::sendfile;
 
 #[test]
 fn sendfile_between_fds() {
@@ -24,7 +24,7 @@ fn sendfile_between_fds() {
 
         // sendfile from file to pipe
         let mut offset: i64 = 0;
-        let n = sendfile::sendfile(pipefd[1], fd_in, &mut offset as *mut _, data.len() as u64);
+        let n = sendfile::sendfile(pipefd[1], fd_in, &mut offset as *mut _, data.len());
         assert_eq!(n, data.len() as i64, "sendfile returned {n}");
 
         // Read from pipe and verify

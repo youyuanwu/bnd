@@ -1,39 +1,39 @@
 //! End-to-end tests for Mmap bindings against real libc.
 
-use bnd_linux::libc::posix::mmap;
+use bnd_linux::libc::{mman, mman_linux};
 
 #[test]
 fn prot_constants() {
-    assert_eq!(mmap::PROT_NONE, 0);
-    assert_eq!(mmap::PROT_READ, 1);
-    assert_eq!(mmap::PROT_WRITE, 2);
-    assert_eq!(mmap::PROT_EXEC, 4);
+    assert_eq!(mman_linux::PROT_NONE, 0);
+    assert_eq!(mman_linux::PROT_READ, 1);
+    assert_eq!(mman_linux::PROT_WRITE, 2);
+    assert_eq!(mman_linux::PROT_EXEC, 4);
 }
 
 #[test]
 fn map_constants() {
-    assert_eq!(mmap::MAP_SHARED, 1);
-    assert_eq!(mmap::MAP_PRIVATE, 2);
-    assert_eq!(mmap::MAP_FIXED, 0x10);
-    assert_eq!(mmap::MAP_ANONYMOUS, 0x20);
+    assert_eq!(mman_linux::MAP_SHARED, 1);
+    assert_eq!(mman_linux::MAP_PRIVATE, 2);
+    assert_eq!(mman_linux::MAP_FIXED, 0x10);
+    assert_eq!(mman_linux::MAP_ANONYMOUS, 0x20);
 }
 
 #[test]
 fn msync_constants() {
-    assert_eq!(mmap::MS_ASYNC, 1);
-    assert_eq!(mmap::MS_INVALIDATE, 2);
-    assert_eq!(mmap::MS_SYNC, 4);
+    assert_eq!(mman_linux::MS_ASYNC, 1);
+    assert_eq!(mman_linux::MS_INVALIDATE, 2);
+    assert_eq!(mman_linux::MS_SYNC, 4);
 }
 
 #[test]
 fn mmap_anonymous_roundtrip() {
     unsafe {
-        let size: u64 = 4096;
-        let ptr = mmap::mmap(
+        let size: usize = 4096;
+        let ptr = mman::mmap(
             core::ptr::null_mut(),
             size,
-            mmap::PROT_READ | mmap::PROT_WRITE,
-            mmap::MAP_PRIVATE | mmap::MAP_ANONYMOUS,
+            mman_linux::PROT_READ | mman_linux::PROT_WRITE,
+            mman_linux::MAP_PRIVATE | mman_linux::MAP_ANONYMOUS,
             -1,
             0,
         );
@@ -43,13 +43,13 @@ fn mmap_anonymous_roundtrip() {
             "mmap should not return MAP_FAILED"
         );
 
-        let slice = std::slice::from_raw_parts_mut(ptr as *mut u8, size as usize);
+        let slice = std::slice::from_raw_parts_mut(ptr as *mut u8, size);
         slice[0] = 0xAB;
         slice[4095] = 0xCD;
         assert_eq!(slice[0], 0xAB);
         assert_eq!(slice[4095], 0xCD);
 
-        let ret = mmap::munmap(ptr, size);
+        let ret = mman::munmap(ptr, size);
         assert_eq!(ret, 0, "munmap should succeed");
     }
 }
@@ -57,23 +57,23 @@ fn mmap_anonymous_roundtrip() {
 #[test]
 fn mprotect_guard_page() {
     unsafe {
-        let size: u64 = 4096;
-        let ptr = mmap::mmap(
+        let size: usize = 4096;
+        let ptr = mman::mmap(
             core::ptr::null_mut(),
             size,
-            mmap::PROT_READ | mmap::PROT_WRITE,
-            mmap::MAP_PRIVATE | mmap::MAP_ANONYMOUS,
+            mman_linux::PROT_READ | mman_linux::PROT_WRITE,
+            mman_linux::MAP_PRIVATE | mman_linux::MAP_ANONYMOUS,
             -1,
             0,
         );
         assert_ne!(ptr as usize, usize::MAX);
 
-        let ret = mmap::mprotect(ptr, size, mmap::PROT_READ);
+        let ret = mman::mprotect(ptr, size, mman_linux::PROT_READ);
         assert_eq!(ret, 0, "mprotect to PROT_READ should succeed");
 
-        let ret = mmap::mprotect(ptr, size, mmap::PROT_READ | mmap::PROT_WRITE);
+        let ret = mman::mprotect(ptr, size, mman_linux::PROT_READ | mman_linux::PROT_WRITE);
         assert_eq!(ret, 0, "mprotect to PROT_READ|PROT_WRITE should succeed");
 
-        mmap::munmap(ptr, size);
+        mman::munmap(ptr, size);
     }
 }

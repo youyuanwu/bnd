@@ -1,10 +1,10 @@
 # bnd-linux: System Header Testing
 
-> **Note**: This crate was originally split into `bnd-posix` and `bnd-linux`.
-> They have been merged into a single `bnd-linux` crate with `libc::posix::*`
-> and `libc::linux::*` sub-modules. Historical references to `bnd-posix` below
-> reflect the original implementation sequence. See
-> [BndLinux.md](../BndLinux.md) for the current design.
+> **Historical test-development record:** This document describes the
+> earlier `bnd-winmd` implementation sequence, including the former
+> `bnd-posix` split and nested `libc::posix`/`libc::linux` modules. It is not
+> the current production architecture or regeneration guide. See
+> [BndLinux.md](../BndLinux.md) for the direct-Clang design.
 
 Design notes for the POSIX and Linux API families tested through the `bnd-linux`
 crate. Each section documents partition layout, expected challenges, API surface,

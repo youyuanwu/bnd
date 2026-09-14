@@ -1,5 +1,10 @@
 # Design: Pure-Rust C Header → WinMD Pipeline
 
+> **Scope:** This document describes the standalone `bnd-winmd` library,
+> CLI, and fixture architecture. `bnd-winmd` remains supported and its
+> fixture tests remain active, but production `bnd-linux` and `bnd-openssl`
+> now use the direct `bnd-clang` → RDL/WinMD → `bnd-bindgen` pipeline.
+
 ## Context
 
 [CSharpGenerator.md](CSharpGenerator.md) describes a pipeline that reuses
@@ -51,7 +56,7 @@ C/C++ Headers
 
 ## Implementation Status
 
-> **Status: v2 implemented and tested.** Clippy clean.
+> **Status: standalone tool implemented and tested.** Clippy clean.
 
 ### What Is Implemented
 
@@ -79,9 +84,9 @@ C/C++ Headers
 | PtrConst workaround | Always emit `PtrMut` — `ELEMENT_TYPE_CMOD_REQD` mid-chain in pointer blobs panics windows-bindgen. Mutability preserved via `ParamAttributes::Out` on mutable pointer parameters. |
 | Warn-and-skip error handling | Non-fatal failures log `tracing::warn!` and skip the declaration |
 | Round-trip integration tests | Multiple fixture files |
-| E2E integration tests | Multiple crates (zlib against real `libz.so`, 16 POSIX API families via bnd-linux, OpenSSL libssl+libcrypto via bnd-openssl) |
-| Package-mode code generation | `bnd-linux-gen` and `bnd-openssl-gen` drive bnd-winmd + `windows-bindgen --package` to generate checked-in source trees with feature-gated sub-modules |
-| Cross-WinMD type imports | `[[type_import]]` in TOML pre-seeds TypeRegistry from external winmd; `--reference` flag tells windows-bindgen to emit external crate paths. See [CrossWinmdReferences.md](CrossWinmdReferences.md) |
+| E2E integration tests | Standalone simple, multi, and zlib fixture crates |
+| Package-mode code generation | Supported by the tool; no longer the production Linux/OpenSSL path |
+| Cross-WinMD type imports | `[[type_import]]` in TOML pre-seeds TypeRegistry from external WinMD; retained for standalone users and historical fixtures |
 | Pre-emit type-reference validation | `validate_type_references()` walks all CType trees before emit, catches `Named { resolved: None }` types missing from TypeRegistry. Reports actionable errors with type name, context (function param / struct field), and partition. |
 
 ### What Is NOT Yet Implemented
@@ -98,100 +103,34 @@ C/C++ Headers
 
 ## File Structure
 
-```
+```text
 bnd-winmd/
 ├── Cargo.toml
 ├── src/
-│   ├── lib.rs               # Public API + module declarations
+│   ├── lib.rs               # Public API and orchestration
 │   ├── config.rs            # TOML config deserialization
-│   ├── model.rs             # Intermediate types: StructDef, CType, TypeRegistry
-│   ├── extract.rs           # clang Entity/Type → model
-│   └── emit.rs              # model → windows-metadata writer calls
+│   ├── model.rs             # Intermediate C/metadata model
+│   ├── extract.rs           # clang Entity/Type -> model
+│   └── emit.rs              # model -> windows-metadata writer
 └── tests/
-    ├── roundtrip_simple.rs       # simple.h fixture
-    ├── roundtrip_multi.rs        # multi-partition fixture
-    ├── roundtrip_posixfile.rs     # bnd-linux fixture
-    ├── roundtrip_zlib.rs          # zlib system header
-    ├── roundtrip_openssl.rs       # openssl multi-library + cross-winmd refs
-    └── roundtrip_validation.rs    # pre-emit type-reference validation
+    ├── roundtrip_simple.rs
+    ├── roundtrip_multi.rs
+    ├── roundtrip_posixfile.rs
+    ├── roundtrip_zlib.rs
+    ├── roundtrip_openssl.rs
+    └── roundtrip_validation.rs
 
 tests/
 ├── fixtures/
-│   ├── simple/ (simple.h, simple.toml)
-│   ├── multi/ (graphics.h, audio.h, multi.toml)
-│   ├── unresolved/ (unresolved.h, unresolved_dep.h, unresolved.toml)
-│   └── zlib/ (zlib.toml — references system headers)
-├── simple-impl/              # Native C lib for e2e-simple
-├── e2e-simple/               # E2E tests (single partition + unions)
-├── e2e-multi/                # E2E tests (multi-partition)
-└── e2e-zlib/                 # E2E tests (system header, real libz.so)
-
-bnd-linux/
-├── Cargo.toml                # Feature-gated sub-modules
-├── src/
-│   ├── lib.rs                # Hand-written module root
-│   └── libc/                 # Auto-generated namespace modules
-│       ├── mod.rs
-│       ├── posix/            # POSIX API families
-│       │   ├── mod.rs
-│       │   ├── dirent/mod.rs
-│       │   ├── dl/mod.rs
-│       │   ├── errno/mod.rs
-│       │   ├── fcntl/mod.rs
-│       │   ├── inet/mod.rs
-│       │   ├── mmap/mod.rs
-│       │   ├── netdb/mod.rs
-│       │   ├── pthread/mod.rs
-│       │   ├── sched/mod.rs
-│       │   ├── signal/mod.rs
-│       │   ├── socket/mod.rs
-│       │   ├── stat/mod.rs
-│       │   ├── stdio/mod.rs
-│       │   ├── time/mod.rs
-│       │   ├── types/mod.rs
-│       │   └── unistd/mod.rs
-│       └── linux/            # Linux-specific API families
-│           └── ...
-└── tests/                    # E2E tests (one per partition)
-    ├── posixfile_e2e.rs      # Fcntl/Unistd
-    ├── stat_e2e.rs           # Stat
-    ├── mmap_e2e.rs           # Mmap
-    ├── dirent_e2e.rs         # Dirent
-    ├── dl_e2e.rs             # Dlfcn
-    ├── errno_e2e.rs          # Errno
-    ├── inet_e2e.rs           # Inet
-    ├── netdb_e2e.rs          # Netdb
-    ├── pthread_e2e.rs        # Pthread
-    ├── sched_e2e.rs          # Sched
-    ├── signal_e2e.rs         # Signal
-    ├── socket_e2e.rs         # Socket
-    ├── stdio_e2e.rs          # Stdio
-    └── time_e2e.rs           # Time
-
-bnd-openssl/
-├── Cargo.toml                # Feature-gated sub-modules, depends on bnd-linux
-├── build.rs                  # cargo:rustc-link-lib=crypto / ssl
-├── src/
-│   ├── lib.rs                # Hand-written module root
-│   └── openssl/              # Auto-generated namespace modules (8 partitions)
-│       ├── mod.rs
-│       ├── bio/mod.rs
-│       ├── bn/mod.rs
-│       ├── crypto/mod.rs
-│       ├── evp/mod.rs
-│       ├── rand/mod.rs
-│       ├── sha/mod.rs
-│       ├── ssl/mod.rs
-│       └── types/mod.rs
-└── tests/                    # E2E tests (one per partition)
-    ├── bio_e2e.rs
-    ├── bn_e2e.rs
-    ├── crypto_e2e.rs
-    ├── evp_e2e.rs
-    ├── rand_e2e.rs
-    ├── sha_e2e.rs
-    └── ssl_e2e.rs
+├── simple-impl/
+├── e2e-simple/
+├── e2e-multi/
+└── e2e-zlib/
 ```
+
+The Linux and OpenSSL product layouts are documented in
+[BndLinux.md](BndLinux.md) and
+[systesting/Openssl.md](systesting/Openssl.md).
 
 ---
 
@@ -292,8 +231,8 @@ Generated FFI bindings linked against real native libraries.
 | `e2e-simple` | Single partition, simple.h, widgets + unions + anonymous nested types |
 | `e2e-multi` | Multi-partition, cross-namespace type references |
 | `e2e-zlib` | System header, real libz.so, compress/uncompress roundtrip |
-| `bnd-linux` | Real libc: 16 POSIX API families (file I/O, mmap, dirent, stat, sockets, inet, netdb, signal, dl, errno, sched, time, pthread, stdio, types, unistd) |
-| `bnd-openssl` | Real libssl + libcrypto: 8 partitions, opaque typedefs, multi-library, cross-WinMD refs to bnd-linux |
+| Historical `bnd-linux` integration | Former production consumer before the direct-Clang cutover |
+| Historical `bnd-openssl` integration | Former production consumer before the direct-Clang cutover |
 
 ### Doc Tests + Freshness Test
 
@@ -344,9 +283,10 @@ local codegen for the imported namespace. This avoids `AssemblyRef` — the
 merged reader resolves types by `(namespace, name)` across all loaded
 winmds.
 
-First consumer: `bnd-openssl` imports POSIX types (`tm`, `_IO_FILE`,
-`pthread_once_t`, `off_t`, etc.) from `bnd-linux.winmd` instead of
-re-extracting glibc headers. See [CrossWinmdReferences.md](CrossWinmdReferences.md).
+The first production consumer was the former `bnd-openssl` generator. The
+current direct-Clang production design instead references the flat canonical
+Linux WinMD at the Clang and RDL stages and uses exact Rust ownership routes.
+See [CrossWinmdReferences.md](features/CrossWinmdReferences.md).
 
 ### `windows-bindgen` Compatibility Conventions
 
@@ -375,8 +315,8 @@ All of the above are implemented and verified by tests.
 | Emission (model → winmd) | ~430 | `emit.rs` |
 | Roundtrip tests | ~1,340 | 5 files |
 | E2E test crates (simple/multi/zlib) | ~530 | 3 crates |
-| bnd-linux E2E tests | ~2,000 | 14 files |
-| bnd-openssl E2E tests | ~370 | 7 files |
+| Historical bnd-linux integration tests | ~2,000 | 14 files |
+| Historical bnd-openssl integration tests | ~370 | 7 files |
 | **Total (bnd-winmd library)** | **~1,855** | |
 | **Total (library + all tests)** | **~6,095** | |
 

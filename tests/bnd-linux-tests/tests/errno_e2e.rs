@@ -1,19 +1,19 @@
 //! End-to-end tests for errno bindings against real libc.
 
-use bnd_linux::libc::posix::errno;
+use bnd_linux::libc::{errno, errno_base};
 
 #[test]
 fn basic_errno_constants() {
-    assert_eq!(errno::EPERM, 1);
-    assert_eq!(errno::ENOENT, 2);
-    assert_eq!(errno::ESRCH, 3);
-    assert_eq!(errno::EINTR, 4);
-    assert_eq!(errno::EIO, 5);
-    assert_eq!(errno::EBADF, 9);
-    assert_eq!(errno::ENOMEM, 12);
-    assert_eq!(errno::EACCES, 13);
-    assert_eq!(errno::EEXIST, 17);
-    assert_eq!(errno::EINVAL, 22);
+    assert_eq!(errno_base::EPERM, 1);
+    assert_eq!(errno_base::ENOENT, 2);
+    assert_eq!(errno_base::ESRCH, 3);
+    assert_eq!(errno_base::EINTR, 4);
+    assert_eq!(errno_base::EIO, 5);
+    assert_eq!(errno_base::EBADF, 9);
+    assert_eq!(errno_base::ENOMEM, 12);
+    assert_eq!(errno_base::EACCES, 13);
+    assert_eq!(errno_base::EEXIST, 17);
+    assert_eq!(errno_base::EINVAL, 22);
 }
 
 #[test]
@@ -49,8 +49,8 @@ fn errno_set_and_read() {
         assert_eq!(*ptr, 0);
 
         // Set to EINVAL and read back
-        *ptr = errno::EINVAL;
-        assert_eq!(*ptr, errno::EINVAL);
+        *ptr = errno_base::EINVAL;
+        assert_eq!(*ptr, errno_base::EINVAL);
 
         // Reset
         *ptr = 0;
@@ -66,13 +66,13 @@ fn errno_reflects_failed_syscall() {
 
         // Use libc open via our unistd bindings to trigger ENOENT
         let path = c"/nonexistent/path/that/does/not/exist";
-        let fd = bnd_linux::libc::posix::unistd::access(path.as_ptr(), 0);
+        let fd = bnd_linux::libc::unistd::access(path.as_ptr(), 0);
         assert_eq!(fd, -1, "access() should fail for nonexistent path");
 
         let err = *errno::__errno_location();
         assert_eq!(
             err,
-            errno::ENOENT,
+            errno_base::ENOENT,
             "errno should be ENOENT after failed access()"
         );
     }

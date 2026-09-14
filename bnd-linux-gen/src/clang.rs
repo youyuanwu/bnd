@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
-/// Generate the staged bnd-linux crate through bnd-clang.
+/// Generate the bnd-linux crate through bnd-clang.
 ///
 /// The canonical metadata uses one flat `libc` namespace partitioned into RDL
 /// files by defining header. A temporary remapped WinMD supplies the
@@ -10,18 +10,17 @@ pub fn generate(output_dir: &Path) {
     let temp = tempfile::tempdir().expect("failed to create temporary metadata directory");
     let generated_winmd = generate_metadata(temp.path());
     let winmd_dir = output_dir.join("winmd");
-    std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-linux-clang WinMD directory");
-    let winmd = winmd_dir.join("bnd-linux-clang.winmd");
-    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-linux-clang WinMD");
-    let remapped_winmd = temp.path().join("bnd-linux-clang.remapped.winmd");
+    std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-linux WinMD directory");
+    let winmd = winmd_dir.join("bnd-linux.winmd");
+    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-linux WinMD");
+    let remapped_winmd = temp.path().join("bnd-linux.remapped.winmd");
     remap_metadata(
         &temp.path().join("metadata"),
         &generated_winmd,
         &remapped_winmd,
     );
     let manifest_path = output_dir.join("Cargo.toml");
-    let manifest =
-        std::fs::read(&manifest_path).expect("failed to preserve bnd-linux-clang Cargo.toml");
+    let manifest = std::fs::read(&manifest_path).expect("failed to preserve bnd-linux Cargo.toml");
 
     let generation = std::panic::catch_unwind(|| {
         windows_bindgen::bindgen([
@@ -38,8 +37,7 @@ pub fn generate(output_dir: &Path) {
         ]);
     });
     if let Err(payload) = generation {
-        std::fs::write(manifest_path, manifest)
-            .expect("failed to restore bnd-linux-clang Cargo.toml");
+        std::fs::write(manifest_path, manifest).expect("failed to restore bnd-linux Cargo.toml");
         std::panic::resume_unwind(payload);
     }
 }
@@ -49,7 +47,7 @@ fn generate_metadata(output_dir: &Path) -> PathBuf {
     clear_rdl_dir(&rdl_dir);
     let winmd_dir = output_dir.join("winmd");
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-clang WinMD directory");
-    let linux_winmd = winmd_dir.join("bnd-linux-clang.winmd");
+    let linux_winmd = winmd_dir.join("bnd-linux.winmd");
 
     const HEADERS: &[&str] = &[
         "sys/types.h",

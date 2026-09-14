@@ -1,440 +1,122 @@
-# Design: Cross-WinMD Type References
+# Design: OpenSSL References to bnd-linux Types
 
-> **Status: Implemented.** All phases completed. OpenSSL bindings now
-> reference POSIX types from `bnd-linux` via cross-winmd TypeRefs.
-> 236 tests passing, clippy clean.
+> **Status: Production.** `bnd-openssl` references external POSIX types from
+> the canonical `bnd-linux` WinMD and projects them to exact
+> `bnd_linux::libc::<defining-header-module>` Rust paths.
 
 ## Problem
 
-OpenSSL headers reference POSIX system types that are also defined in
-`bnd-linux`. Today `openssl.toml` drags in glibc sub-headers
-(`bits/types/struct_tm.h`, `bits/types/struct_FILE.h`) so that those types
-exist locally inside the openssl winmd. This duplicates `struct tm`,
-`_IO_FILE`, and their transitive dependencies (`__off_t`, `_IO_lock_t`, …)
-across two crates.
+OpenSSL headers use POSIX types such as `FILE`, `tm`, `time_t`, `off_t`,
+`ssize_t`, `timeval`, and pthread typedefs. Generating local copies in
+`bnd-openssl` would create distinct Rust types for the same native ABI and
+would prevent values from moving directly between Linux and OpenSSL APIs.
 
-Duplication means:
-- **ABI mismatch risk** — the two copies are independent types in Rust;
-  passing a `bnd_linux::libc::posix::time::tm` to an `openssl::crypto` function
-  that expects its own `tm` requires a transmute.
-- **Binary bloat** — identical struct definitions emitted twice.
-- **Maintenance burden** — traverse lists for system types must be kept in
-  sync across every TOML that needs them.
+The production design keeps both metadata and Rust ownership external:
 
-The goal is to let `bnd-openssl` reference types from `bnd-linux` instead
-of redefining them.
+- `bnd-linux/winmd/bnd-linux.winmd` defines the canonical flat `libc`
+  metadata.
+- `bnd-openssl/winmd/bnd-openssl.winmd` contains external `libc` TypeRefs,
+  not local libc TypeDefs.
+- Generated OpenSSL Rust uses types from the `bnd-linux` crate.
 
----
+## Generation Pipeline
 
-## How windows-bindgen Already Supports This
-
-`windows-bindgen` has two relevant flags:
-
-### `--in` (load metadata)
-
-```
---in bnd-linux.winmd --in openssl.winmd
+```text
+bnd-linux/winmd/bnd-linux.winmd
+             | reference at Clang stage
+             | reference at RDL stage
+             v
+OpenSSL headers -> bnd-clang -> defining-header RDL
+                               -> flat openssl WinMD
+                               -> temporary package remap
+             + canonical Linux WinMD
+                               -> bnd-bindgen
+                               -> bnd-openssl/src/openssl/**
 ```
 
-All `.winmd` files passed to `--in` are merged into a single
-`Reader` — a flat `HashMap<namespace, HashMap<name, Vec<Type>>>`.
-TypeRef resolution is purely by `(namespace, name)` lookup in this merged
-map. The `AssemblyRef` table is written for ECMA-335 conformance but
-**never read** during resolution.
+The Linux WinMD is supplied to both metadata stages:
 
-This means a TypeRef in `openssl.winmd` pointing to `libc.posix.time.tm` will
-resolve successfully as long as `bnd-linux.winmd` is also passed via
-`--in`.
+1. `bnd-clang` resolves Linux definitions and leaves them externally owned.
+2. `windows-rdl` resolves the emitted external TypeRefs while compiling the
+   canonical OpenSSL WinMD.
 
-### `--reference` (suppress codegen for external types)
+Passing the Linux WinMD only to bindgen would be too late: the canonical
+OpenSSL metadata itself must already contain valid external references.
 
-```
---reference bnd_linux,full,libc
-```
+## Exact Rust Ownership Routes
 
-Format: `<crate>,<style>,<namespace-or-type>`
+WinMD identifies metadata namespace and type names, but it does not encode
+the Cargo crate or Rust module that owns an external type. The local
+`bnd-bindgen` fork therefore accepts caller-supplied external ownership
+routes.
 
-| Part | Meaning |
+`bnd-openssl-gen` owns the concrete route table:
+
+| Metadata type | Generated Rust owner |
 |---|---|
-| `bnd_linux` | Rust crate name used in path prefixes (`bnd_linux::libc::posix::time::tm`) |
-| `full` | Keep the full namespace path as module segments |
-| `libc` | Match all types under the `libc.*` namespace tree |
+| `libc.FILE` | `bnd_linux::libc::file` |
+| `libc.hostent` | `bnd_linux::libc::netdb` |
+| `libc.pthread_key_t`, `pthread_once_t`, `pthread_t` | `bnd_linux::libc::pthreadtypes` |
+| `libc.timeval` | `bnd_linux::libc::struct_timeval` |
+| `libc.tm` | `bnd_linux::libc::struct_tm` |
+| `libc.time_t` | `bnd_linux::libc::time_t` |
+| `libc.off_t`, `ssize_t` | `bnd_linux::libc::types` |
 
-**Styles:**
+Routes are exact because the flat canonical `libc` namespace does not carry
+Rust defining-header ownership. The generator derives the set of external
+types actually used by OpenSSL, rejects missing routes, and marks transitive
+Linux metadata dependencies as external so bindgen does not generate a
+local `libc` tree.
 
-| Style | Path for `libc.posix.time.tm` |
-|---|---|
-| `flat` | `bnd_linux::tm` |
-| `full` | `bnd_linux::libc::posix::time::tm` |
-| `skip-root` | `bnd_linux::posix::time::tm` |
+The routing API is generic. Linux- and OpenSSL-specific names remain in
+`bnd-openssl-gen`, not in the vendored bindgen implementation.
 
-**Effect:** Types matching the reference pattern are used for dependency
-resolution (understanding signatures, struct fields) but are **never
-emitted** in the output. The generated code emits `use bnd_linux::...`
-paths instead of local type definitions.
+## Cargo Features
 
-### Combined usage
+`bnd-openssl` depends on `bnd-linux` with default features disabled and only
+the defining-header features required by routed types:
 
-```
---in bnd-linux.winmd       # metadata for resolution
---in openssl.winmd         # metadata to generate
---filter openssl           # only emit openssl.* types
---reference bnd_linux,full,libc  # libc.* types come from bnd_linux crate
-```
+- `file`
+- `netdb`
+- `pthreadtypes`
+- `struct_timeval`
+- `struct_tm`
+- `time_t`
+- `types`
 
-windows-bindgen's `TypeMap::filter()` collects all types matching
-`--filter`, walks their dependencies, and:
-- Adds dependencies to codegen if they're not covered by a `--reference`
-- Skips dependencies covered by a `--reference` — the generated code uses
-  the external crate path
+Generated OpenSSL feature dependencies remain separate and are derived from
+the temporary package metadata.
 
----
+## Validation
 
-## What Needs to Change
+The OpenSSL freshness test verifies that:
 
-### 1. bnd-winmd: emit TypeRefs for external types (no changes needed)
+- No local `src/libc` tree is generated.
+- Generated Rust contains every expected exact external route.
+- Rust sources, the canonical OpenSSL WinMD, and generated Cargo features
+  match checked-in artifacts.
+- A second generation is identical.
 
-bnd-winmd already emits TypeRef rows for named types via
-`ctype_to_wintype()`. When openssl's `OPENSSL_gmtime` takes a
-`struct tm *` parameter:
+Metadata assertions also verify that canonical OpenSSL metadata contains no
+local `libc` definitions and that native functions retain the correct
+`crypto` or `ssl` library.
 
-- extract.rs: clang resolves `struct tm` → `CType::Named { name: "tm", .. }`
-- emit.rs: `ctype_to_wintype` checks `TypeRegistry::contains("tm")`
-  - If `"tm"` is in the registry → emit `Type::named(namespace, "tm")`
-  - If not → fall back to resolved canonical type
+## Regeneration Order
 
-The issue is that `struct tm` is only in the registry if the types
-partition that traverses `bits/types/struct_tm.h` is part of *this* winmd.
-When we remove the glibc traverse headers from openssl.toml, `tm` won't be
-in the local registry and the emit will fall back to a primitive, losing
-the struct information.
+The Linux canonical WinMD must exist before OpenSSL generation:
 
-**Fix:** Pre-seed the `TypeRegistry` with types from the referenced winmd
-via the `[[type_import]]` config. The existing `TypeImportConfig` stub in
-config.rs (which has `assembly`/`version`/`types` fields) is replaced with
-a simpler struct matching the TOML schema:
-
-```toml
-[[type_import]]
-winmd = "../bnd-linux/winmd/bnd-linux.winmd"
-namespace = "libc"
+```sh
+just generate-openssl
 ```
 
-The `winmd` path is resolved relative to the TOML file's directory
-(`base_dir`), using the same logic as `resolve_header`.
+This runs `bnd-linux-gen` followed by `bnd-openssl-gen`.
 
-bnd-winmd reads the referenced winmd at extraction time, walks its TypeDef
-table, and pre-registers every type found into the `TypeRegistry` with its
-original namespace. When emit encounters `CType::Named { name: "tm" }`, it
-finds `"tm"` → `"libc.posix.time"` in the registry and emits:
+## History
 
-```
-TypeRef(namespace="libc.posix.time", name="tm")
-```
+The earlier `bnd-winmd` production path used nested
+`libc.posix.*` metadata and a namespace-wide `--reference` mapping. The
+direct-Clang cutover changed canonical Linux metadata to flat `libc` and
+made defining-header Rust ownership explicit through exact bindgen routes.
 
-No local TypeDef is emitted — just a reference row. The assembly metadata
-is valid ECMA-335: it points to a type defined in an external assembly.
-
-### 2. bnd-openssl-gen: pass both winmds + `--reference`
-
-```rust
-pub fn generate(output_dir: &Path) {
-    let gen_dir = Path::new(env!("CARGO_MANIFEST_DIR"));
-
-    // Step 1: Generate openssl.winmd
-    let winmd_dir = output_dir.join("winmd");
-    std::fs::create_dir_all(&winmd_dir).expect("create winmd dir");
-    let openssl_winmd = winmd_dir.join("bnd-openssl.winmd");
-    bnd_winmd::run(&gen_dir.join("openssl.toml"), Some(&openssl_winmd))
-        .expect("bnd-winmd failed");
-
-    // Step 2: Locate bnd-linux winmd (produced by bnd-linux-gen)
-    let linux_winmd = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../bnd-linux/winmd/bnd-linux.winmd");
-
-    // Step 3: Generate Rust with cross-references
-    windows_bindgen::bindgen([
-        "--in",
-        openssl_winmd.to_str().unwrap(),
-        "--in",
-        linux_winmd.to_str().unwrap(),
-        "--out",
-        output_dir.to_str().unwrap(),
-        "--filter",
-        "openssl",
-        "--reference",
-        "bnd_linux,full,libc",
-        "--sys",
-        "--package",
-        "--no-toml",
-    ])
-    .unwrap();
-}
-```
-
-`--filter openssl` ensures only openssl types are generated.
-`--reference bnd_linux,full,libc` tells bindgen that any `libc.*`
-type comes from the `bnd_linux` crate with `full` path style, producing
-paths like `bnd_linux::libc::posix::time::tm`. The `full` style is required
-because `bnd-linux` keeps the `libc` root module (`pub mod libc` in
-lib.rs) — `skip-root` would generate `bnd_linux::posix::time::tm` which doesn't
-compile.
-
-`--no-toml` is included because bnd-openssl already has its own
-hand-authored `Cargo.toml`.
-
-### 3. openssl.toml: remove system header traversal
-
-Before:
-```toml
-[[partition]]
-namespace = "openssl.crypto"
-library = "crypto"
-headers = ["openssl/crypto.h"]
-traverse = ["openssl/crypto.h", "bits/types/struct_tm.h", "bits/types/struct_FILE.h"]
-```
-
-After:
-```toml
-[[partition]]
-namespace = "openssl.crypto"
-library = "crypto"
-headers = ["openssl/crypto.h"]
-traverse = ["openssl/crypto.h"]
-
-[[type_import]]
-winmd = "../bnd-linux/winmd/bnd-linux.winmd"
-namespace = "libc"
-```
-
-The system types (`tm`, `_IO_FILE`, etc.) are no longer extracted locally —
-they're referenced from the bnd-linux winmd via TypeRef rows.
-
-### 4. bnd-openssl Cargo.toml: add dependency
-
-```toml
-[dependencies]
-bnd-linux = { path = "../bnd-linux" }
-windows-link.workspace = true
-```
-
-The generated code will contain `use bnd_linux::libc::posix::time::tm;` (or
-similar `super::` paths depending on `--package` mode), so the runtime
-dependency is required.
-
-Feature-gate the dependency to pull in only the needed modules:
-
-```toml
-bnd-linux = { path = "../bnd-linux", features = ["time", "stdio", "pthread", "types"] }
-```
-
-> **Note:** The initial design expected only `time` and `stdio`, but
-> generated code also references `pthread` (for `CRYPTO_ONCE`,
-> `CRYPTO_THREAD_ID`, `CRYPTO_THREAD_LOCAL`) and `types` (for `off_t`,
-> `ssize_t`).
-
----
-
-## Generated Output Example
-
-**Before (local duplication):**
-```rust
-// openssl/crypto/mod.rs
-windows_link::link!("crypto" "C" fn OPENSSL_gmtime(timer : *const i64, result : *mut tm) -> *mut tm);
-
-pub struct tm {
-    pub tm_sec: i32,
-    pub tm_min: i32,
-    // ... 9 fields duplicated from bnd-linux
-}
-```
-
-**After (cross-reference):**
-```rust
-// openssl/crypto/mod.rs
-#[cfg(feature = "types")]
-windows_link::link!("crypto" "C" fn OPENSSL_gmtime(
-    timer : *const i64,
-    result : *mut bnd_linux::libc::posix::time::tm
-) -> *mut bnd_linux::libc::posix::time::tm);
-
-// No local `struct tm` — it lives in bnd_linux::libc::posix::time
-```
-
----
-
-## Implementation Plan
-
-All phases completed. See commits on the `dev` branch.
-
-### Phase 1: TypeRegistry pre-seeding from external winmd
-
-1. ✅ **Upgrade `windows-metadata` from 0.59 to 0.60** — the reader API
-   renames `Index` → `TypeIndex` and `.all()` → `.types()`. Update the
-   workspace `Cargo.toml` and the roundtrip tests. The 0.60 API adds
-   `TypeIndex::contains()` which is useful for validation.
-
-2. ✅ **Replace `TypeImportConfig` in config.rs** — the existing stub has
-   `assembly`/`version`/`types` fields; replace with `winmd: PathBuf` +
-   `namespace: String` to match the TOML schema.
-
-3. ✅ **Add `type_import` processing to `lib.rs`** — after loading config,
-   resolve each `[[type_import]]` winmd path (relative to `base_dir`),
-   read its TypeDef table using `windows_metadata::reader`, and register
-   each type in the `TypeRegistry` with its namespace. Pre-seeding
-   happens *before* `build_type_registry` so imported types take priority.
-
-4. ✅ **Emit TypeRef for imported types** — `ctype_to_wintype()` already does
-   this when a name is in the registry. No emit.rs changes needed.
-
-5. ✅ **Typedef and struct dedup is a safety net** — `generate_from_config`
-   deduplicates typedefs and structs by checking if the canonical namespace
-   matches the local partition namespace. Pre-seeded types have their
-   original namespace (e.g. `posix.time`), which never matches any openssl
-   partition — so any accidentally-extracted local copies are
-   automatically dropped. No dedup code changes needed.
-
-### Phase 2: Gen crate changes
-
-6. ✅ **Update `bnd-openssl-gen`** — pass both winmds to `windows_bindgen`,
-   add `--reference bnd_linux,full,libc`.
-
-7. ✅ **Update `openssl.toml`** — remove `bits/types/struct_tm.h` and
-   `bits/types/struct_FILE.h` from traverse, add `[[type_import]]`.
-
-8. ✅ **Add `bnd-linux` dependency** to `bnd-openssl/Cargo.toml` with
-   feature gates: `features = ["time", "stdio", "pthread", "types"]`.
-
-### Phase 3: Validation
-
-9.  ✅ **Build ordering** — `bnd-linux-gen` must run before
-    `bnd-openssl-gen` so the bnd-linux winmd exists. The gen crates run
-    outside `cargo build` (manual `cargo run -p`), so add a clear error
-    message when the referenced winmd file doesn't exist.
-
-10. ✅ **Roundtrip test** — add `roundtrip_openssl.rs` assertion that
-    `openssl.crypto` functions reference `libc.posix.time.tm` as a TypeRef
-    (not a local TypeDef).
-
-11. ✅ **E2E test** — call `OPENSSL_gmtime` with a
-    `bnd_linux::libc::posix::time::tm` from the bnd-linux crate, verifying no
-    transmute is needed.
-
----
-
-## TypeRegistry Pre-seeding: Reading External WinMD
-
-The `windows-metadata` reader module (available since bnd-winmd already
-depends on `windows-metadata` for the writer) provides `File::new(bytes)`
-and `TypeIndex` (0.60) for iterating TypeDef rows. This is the same API
-used by the roundtrip tests.
-
-```rust
-use windows_metadata::reader::{File, TypeIndex};
-
-fn seed_registry_from_winmd(registry: &mut TypeRegistry, winmd_path: &Path) {
-    let bytes = std::fs::read(winmd_path)
-        .unwrap_or_else(|e| panic!(
-            "failed to read external winmd {}: {e}\n\
-             Hint: run `cargo run -p bnd-linux-gen` first",
-            winmd_path.display()
-        ));
-    let file = File::new(bytes).expect("parse external winmd");
-    let index = TypeIndex::new(vec![file]);
-    for td in index.types() {
-        let ns = td.namespace();
-        let name = td.name();
-        if !ns.is_empty() && name != "<Module>" && name != "Apis" {
-            registry.register(name, ns);
-        }
-    }
-}
-```
-
-This avoids any manual type listing — the registry is populated
-automatically from whatever the external winmd contains. The `Apis` class
-(which holds functions and constants) is excluded since it's not a real
-type.
-
-> **Note:** Upgrading from 0.59 to 0.60 also requires updating the
-> roundtrip tests: `Index` → `TypeIndex`, `.all()` → `.types()`.
-
----
-
-## Dependency Graph
-
-```
-bnd-linux-gen
-    │
-    ▼
-bnd-linux.winmd ──────────────┐
-    │                         │
-    ▼                         ▼
-bnd-linux (crate)    bnd-openssl-gen
-                         │    reads bnd-linux.winmd for
-                         │    type_import + --reference
-                         ▼
-                    openssl.winmd
-                         │
-                         ▼
-                    bnd-openssl (crate)
-                         │
-                         ▼
-                    depends on bnd-linux (runtime)
-```
-
----
-
-## Scope of Shared Types
-
-The openssl `crypto.h` partition currently traverses two glibc headers:
-
-| System header | Types extracted | Already in bnd-linux |
-|---|---|---|
-| `bits/types/struct_tm.h` | `tm` (9 fields) | `libc.posix.time` |
-| `bits/types/struct_FILE.h` | `_IO_FILE` (30 fields), `_IO_lock_t` | `libc.posix.stdio` |
-
-Additional transitive types that may be pulled in:
-- `__off_t`, `__off64_t` — from `_IO_FILE` fields → `libc.posix.types`
-- `__ssize_t` — from cookie callbacks → `libc.posix.types`
-
-After the cross-reference change, `openssl.toml` needs zero glibc traverse
-headers. All system types flow through the bnd-linux winmd.
-
-Future libraries (zlib, curl, etc.) that also reference `FILE*` or
-`struct tm*` will follow the same pattern: import from `bnd-linux.winmd`,
-never traverse glibc headers locally.
-
----
-
-## Resolved Questions
-
-### 1. `full` path style (not `skip-root`)
-
-`bnd-linux` keeps the root `libc` module: `lib.rs` has `pub mod libc`,
-and `--package` mode generates `src/libc/posix/time/mod.rs` etc.  The crate
-does not re-export modules at the crate root, so the correct path to
-`tm` is `bnd_linux::libc::posix::time::tm`.
-
-This means `--reference bnd_linux,full,libc` is the correct flag.
-`skip-root` would generate `bnd_linux::posix::time::tm` which doesn't compile.
-
-### 2. Build order enforcement
-
-The gen crates run outside `cargo build` (manual `cargo run -p`), so there
-is no automatic ordering. The implementation adds a clear panic message
-when the referenced winmd doesn't exist, pointing users to run
-`cargo run -p bnd-linux-gen` first.
-
-### 3. Feature gating
-
-`bnd-openssl` depends on `bnd-linux` with explicit features:
-`features = ["time", "stdio", "pthread", "types"]`. This pulls in only
-the modules whose types are actually referenced by openssl signatures.
-
-The four modules cover all cross-referenced types:
-- `time` — `struct tm` (used by `OPENSSL_gmtime`)
-- `stdio` — `_IO_FILE` (used by `BIO_new_fp`, `ERR_print_errors_fp`, etc.)
-- `pthread` — `pthread_once_t`, `pthread_t`, `pthread_key_t` (used by
-  `CRYPTO_ONCE`, `CRYPTO_THREAD_ID`, `CRYPTO_THREAD_LOCAL`)
-- `types` — `off_t`, `ssize_t` (used by BIO and other APIs)
+The old design remains relevant only as implementation history for the
+standalone `bnd-winmd` tool and its fixtures.

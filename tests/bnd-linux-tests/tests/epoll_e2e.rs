@@ -1,6 +1,6 @@
 #![allow(clippy::unnecessary_mut_passed)]
 
-use bnd_linux::libc::linux::epoll;
+use bnd_linux::libc::epoll;
 
 #[test]
 fn epoll_create1_returns_valid_fd() {
@@ -21,7 +21,7 @@ fn epoll_ctl_add_eventfd() {
         events: epoll::EPOLLIN,
         ..Default::default()
     };
-    ev.data.Value.fd = efd;
+    ev.data.fd = efd;
 
     let ret = unsafe { epoll::epoll_ctl(epfd, epoll::EPOLL_CTL_ADD, efd, &mut ev) };
     assert_eq!(ret, 0, "epoll_ctl ADD failed");
@@ -44,7 +44,7 @@ fn epoll_wait_eventfd_readable() {
         events: epoll::EPOLLIN,
         ..Default::default()
     };
-    ev.data.Value.fd = efd;
+    ev.data.fd = efd;
     unsafe { epoll::epoll_ctl(epfd, epoll::EPOLL_CTL_ADD, efd, &mut ev) };
 
     // Write to eventfd to make it readable
@@ -82,5 +82,5 @@ fn epoll_ctl_constants() {
 #[test]
 fn epoll_event_struct_size() {
     assert_eq!(core::mem::size_of::<epoll::epoll_event>(), 12);
-    assert_eq!(core::mem::size_of::<epoll::epoll_data>(), 8);
+    assert_eq!(core::mem::size_of::<epoll::epoll_data_t>(), 8);
 }

@@ -18,35 +18,34 @@ const ROOT_HEADERS: &[&str] = &[
 // `core::ffi::c_void`, which cannot derive Clone, Copy, or Default.
 
 const EXTERNAL_REFERENCE_ROUTES: &[(&str, &str)] = &[
-    ("FILE", "bnd_linux_clang::libc::file"),
-    ("hostent", "bnd_linux_clang::libc::netdb"),
-    ("off_t", "bnd_linux_clang::libc::types"),
-    ("pthread_key_t", "bnd_linux_clang::libc::pthreadtypes"),
-    ("pthread_once_t", "bnd_linux_clang::libc::pthreadtypes"),
-    ("pthread_t", "bnd_linux_clang::libc::pthreadtypes"),
-    ("ssize_t", "bnd_linux_clang::libc::types"),
-    ("time_t", "bnd_linux_clang::libc::time_t"),
-    ("timeval", "bnd_linux_clang::libc::struct_timeval"),
-    ("tm", "bnd_linux_clang::libc::struct_tm"),
+    ("FILE", "bnd_linux::libc::file"),
+    ("hostent", "bnd_linux::libc::netdb"),
+    ("off_t", "bnd_linux::libc::types"),
+    ("pthread_key_t", "bnd_linux::libc::pthreadtypes"),
+    ("pthread_once_t", "bnd_linux::libc::pthreadtypes"),
+    ("pthread_t", "bnd_linux::libc::pthreadtypes"),
+    ("ssize_t", "bnd_linux::libc::types"),
+    ("time_t", "bnd_linux::libc::time_t"),
+    ("timeval", "bnd_linux::libc::struct_timeval"),
+    ("tm", "bnd_linux::libc::struct_tm"),
 ];
 
-/// Generate the staged OpenSSL crate through one direct-Clang translation unit.
+/// Generate the bnd-openssl crate through one direct-Clang translation unit.
 pub fn generate(output_dir: &Path) {
     let linux_winmd = linux_winmd();
     let temp = tempfile::tempdir_in(
         output_dir
             .parent()
-            .expect("bnd-openssl-clang output must have a parent directory"),
+            .expect("bnd-openssl output must have a parent directory"),
     )
     .expect("failed to create temporary OpenSSL metadata directory");
     let generated_winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
     let winmd_dir = output_dir.join("winmd");
-    std::fs::create_dir_all(&winmd_dir)
-        .expect("failed to create bnd-openssl-clang WinMD directory");
-    let winmd = winmd_dir.join("bnd-openssl-clang.winmd");
-    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-openssl-clang WinMD");
+    std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-openssl WinMD directory");
+    let winmd = winmd_dir.join("bnd-openssl.winmd");
+    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-openssl WinMD");
 
-    let remapped_winmd = temp.path().join("bnd-openssl-clang.remapped.winmd");
+    let remapped_winmd = temp.path().join("bnd-openssl.remapped.winmd");
     remap_metadata(
         &temp.path().join("metadata"),
         &generated_winmd,
@@ -60,7 +59,7 @@ pub fn generate(output_dir: &Path) {
 
     let manifest_path = output_dir.join("Cargo.toml");
     let manifest =
-        std::fs::read(&manifest_path).expect("failed to preserve bnd-openssl-clang Cargo.toml");
+        std::fs::read(&manifest_path).expect("failed to preserve bnd-openssl Cargo.toml");
     let generation = std::panic::catch_unwind(|| {
         let mut bindgen = staged_bindgen::Bindgen::new();
         bindgen
@@ -77,23 +76,21 @@ pub fn generate(output_dir: &Path) {
         // Excluded libc definitions still participate in bindgen's dependency closure.
         // Mark their transitive dependencies external; only the direct routes above are emitted.
         for type_name in external_dependencies.difference(&external_types) {
-            bindgen.external_reference(&format!("libc.{type_name}"), "bnd_linux_clang::libc");
+            bindgen.external_reference(&format!("libc.{type_name}"), "bnd_linux::libc");
         }
         bindgen.write();
     });
     if let Err(payload) = generation {
-        std::fs::write(manifest_path, manifest)
-            .expect("failed to restore bnd-openssl-clang Cargo.toml");
+        std::fs::write(manifest_path, manifest).expect("failed to restore bnd-openssl Cargo.toml");
         std::panic::resume_unwind(payload);
     }
 }
 
 fn linux_winmd() -> PathBuf {
-    let path = Path::new(env!("CARGO_MANIFEST_DIR"))
-        .join("../bnd-linux-clang/winmd/bnd-linux-clang.winmd");
+    let path = Path::new(env!("CARGO_MANIFEST_DIR")).join("../bnd-linux/winmd/bnd-linux.winmd");
     assert!(
         path.exists(),
-        "bnd-linux-clang WinMD not found at {}\nHint: run `cargo run -p bnd-linux-gen` first",
+        "bnd-linux WinMD not found at {}\nHint: run `cargo run -p bnd-linux-gen` first",
         path.display()
     );
     path
@@ -104,7 +101,7 @@ fn generate_metadata(output_dir: &Path, linux_winmd: &Path, headers: &[&str]) ->
     clear_rdl_dir(&rdl_dir);
     let winmd_dir = output_dir.join("winmd");
     std::fs::create_dir_all(&winmd_dir).expect("failed to create OpenSSL WinMD directory");
-    let openssl_winmd = winmd_dir.join("bnd-openssl-clang.winmd");
+    let openssl_winmd = winmd_dir.join("bnd-openssl.winmd");
     let source = headers
         .iter()
         .map(|header| format!("#include <{header}>\n"))
@@ -171,9 +168,9 @@ fn external_libc_types(input: &Path, linux_winmd: &Path) -> BTreeSet<String> {
     )
     .expect("failed to parse generated OpenSSL WinMD");
     let linux = windows_metadata::reader::File::new(
-        std::fs::read(linux_winmd).expect("failed to read bnd-linux-clang WinMD"),
+        std::fs::read(linux_winmd).expect("failed to read bnd-linux WinMD"),
     )
-    .expect("failed to parse bnd-linux-clang WinMD");
+    .expect("failed to parse bnd-linux WinMD");
     let index = windows_metadata::reader::Index::new(vec![openssl, linux]);
     let mut result = BTreeSet::new();
     for ty in index.types().filter(|ty| ty.namespace() == "openssl") {
@@ -220,7 +217,7 @@ fn checked_external_routes(types: &BTreeSet<String>) -> BTreeMap<String, String>
         .collect();
     assert!(
         missing.is_empty(),
-        "missing bnd-linux-clang Rust routes for external libc types: {missing:?}"
+        "missing bnd-linux Rust routes for external libc types: {missing:?}"
     );
     let unused: Vec<_> = available
         .keys()
@@ -229,7 +226,7 @@ fn checked_external_routes(types: &BTreeSet<String>) -> BTreeMap<String, String>
         .collect();
     assert!(
         unused.is_empty(),
-        "unused bnd-linux-clang Rust routes do not match OpenSSL metadata: {unused:?}"
+        "unused bnd-linux Rust routes do not match OpenSSL metadata: {unused:?}"
     );
     types
         .iter()
@@ -478,7 +475,7 @@ mod tests {
         let temp = tempfile::tempdir_in(target).expect("create OpenSSL test output");
         let linux_winmd = linux_winmd();
         let winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
-        let remapped = temp.path().join("bnd-openssl-clang.remapped.winmd");
+        let remapped = temp.path().join("bnd-openssl.remapped.winmd");
         remap_metadata(&temp.path().join("metadata"), &winmd, &remapped);
         let external_types = external_libc_types(&winmd, &linux_winmd);
         checked_external_routes(&external_types);

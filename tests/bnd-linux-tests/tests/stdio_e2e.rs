@@ -1,17 +1,17 @@
 //! End-to-end tests for stdio bindings against real libc.
 
-use bnd_linux::libc::posix::stdio;
+use bnd_linux::libc::{fcntl, stdio, stdio_lim, struct_file};
 
 #[test]
 fn stdio_constants() {
     assert_eq!(stdio::BUFSIZ, 8192);
-    assert_eq!(stdio::SEEK_SET, 0);
-    assert_eq!(stdio::SEEK_CUR, 1);
-    assert_eq!(stdio::SEEK_END, 2);
+    assert_eq!(fcntl::SEEK_SET, 0);
+    assert_eq!(fcntl::SEEK_CUR, 1);
+    assert_eq!(fcntl::SEEK_END, 2);
     assert_eq!(stdio::L_tmpnam, 20);
     assert_eq!(stdio::TMP_MAX, 238328);
     assert_eq!(stdio::FOPEN_MAX, 16);
-    assert_eq!(stdio::FILENAME_MAX, 4096);
+    assert_eq!(stdio_lim::FILENAME_MAX, 4096);
     assert_eq!(stdio::_IOFBF, 0);
     assert_eq!(stdio::_IOLBF, 1);
     assert_eq!(stdio::_IONBF, 2);
@@ -39,23 +39,13 @@ fn fwrite_fread_roundtrip() {
         assert!(!f.is_null());
 
         let data = b"hello stdio";
-        let written = stdio::fwrite(
-            data.as_ptr() as *const core::ffi::c_void,
-            1,
-            data.len() as u64,
-            f,
-        );
+        let written = stdio::fwrite(data.as_ptr() as *const core::ffi::c_void, 1, data.len(), f);
         assert_eq!(written, data.len() as u64);
 
         stdio::rewind(f);
 
         let mut buf = [0u8; 32];
-        let read = stdio::fread(
-            buf.as_mut_ptr() as *mut core::ffi::c_void,
-            1,
-            data.len() as u64,
-            f,
-        );
+        let read = stdio::fread(buf.as_mut_ptr() as *mut core::ffi::c_void, 1, data.len(), f);
         assert_eq!(read, data.len() as u64);
         assert_eq!(&buf[..data.len()], data);
 
@@ -99,7 +89,7 @@ fn fseek_ftell() {
         stdio::fwrite(data.as_ptr() as *const core::ffi::c_void, 1, 10, f);
 
         // Seek to offset 5
-        let ret = stdio::fseek(f, 5, stdio::SEEK_SET);
+        let ret = stdio::fseek(f, 5, fcntl::SEEK_SET);
         assert_eq!(ret, 0);
 
         let pos = stdio::ftell(f);
@@ -244,7 +234,7 @@ fn fpos_t_layout() {
 fn io_file_struct_size() {
     // _IO_FILE is 216 bytes on glibc x86-64
     assert_eq!(
-        core::mem::size_of::<stdio::_IO_FILE>(),
+        core::mem::size_of::<struct_file::__FILE>(),
         216,
         "_IO_FILE should be 216 bytes"
     );

@@ -1,7 +1,7 @@
 //! End-to-end tests for time bindings against real libc.
 #![allow(clippy::unnecessary_mut_passed)]
 
-use bnd_linux::libc::posix::time;
+use bnd_linux::libc::{struct_timespec::timespec, struct_tm::tm, time};
 
 #[test]
 fn clock_constants() {
@@ -31,9 +31,8 @@ fn time_returns_epoch() {
 
 #[test]
 fn clock_gettime_monotonic() {
-    use bnd_linux::libc::posix::stat; // timespec lives in stat partition
     unsafe {
-        let mut ts: stat::timespec = core::mem::zeroed();
+        let mut ts: timespec = core::mem::zeroed();
         let ret = time::clock_gettime(time::CLOCK_MONOTONIC, &mut ts);
         assert_eq!(ret, 0, "clock_gettime(CLOCK_MONOTONIC) should succeed");
         assert!(ts.tv_sec > 0, "monotonic clock should have elapsed seconds");
@@ -62,7 +61,7 @@ fn mktime_roundtrip() {
     unsafe {
         // Start from a known epoch and roundtrip through gmtime + mktime
         let original: i64 = 1_000_000_000; // 2001-09-09
-        let mut tm: time::tm = core::mem::zeroed();
+        let mut tm: tm = core::mem::zeroed();
         let result = time::gmtime_r(&original, &mut tm);
         assert!(!result.is_null());
         // mktime interprets as local time, but the roundtrip should be close
@@ -82,12 +81,12 @@ fn difftime_works() {
 #[test]
 fn struct_tm_layout() {
     // struct tm should have the standard POSIX layout
-    let tm = time::tm::default();
+    let tm = tm::default();
     assert_eq!(tm.tm_sec, 0);
     assert_eq!(tm.tm_min, 0);
     assert_eq!(tm.tm_hour, 0);
     // Size should be reasonable (at least 44 bytes on x86_64 with gmtoff+zone)
-    assert!(core::mem::size_of::<time::tm>() >= 44);
+    assert!(core::mem::size_of::<tm>() >= 44);
 }
 
 #[test]

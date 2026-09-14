@@ -1,4 +1,4 @@
-use bnd_linux::libc::linux::mount;
+use bnd_linux::libc::mount;
 
 #[test]
 fn mount_constants() {

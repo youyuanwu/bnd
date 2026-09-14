@@ -1,8 +1,6 @@
 //! End-to-end tests for Socket bindings against real libc.
 
-use bnd_linux::libc::posix::inet;
-use bnd_linux::libc::posix::socket;
-use bnd_linux::libc::posix::unistd;
+use bnd_linux::libc::{r#in, socket, socket_type, struct_iovec, unistd};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -10,10 +8,10 @@ use bnd_linux::libc::posix::unistd;
 
 #[test]
 fn sock_type_constants() {
-    assert_eq!(socket::SOCK_STREAM, 1);
-    assert_eq!(socket::SOCK_DGRAM, 2);
-    assert_eq!(socket::SOCK_RAW, 3);
-    assert_eq!(socket::SOCK_SEQPACKET, 5);
+    assert_eq!(socket_type::SOCK_STREAM, 1);
+    assert_eq!(socket_type::SOCK_DGRAM, 2);
+    assert_eq!(socket_type::SOCK_RAW, 3);
+    assert_eq!(socket_type::SOCK_SEQPACKET, 5);
 }
 
 #[test]
@@ -74,7 +72,7 @@ fn msghdr_struct_size() {
 #[test]
 fn iovec_struct_size() {
     assert_eq!(
-        core::mem::size_of::<socket::iovec>(),
+        core::mem::size_of::<struct_iovec::iovec>(),
         16,
         "struct iovec should be 16 bytes"
     );
@@ -95,14 +93,14 @@ fn linger_struct_size() {
 
 #[test]
 fn socket_create_tcp() {
-    let fd = unsafe { socket::socket(socket::PF_INET, socket::SOCK_STREAM as i32, 0) };
+    let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0, "socket(PF_INET, SOCK_STREAM, 0) failed: {fd}");
     unsafe { unistd::close(fd) };
 }
 
 #[test]
 fn socket_create_udp() {
-    let fd = unsafe { socket::socket(socket::PF_INET, socket::SOCK_DGRAM as i32, 0) };
+    let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_DGRAM as i32, 0) };
     assert!(fd >= 0, "socket(PF_INET, SOCK_DGRAM, 0) failed: {fd}");
     unsafe { unistd::close(fd) };
 }
@@ -113,7 +111,7 @@ fn socketpair_unix() {
     let rc = unsafe {
         socket::socketpair(
             socket::PF_LOCAL,
-            socket::SOCK_STREAM as i32,
+            socket_type::SOCK_STREAM as i32,
             0,
             fds.as_mut_ptr(),
         )
@@ -130,25 +128,25 @@ fn socketpair_unix() {
 #[test]
 #[allow(clippy::field_reassign_with_default)]
 fn getsockname_after_bind() {
-    let fd = unsafe { socket::socket(socket::PF_INET, socket::SOCK_STREAM as i32, 0) };
+    let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0);
 
-    let mut addr = inet::sockaddr_in::default();
+    let mut addr = r#in::sockaddr_in::default();
     addr.sin_family = socket::PF_INET as u16;
     addr.sin_port = 0;
-    addr.sin_addr.s_addr = unsafe { inet::htonl(0x7f000001) }; // 127.0.0.1
+    addr.sin_addr.s_addr = unsafe { r#in::htonl(0x7f000001) }; // 127.0.0.1
 
     let rc = unsafe {
         socket::bind(
             fd,
             &addr as *const _ as *const socket::sockaddr,
-            core::mem::size_of::<inet::sockaddr_in>() as u32,
+            core::mem::size_of::<r#in::sockaddr_in>() as u32,
         )
     };
     assert_eq!(rc, 0, "bind to loopback:0 failed");
 
-    let mut out = inet::sockaddr_in::default();
-    let mut len = core::mem::size_of::<inet::sockaddr_in>() as u32;
+    let mut out = r#in::sockaddr_in::default();
+    let mut len = core::mem::size_of::<r#in::sockaddr_in>() as u32;
     let rc = unsafe {
         socket::getsockname(
             fd,
@@ -166,19 +164,19 @@ fn getsockname_after_bind() {
 #[test]
 #[allow(clippy::field_reassign_with_default)]
 fn listen_on_tcp_socket() {
-    let fd = unsafe { socket::socket(socket::PF_INET, socket::SOCK_STREAM as i32, 0) };
+    let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0);
 
-    let mut addr = inet::sockaddr_in::default();
+    let mut addr = r#in::sockaddr_in::default();
     addr.sin_family = socket::PF_INET as u16;
     addr.sin_port = 0;
-    addr.sin_addr.s_addr = unsafe { inet::htonl(0x7f000001) };
+    addr.sin_addr.s_addr = unsafe { r#in::htonl(0x7f000001) };
 
     let rc = unsafe {
         socket::bind(
             fd,
             &addr as *const _ as *const socket::sockaddr,
-            core::mem::size_of::<inet::sockaddr_in>() as u32,
+            core::mem::size_of::<r#in::sockaddr_in>() as u32,
         )
     };
     assert_eq!(rc, 0, "bind failed");
@@ -191,7 +189,7 @@ fn listen_on_tcp_socket() {
 
 #[test]
 fn setsockopt_reuseaddr() {
-    let fd = unsafe { socket::socket(socket::PF_INET, socket::SOCK_STREAM as i32, 0) };
+    let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0);
 
     let optval: i32 = 1;
@@ -215,7 +213,7 @@ fn send_recv_socketpair() {
     let rc = unsafe {
         socket::socketpair(
             socket::PF_LOCAL,
-            socket::SOCK_STREAM as i32,
+            socket_type::SOCK_STREAM as i32,
             0,
             fds.as_mut_ptr(),
         )
@@ -227,7 +225,7 @@ fn send_recv_socketpair() {
         socket::send(
             fds[0],
             msg.as_ptr() as *const core::ffi::c_void,
-            msg.len() as u64,
+            msg.len(),
             0,
         )
     };
@@ -238,7 +236,7 @@ fn send_recv_socketpair() {
         socket::recv(
             fds[1],
             buf.as_mut_ptr() as *mut core::ffi::c_void,
-            buf.len() as u64,
+            buf.len(),
             0,
         )
     };

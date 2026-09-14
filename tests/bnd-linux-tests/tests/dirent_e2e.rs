@@ -1,6 +1,6 @@
 //! End-to-end tests for Dirent bindings against real libc.
 
-use bnd_linux::libc::posix::dirent;
+use bnd_linux::libc::dirent;
 
 use std::ffi::CString;
 

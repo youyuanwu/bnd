@@ -1,7 +1,6 @@
 #![allow(clippy::unnecessary_mut_passed)]
 
-use bnd_linux::libc::linux::timerfd;
-use bnd_linux::libc::posix::time::itimerspec;
+use bnd_linux::libc::{struct_itimerspec::itimerspec, struct_timespec::timespec, timerfd};
 
 #[test]
 fn timerfd_create_monotonic() {
@@ -18,11 +17,11 @@ fn timerfd_settime_gettime_roundtrip() {
 
     // Set a 1-second one-shot timer
     let new_value = itimerspec {
-        it_interval: bnd_linux::libc::posix::stat::timespec {
+        it_interval: timespec {
             tv_sec: 0,
             tv_nsec: 0,
         },
-        it_value: bnd_linux::libc::posix::stat::timespec {
+        it_value: timespec {
             tv_sec: 1,
             tv_nsec: 0,
         },

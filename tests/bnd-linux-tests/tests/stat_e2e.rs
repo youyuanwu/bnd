@@ -1,8 +1,6 @@
 //! End-to-end tests for Stat bindings against real libc.
 
-use bnd_linux::libc::posix::fcntl;
-use bnd_linux::libc::posix::stat;
-use bnd_linux::libc::posix::unistd;
+use bnd_linux::libc::{fcntl, struct_stat, struct_timespec, unistd};
 
 use std::ffi::CString;
 
@@ -16,17 +14,11 @@ fn stat_file_size() {
     let fd = unsafe { fcntl::creat(path.as_ptr(), 0o644) };
     assert!(fd >= 0);
     let data = b"0123456789";
-    unsafe {
-        unistd::write(
-            fd,
-            data.as_ptr() as *const core::ffi::c_void,
-            data.len() as u64,
-        )
-    };
+    unsafe { unistd::write(fd, data.as_ptr() as *const core::ffi::c_void, data.len()) };
     unsafe { unistd::close(fd) };
 
-    let mut st = stat::stat::default();
-    let rc = unsafe { stat::stat(path.as_ptr(), &mut st) };
+    let mut st = struct_stat::stat::default();
+    let rc = unsafe { struct_stat::stat(path.as_ptr(), &mut st) };
     assert_eq!(rc, 0, "stat failed");
     assert_eq!(st.st_size, 10);
 
@@ -40,8 +32,8 @@ fn stat_is_regular_file() {
     assert!(fd >= 0);
     unsafe { unistd::close(fd) };
 
-    let mut st = stat::stat::default();
-    let rc = unsafe { stat::stat(path.as_ptr(), &mut st) };
+    let mut st = struct_stat::stat::default();
+    let rc = unsafe { struct_stat::stat(path.as_ptr(), &mut st) };
     assert_eq!(rc, 0);
     assert_eq!(
         st.st_mode & 0o170000,
@@ -56,7 +48,7 @@ fn stat_is_regular_file() {
 #[test]
 fn stat_struct_size() {
     assert_eq!(
-        std::mem::size_of::<stat::stat>(),
+        std::mem::size_of::<struct_stat::stat>(),
         144,
         "struct stat should be 144 bytes on x86_64 Linux"
     );
@@ -65,7 +57,7 @@ fn stat_struct_size() {
 #[test]
 fn timespec_struct_size() {
     assert_eq!(
-        std::mem::size_of::<stat::timespec>(),
+        std::mem::size_of::<struct_timespec::timespec>(),
         16,
         "struct timespec should be 16 bytes"
     );

@@ -1,8 +1,9 @@
 # Evaluation: windows-clang and RDL for bnd
 
-## Status
+## Historical Decision and Current Outcome
 
-> **Decision: retain `bnd-winmd` as the C-header frontend.**
+> **Historical decision (September 11, 2026): retain `bnd-winmd` as the
+> C-header frontend at the evaluated upstream revision.**
 >
 > `windows-clang` cannot directly replace it for Linux and OpenSSL
 > generation at the evaluated revision. The most promising reuse boundary is
@@ -10,15 +11,21 @@
 > serialize its intermediate model as RDL, and let `windows-rdl` produce the
 > WinMD.
 
+That decision was later superseded by the maintained fork experiment
+described below. The fork closed the required Linux ABI and generation gaps,
+and the direct `bnd-clang` → RDL/WinMD → `bnd-bindgen` path is now the
+production generator for both `bnd-linux` and `bnd-openssl`.
+
 This evaluation uses the local `microsoft/windows-rs` checkout at commit
 [`ca99b307b4e3705da54be35396a33a5afad229fd`](https://github.com/microsoft/windows-rs/commit/ca99b307b4e3705da54be35396a33a5afad229fd)
 from September 11, 2026. The relevant crate is located at
 `crates/libs/clang`; there is no `crates/tools/windows-clang` directory in
 that revision.
 
-## Question
+## Historical Question
 
-Can bnd replace its custom C-header-to-WinMD generator with
+At the evaluated revision, could bnd replace its custom C-header-to-WinMD
+generator with
 [`windows-clang`](https://crates.io/crates/windows-clang), either directly
 or through a small adapter?
 
@@ -104,7 +111,8 @@ type-mapping or layout decisions without changing or forking the crate.
 
 ## Capability Comparison
 
-Statuses below are relative to bnd's current requirements.
+Statuses below are relative to bnd's requirements at the time of the
+evaluation, before the maintained fork work.
 
 | Capability | `windows-clang` | bnd impact |
 |---|---|---|
@@ -131,7 +139,7 @@ Statuses below are relative to bnd's current requirements.
 | Deterministic output | Mostly supported | Ordered collections are used, but callers should provide explicitly ordered inputs |
 | Linux ABI semantics | Missing | Scalar canonicalization follows Windows LLP64 |
 
-## Blocking Differences
+## Historical Blocking Differences
 
 ### Linux `long` is mapped as a Windows type
 
@@ -213,7 +221,7 @@ The evaluated revision pins libclang 22.1.8. Its Clang tests are run by
 upstream on Windows hosts, so Linux use would require bnd to own libclang
 discovery, versioning, and compatibility testing.
 
-## Adoption Options
+## Historical Adoption Options
 
 ### Direct replacement
 
@@ -267,7 +275,7 @@ extra layer.
 
 **Recommended.**
 
-The current implementation already encodes the behavior required by the
+At evaluation time, the implementation encoded the behavior required by the
 generated Linux and OpenSSL crates:
 
 - LP64 scalar widths.
@@ -281,7 +289,7 @@ generated Linux and OpenSSL crates:
 Replacing it provides no immediate functional benefit and would introduce
 ABI risk.
 
-## Recommendation
+## Historical Recommendation
 
 Keep `bnd-winmd` as the authoritative header parser and ABI normalization
 layer. Do not wrap or fork `windows-clang` unless upstream first exposes
@@ -292,90 +300,48 @@ model-to-RDL prototype using the existing simple and zlib fixtures before
 trying the full Linux/OpenSSL surface. That prototype must preserve generated
 Rust APIs and the ABI assertions already covered by bnd's end-to-end tests.
 
-## Fork Experiment
+## Fork Experiment and Production Cutover
 
-The repository includes two non-published crates for experiments:
+The repository maintains two non-published generator components:
 
-- `bnd-clang`, containing a fork of `windows-clang` under
-  `bnd-clang/vendored/windows-clang`.
-- `bnd-bindgen`, containing a fork of `windows-bindgen` under
-  `bnd-bindgen/vendored/windows-bindgen`.
+- `bnd-clang`, containing the vendored `windows-clang` fork.
+- `bnd-bindgen`, containing the vendored `windows-bindgen` fork.
 
-Each crate records the upstream revision and license in `VENDORED.md`.
-They participate in normal workspace builds. `bnd-clang` makes
-`clang-sys/runtime` optional and leaves it disabled for workspace builds, so
-both Clang frontends use the same linked libclang selected at build time.
-This avoids runtime discovery selecting a different libclang and changing
-generated ABI output.
+Each records its upstream revision and license in `VENDORED.md`. The fork
+work made scalar widths target-aware for the active host ABI, preserved C
+calling conventions, corrected partial-bitfield storage, handled compiler
+`va_list` and unsupported extended numeric types safely, and added the
+package-feature and external-reference primitives needed by the product
+generators.
 
-The fork now maps C `long` and `unsigned long` from the widths reported by
-Clang for the active host ABI. Cross-compilation is not supported. Plain C
-functions and callbacks also retain the C calling convention rather than
-falling back to RDL's Windows platform default. Integration coverage ports
-the `multi` fixture through C headers, RDL, WinMD, generated Rust, and linked
-runtime calls. The `simple` fixture covers LP64 fields, over-aligned records,
-anonymous records and arrays, bitfields, and unsupported integer typedefs.
-The zlib experiment exercises real Linux system headers in two ordered
-partitions, resolves the second partition against metadata from the first,
-and compiles and runs the generated Rust bindings against `libz`.
-Its generated layouts and linked calls match the active Linux ABI, but its
-source API is not identical to `bnd-winmd`: inline declarations such as
-`typedef struct z_stream_s { ... } z_stream` are emitted directly as
-`z_stream`, while `bnd-winmd` retains `z_stream_s` and projects `z_stream`
-as a wrapper. The same difference applies to `gz_header`.
+After fixture, zlib, Linux, and OpenSSL parity testing, the direct path was
+promoted into production:
 
-`bnd-linux-gen` also contains a direct-Clang path covering the complete
-header inventory configured in `bnd-linux.toml`: shared POSIX types; file,
-memory, directory, socket, network database, signal, dynamic loading, errno,
-scheduling, time, pthread, and stdio APIs; and the Linux epoll, eventfd,
-timerfd, signalfd, inotify, sendfile, xattr, mount, and kernel type surfaces.
-Like the windows-rs Win32 pipeline, it parses one combined translation unit,
-emits temporary RDL files per defining header under a single flat `libc`
-namespace, and compiles them into one canonical WinMD. A packaging-only
-metadata remap then turns header ownership into Rust module boundaries such
-as `libc::types` and `libc::sendfile`. The non-published `bnd-linux-clang`
-staging crate checks in those generated modules and exercises them together
-against their native libraries. Most symbols link from libc; `crypt` is
-routed to libcrypt and `inet_net_*`/`inet_neta` are routed to libresolv.
-Package features and their cross-header dependencies are regenerated from
-the remapped metadata. A golden-file test covers the manifest, WinMD, and
-Rust source tree. The production `generate` path remains unchanged and
-continues to use `bnd-winmd` until the required Linux surface has equivalent
-coverage.
+- `bnd-linux-gen` parses one GNU C11 translation unit, emits RDL by defining
+  header under a flat `libc` namespace, writes the canonical
+  `bnd-linux/winmd/bnd-linux.winmd`, temporarily remaps header ownership, and
+  generates `bnd-linux::libc` modules and features with `bnd-bindgen`.
+- `bnd-openssl-gen` follows the same model under a flat `openssl` namespace,
+  writes `bnd-openssl/winmd/bnd-openssl.winmd`, and references the canonical
+  Linux WinMD at both the Clang and RDL stages.
+- Exact external-reference routes project OpenSSL POSIX TypeRefs to
+  `bnd_linux::libc::<defining-header-module>` without a local libc module or
+  source rewriting.
+- Linux functions link to libc by default, with explicit libcrypt/libresolv
+  exceptions. OpenSSL functions link to crypto by default, with `ssl.h` and
+  `tls1.h` definitions routed to ssl.
+- Freshness tests cover generated Rust, canonical WinMD, Cargo features, and
+  second-generation determinism. Runtime tests exercise both production
+  crates against their native libraries.
 
-`bnd-openssl-gen` now applies the same staged architecture to OpenSSL. One
-GNU C11 translation unit emits defining-header-owned RDL under a flat
-canonical `openssl` namespace. The generator supplies
-`bnd-linux-clang.winmd` as an explicit reference to both the Clang builder
-and the RDL reader, then uses RDL ownership to create temporary packaging
-metadata for 17 generated modules. The canonical checked-in WinMD is never
-remapped.
+The temporary staging product crates used during evaluation were removed
+after cutover. `bnd-winmd` was not removed: it remains a standalone
+TOML-driven tool with its fixture tests, but it is no longer the production
+Linux or OpenSSL generator.
 
-The local `bnd-bindgen` fork adds generic external-reference routing because
-upstream `--in` makes external metadata available but does not encode the
-Rust crate/module that owns it. OpenSSL's POSIX TypeRefs therefore generate
-as `bnd_linux_clang::libc::*` paths without source rewriting or a local
-`libc` module. Functions default to `crypto`, while definitions owned by
-`openssl/ssl.h` and `openssl/tls1.h` route to `ssl`. Checked-in Rust, WinMD,
-and manifest freshness is tested, and the staging crate mirrors all 28
-production runtime tests.
-
-`openssl/err.h` remains excluded: its
-`lhash_st_ERR_STRING_DATA::dummy` inline union projects as a by-value
-`core::ffi::c_void`, which cannot derive the traits required by generated
-Rust. The existing `generate-openssl` entry point already reaches both
-production and staged outputs through the generator binary. Production
-`bnd-openssl` remains on `bnd-winmd`; this experiment did not perform a
-production cutover.
-
-These experiments remove the scalar-width, C-calling-convention,
-partial-bitfield, compiler `va_list`, unsupported extended numeric, and
-package-feature blockers from the fork. They also prove the partition and
-reference primitives needed by a future configuration wrapper, but no
-general TOML orchestration exists yet. Injection and cross-crate generation
-gaps remain. `bnd-linux-gen` now uses the local `bnd-bindgen` fork for both
-legacy and staged package generation, while bnd-clang has not replaced the
-current production `bnd-winmd` pipeline.
+`openssl/err.h` remains excluded because its inline LHASH union projects as
+a by-value `core::ffi::c_void`, which cannot derive the traits required by
+generated Rust.
 
 ## Upstream References
 

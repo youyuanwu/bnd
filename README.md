@@ -3,21 +3,25 @@
 Generate Rust FFI bindings from C headers using [WinMD](https://ecma-international.org/publications-and-standards/standards/ecma-335/) (ECMA-335) as an intermediate representation.
 
 ```
-C Headers ──→ libclang ──→ bnd-winmd ──→ .winmd ──→ windows-bindgen ──→ Rust FFI module
+C headers ──→ bnd-clang ──→ RDL ──→ WinMD ──→ bnd-bindgen ──→ Rust FFI modules
 ```
 
 ## Crates
 
 | Crate | Purpose |
 |---|---|
-| [`bnd-winmd`](bnd-winmd/) | Core library + CLI: C header → `.winmd` extraction and emission |
+| [`bnd-clang`](bnd-clang/) | Vendored direct-Clang C header → RDL frontend used by production generators |
+| [`bnd-bindgen`](bnd-bindgen/) | Vendored WinMD → Rust generator used by production generators |
+| [`bnd-linux`](bnd-linux/) | Generated POSIX and Linux system bindings |
+| [`bnd-openssl`](bnd-openssl/) | Generated OpenSSL 3.x bindings with POSIX types owned by `bnd-linux` |
+| [`bnd-winmd`](bnd-winmd/) | Standalone TOML-driven C header → WinMD library and CLI; retained with its fixture tests |
 
 ## Example bindings
 
 | Crate | Source | Description |
 |---|---|---|
-| [`bnd-posix`](bnd-posix/) | glibc system headers | 15 POSIX modules (fcntl, socket, pthread, signal, …) |
-| [`bnd-openssl`](bnd-openssl/) | OpenSSL 3.x headers | 8 partitions across libssl + libcrypto |
+| [`bnd-linux`](bnd-linux/) | glibc and Linux system headers | Defining-header modules under the flat `bnd_linux::libc` root |
+| [`bnd-openssl`](bnd-openssl/) | OpenSSL 3.x headers | Defining-header modules across libssl + libcrypto |
 
 ## Prerequisites
 

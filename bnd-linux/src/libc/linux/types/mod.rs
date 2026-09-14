@@ -1,9 +1,0 @@
-pub type __be16 = u16;
-pub type __be32 = u32;
-pub type __be64 = u64;
-pub type __le16 = u16;
-pub type __le32 = u32;
-pub type __le64 = u64;
-pub type __poll_t = u32;
-pub type __sum16 = u16;
-pub type __wsum = u32;

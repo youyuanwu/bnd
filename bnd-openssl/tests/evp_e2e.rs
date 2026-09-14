@@ -35,7 +35,7 @@ fn evp_sha256_digest() {
         assert_eq!(ret, 1, "EVP_DigestInit_ex should return 1");
 
         let data = b"hello";
-        let ret = evp::EVP_DigestUpdate(ctx, data.as_ptr() as *const _, data.len() as u64);
+        let ret = evp::EVP_DigestUpdate(ctx, data.as_ptr() as *const _, data.len());
         assert_eq!(ret, 1, "EVP_DigestUpdate should return 1");
 
         let mut hash = [0u8; 32];
