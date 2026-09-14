@@ -2,7 +2,7 @@
 
 `bnd-linux` provides generated Rust FFI bindings for POSIX and Linux system
 headers. Production generation uses `bnd-clang`, RDL, the
-`windows-rdl` WinMD writer, and `bnd-bindgen`; it does not use `bnd-winmd`.
+`windows-rdl` WinMD writer, and `bnd-bindgen` end to end.
 
 ## Production Pipeline
 
@@ -154,5 +154,5 @@ under `libc::posix::*` and `libc::linux::*`. A direct-Clang implementation
 was first validated in a separate staging crate, then promoted into
 `bnd-linux`; the staging crate was removed during the production cutover.
 
-`bnd-winmd` remains a standalone tool with its own fixture tests. Its
-continued presence does not make it the production Linux generator.
+The standalone implementation and its fixture packages were later retired
+after direct-Clang coverage became authoritative.

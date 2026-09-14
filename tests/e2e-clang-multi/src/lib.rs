@@ -70,9 +70,31 @@ mod tests {
             assert_eq!(widget_count(), 1);
             assert_eq!(widget.values, [1, 2, 640, 480]);
             assert_eq!(widget.color, COLOR_RED);
+            assert_eq!(widget.name, name);
+            assert_eq!(
+                std::ffi::CStr::from_ptr(widget.name).to_str().unwrap(),
+                "clang"
+            );
 
             destroy_widget(&mut widget);
             assert_eq!(widget_count(), 0);
+        }
+    }
+
+    #[test]
+    fn generated_namespaced_function_handles_null_pointers() {
+        unsafe {
+            let bounds = Rect {
+                x: 0,
+                y: 0,
+                width: 0,
+                height: 0,
+            };
+
+            assert_eq!(
+                create_widget(std::ptr::null(), bounds, std::ptr::null_mut()),
+                -1
+            );
         }
     }
 }

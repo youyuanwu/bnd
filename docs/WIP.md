@@ -94,7 +94,7 @@ Bugs discovered and fixed:
   `const struct dirent **` put `ELEMENT_TYPE_CMOD_REQD` mid-chain in blobs,
   crashing windows-bindgen `from_blob_impl`. Fix: always emit `PtrMut`;
   constness tracked via `ParamAttributes::Out` on mutable pointer parameters
-  (see [pointer-mutability-lost](../bugs/pointer-mutability-lost.md)).
+  (see [pointer-mutability-lost](bugs/pointer-mutability-lost.md)).
 - **Anonymous enum names**: `enum (unnamed at dirent.h:97:1)` → invalid
   Rust type name. Fix: detect anonymous enums in `collect_enums` and
   emit their variants as standalone `ConstantDef` entries (`DT_*` constants).
@@ -313,6 +313,6 @@ From [RustGenerator.md](design/RustGenerator.md):
 | Feature | Complexity | Status |
 |---|---|---|
 | Multi-header wrapper generation | Low | ⬜ |
-| Cross-WinMD type imports (`[[type_import]]`) | Medium | ✅ [Design doc](design/CrossWinmdReferences.md) |
+| Cross-WinMD type imports (`[[type_import]]`) | Medium | ✅ [Design doc](design/features/CrossWinmdReferences.md) |
 | COM interface support | Medium | ⬜ |
 | Inline function skipping | Low | ⬜ |

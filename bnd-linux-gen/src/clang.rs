@@ -525,10 +525,16 @@ mod tests {
         for name in [
             "__errno_location",
             "clock_gettime",
+            "chmod",
             "dlopen",
+            "dup",
+            "dup2",
             "fopen",
+            "fsync",
             "getaddrinfo",
             "inet_pton",
+            "lstat",
+            "mkdir",
             "mmap",
             "opendir",
             "pthread_create",
@@ -536,11 +542,24 @@ mod tests {
             "sigaction",
             "socket",
             "stat",
+            "umask",
             "write",
         ] {
             assert!(method_names.contains(&name), "{name} missing");
         }
-        for name in ["_IOFBF", "_IOLBF", "_IONBF"] {
+        for name in [
+            "_IOFBF",
+            "_IOLBF",
+            "_IONBF",
+            "O_RDONLY",
+            "O_WRONLY",
+            "O_RDWR",
+            "O_CREAT",
+            "O_TRUNC",
+            "STDIN_FILENO",
+            "STDOUT_FILENO",
+            "STDERR_FILENO",
+        ] {
             assert!(constants.contains(&name), "{name} missing");
         }
         assert!(!has("libc", "__pthread_unwind_buf_t"));

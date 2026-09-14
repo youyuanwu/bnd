@@ -1,5 +1,13 @@
 # Cacheline-Aligned Struct Fix
 
+> **Historical implementation record:** The padding workaround described
+> below belonged to the retired `bnd-winmd` extractor. The current fork emits
+> forced alignment through RDL, and active ABI coverage verifies aligned and
+> embedded records in
+> [`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
+
 ## Problem
 
 Some Linux kernel structs use `____cacheline_aligned_in_smp` or
@@ -111,9 +119,9 @@ pub struct EmbeddingAligned {
 }
 ```
 
-## Tests
+## Historical Tests
 
-`tests/fixtures/simple/simple.h` defines:
+The removed legacy simple fixture defined:
 
 - `CacheAligned` — struct with `__attribute__((aligned(64)))`, tests
   trailing padding (8 bytes of fields → 64 bytes total).

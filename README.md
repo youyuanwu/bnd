@@ -1,10 +1,24 @@
 # bnd
 
-Generate Rust FFI bindings from C headers using [WinMD](https://ecma-international.org/publications-and-standards/standards/ecma-335/) (ECMA-335) as an intermediate representation.
+Generate Rust FFI bindings from C headers using
+[WinMD](https://ecma-international.org/publications-and-standards/standards/ecma-335/)
+(ECMA-335) as an intermediate representation.
 
 ```
-C headers ──→ bnd-clang ──→ RDL ──→ WinMD ──→ bnd-bindgen ──→ Rust FFI modules
+C headers -> bnd-clang -> RDL -> windows-rdl -> canonical WinMD
+                                                     |
+                           defining-header remap + bnd-bindgen package mode
+                                                     |
+                                                     v
+                                             Rust FFI modules
 ```
+
+Production generators parse one coherent translation unit, emit RDL by
+defining header under one flat canonical WinMD namespace, then remap a
+temporary metadata copy so `bnd-bindgen` package mode can generate
+header-owned Rust modules and Cargo features. External WinMD references are
+preserved through the Clang and RDL stages and routed to their owning Rust
+crate during bindgen.
 
 ## Crates
 
@@ -12,9 +26,11 @@ C headers ──→ bnd-clang ──→ RDL ──→ WinMD ──→ bnd-bindge
 |---|---|
 | [`bnd-clang`](bnd-clang/) | Vendored direct-Clang C header → RDL frontend used by production generators |
 | [`bnd-bindgen`](bnd-bindgen/) | Vendored WinMD → Rust generator used by production generators |
+| [`bnd-macros`](bnd-macros/) | Link macros used by generated sys bindings |
+| [`bnd-linux-gen`](bnd-linux-gen/) | In-repo Linux generator: Clang/RDL, canonical WinMD, remapping, and package generation |
 | [`bnd-linux`](bnd-linux/) | Generated POSIX and Linux system bindings |
+| [`bnd-openssl-gen`](bnd-openssl-gen/) | In-repo OpenSSL generator with external `bnd-linux` metadata routes |
 | [`bnd-openssl`](bnd-openssl/) | Generated OpenSSL 3.x bindings with POSIX types owned by `bnd-linux` |
-| [`bnd-winmd`](bnd-winmd/) | Standalone TOML-driven C header → WinMD library and CLI; retained with its fixture tests |
 
 ## Example bindings
 

@@ -1,7 +1,16 @@
 # Sonar Forward Declaration Skips Enum
 
-**Component:** bnd-winmd  
-**Status:** Fixed — supplemental `EnumDecl` pass in `collect_enums()`
+> **Historical implementation record:** This issue and supplemental-pass fix
+> belonged to the retired `bnd-winmd`/`clang::sonar` frontend. The active
+> frontend is the maintained `bnd-clang` fork; enum and bitfield behavior is
+> covered by
+> [`bnd-clang/tests/linux_simple.rs`](../../../bnd-clang/tests/linux_simple.rs)
+> and
+> [`tests/e2e-clang-simple/src/lib.rs`](../../../tests/e2e-clang-simple/src/lib.rs).
+
+**Historical component:** bnd-winmd
+**Status at archival:** Fixed by a supplemental `EnumDecl` pass in
+`collect_enums()`.
 
 ## Problem
 

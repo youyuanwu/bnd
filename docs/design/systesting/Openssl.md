@@ -442,7 +442,7 @@ public fields, but wrapped in `#ifndef OPENSSL_NO_DEPRECATED_3_0`
 | 8 | Macro aliases (`EVP_MD_CTX_create`) | Not extracted (expected) — underlying real functions are available |
 | 9 | Callback typedefs | Extracted as WinMD delegates correctly |
 | 10 | Cross-partition include coupling | Resolved via TypeRegistry cross-partition TypeRef, same as bnd-linux |
-| 11 | `struct tm` / `FILE` in crypto.h | Resolved via cross-WinMD type import — system types now reference `bnd-linux.winmd` instead of being extracted locally (see [CrossWinmdReferences.md](../CrossWinmdReferences.md)) |
+| 11 | `struct tm` / `FILE` in crypto.h | Resolved via cross-WinMD type import — system types now reference `bnd-linux.winmd` instead of being extracted locally (see [CrossWinmdReferences.md](../features/CrossWinmdReferences.md)) |
 | 12 | `tls_session_ticket_ext_st` in ssl.h | Fixed by adding `openssl/tls1.h` to ssl traverse |
 | 13 | LHASH inline unions in err.h | **Unresolved** — err partition skipped. See Known Limitations |
 

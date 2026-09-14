@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["bnd-bindgen", "bnd-clang", "bnd-macros", "bnd-winmd", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-simple", "tests/e2e-multi", "tests/e2e-clang-multi", "tests/e2e-clang-simple", "tests/e2e-clang-zlib", "tests/e2e-zlib", "tests/bnd-linux-tests"]
+members = ["bnd-bindgen", "bnd-clang", "bnd-macros", "bnd-openssl", "bnd-openssl-gen", "bnd-linux", "bnd-linux-gen", "tests/simple-impl", "tests/e2e-clang-multi", "tests/e2e-clang-simple", "tests/e2e-clang-zlib", "tests/bnd-linux-tests"]
 
 package.edition = "2024"
 package.authors = [ "youyuanwu@outlook.com" ]
@@ -9,19 +9,10 @@ package.repository = "https://github.com/youyuanwu/bnd"
 package.license = "MIT"
 
 [workspace.dependencies]
-anyhow = "1"
-clang = { version = "2", features = ["clang_10_0"] }
-clap = { version = "4", features = ["derive"] }
-serde = { version = "1", features = ["derive"] }
 simple-impl = { path = "tests/simple-impl" }
 tempfile = "3"
-toml = "1"
-tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-windows-bindgen = "0.100"
-# windows-bindgen = { path = "../windows-rs/crates/libs/bindgen"}
 windows-metadata = "0.100"
 
 # Crate in this repo.
-bnd-winmd = { path = "bnd-winmd" , version = "0.0.7" }
 bnd-macros = { path = "bnd-macros", version = "0.0.6" }

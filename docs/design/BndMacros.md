@@ -97,9 +97,9 @@ Each crate depends on `bnd-macros` (workspace dependency) and adds the
 
 - `bnd-linux` — `extern crate bnd_macros as windows_link;`
 - `bnd-openssl` — `extern crate bnd_macros as windows_link;`
-- `tests/e2e-simple` — `extern crate bnd_macros as windows_link;`
-- `tests/e2e-multi` — `extern crate bnd_macros as windows_link;`
-- `tests/e2e-zlib` — `extern crate bnd_macros as windows_link;`
+- `tests/e2e-clang-simple` — `extern crate bnd_macros as windows_link;`
+- `tests/e2e-clang-multi` — `extern crate bnd_macros as windows_link;`
+- `tests/e2e-clang-zlib` — `extern crate bnd_macros as windows_link;`
 
 ## Status
 
