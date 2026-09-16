@@ -35,7 +35,7 @@ dependencies = [
  "clang-sys",
  "proc-macro2",
  "quote",
- "syn",
+ "syn 3.0.5",
  "tempfile",
  "windows-default",
  "windows-metadata",
@@ -104,9 +104,9 @@ checksum = "9330f8b2ff13f34540b44e946ef35111825727b38d33286ef986142615121801"
 
 [[package]]
 name = "clang-sys"
-version = "1.8.1"
+version = "1.9.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b023947811758c97c59bf9d1c188fd619ad4718dcaa767947df1cadb14f39f4"
+checksum = "157a8ba7b480713b56f4c09fd13fc3e0a22a5dfab8097ba61cbc5feef950788a"
 dependencies = [
  "glob",
  "libc",
@@ -250,18 +250,18 @@ checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
 
 [[package]]
 name = "proc-macro2"
-version = "1.0.106"
+version = "1.0.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fd00f0bb2e90d81d1044c2b32617f68fcb9fa3bb7640c23e9c748e53fb30934"
+checksum = "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
 dependencies = [
  "unicode-ident",
 ]
 
 [[package]]
 name = "quote"
-version = "1.0.46"
+version = "1.0.47"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dfbc457d0c7a0759a614551b11a6409e5951f6c7537be1f1b7682b9ae9230368"
+checksum = "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
 dependencies = [
  "proc-macro2",
 ]
@@ -326,6 +326,17 @@ name = "syn"
 version = "2.0.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "872831b642d1a07999a962a351ed35b955ea2cfc8f3862091e2a240a84f17297"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "unicode-ident",
+]
+
+[[package]]
+name = "syn"
+version = "3.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "12df2e0110f65b775f769bb17ef989067a1d931b2eb822bd4346631eeada89f9"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -447,7 +458,7 @@ checksum = "9fec90978da14e3ebd4a9b4347d3e17351804aafed9676a955d82b022747f789"
 dependencies = [
  "proc-macro2",
  "quote",
- "syn",
+ "syn 2.0.119",
  "windows-default",
  "windows-metadata",
 ]
