@@ -1,5 +1,5 @@
 #![allow(non_upper_case_globals)]
-#![doc = include_str!("../readme.md")]
+#![doc = include_str!("../../../README.md")]
 
 use std::collections::{BTreeMap, HashMap, HashSet};
 use std::path::{Path, PathBuf};

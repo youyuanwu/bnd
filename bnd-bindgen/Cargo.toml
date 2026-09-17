@@ -1,13 +1,26 @@
 [package]
 name = "bnd-bindgen"
-version = "0.0.0"
+version = "0.0.7"
 edition.workspace = true
 rust-version = "1.95"
-publish = false
+authors.workspace = true
 license = "MIT OR Apache-2.0"
-description = "Experimental bnd fork of windows-bindgen"
+description = "Generates Rust bindings from WinMD metadata"
 repository.workspace = true
-readme = "vendored/windows-bindgen/readme.md"
+documentation = "https://docs.rs/bnd-bindgen"
+readme = "README.md"
+keywords = ["winmd", "ffi", "bindings", "codegen", "rust"]
+categories = ["development-tools::ffi", "external-ffi-bindings"]
+include = [
+    "README.md",
+    "VENDORED.md",
+    "vendored/windows-bindgen/Cargo.toml.upstream",
+    "vendored/windows-bindgen/license-apache-2.0",
+    "vendored/windows-bindgen/license-mit",
+    "vendored/windows-bindgen/readme.md",
+    "vendored/windows-bindgen/src/**",
+    "tests/*.rs",
+]
 
 [lib]
 name = "windows_bindgen"

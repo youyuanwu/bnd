@@ -13,14 +13,17 @@ This crate contains an experimental fork of `windows-bindgen`.
 
 The vendored directory started as an exact copy of the upstream crate at the
 recorded revision, including its original manifest, README, and license
-files. The bnd package manifest lives one level above it and points its
-library target at the vendored source.
+files. The upstream manifest is stored as `Cargo.toml.upstream` so Cargo does
+not exclude the vendored source as a nested package. The bnd package manifest
+lives one level above it and points its library target at the vendored source.
 
 Local experiments should modify files under `vendored/windows-bindgen` so
 the fork remains easy to compare with upstream.
 
 ## Local changes
 
+- Crate-level documentation uses the bnd package README while the upstream
+  README remains preserved in the vendored directory.
 - Package feature dependencies can use an explicitly configured root
   namespace without flattening its Rust module hierarchy.
 - Metadata filters can be routed to caller-provided external Rust crate or

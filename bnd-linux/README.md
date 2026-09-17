@@ -13,6 +13,13 @@ The checked-in canonical metadata is
 temporary remap is used only while generating Rust modules and is not
 checked in.
 
+## Supported target
+
+The checked-in bindings are generated and validated for
+`x86_64-unknown-linux-gnu` from Ubuntu 26.04 system headers (glibc 2.43).
+Other operating systems, architectures, and C library environments are
+rejected because their native ABI layouts may differ.
+
 ## Features
 
 Each defining header owns a Rust module directly below `bnd_linux::libc`.
@@ -36,7 +43,7 @@ Add to `Cargo.toml` with the features you need:
 
 ```toml
 [dependencies]
-bnd-linux = { version = "0.0.6", default-features = false, features = ["epoll", "signal"] }
+bnd-linux = { version = "0.0.7", default-features = false, features = ["epoll", "signal"] }
 ```
 
 Then use the bindings:
