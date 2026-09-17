@@ -23,7 +23,7 @@ feature to use `clang-sys` runtime loading instead.
 
 ```toml
 [build-dependencies]
-windows-clang = { package = "bnd-clang", version = "0.0.7" }
+windows-clang = { package = "bnd-clang", version = "0.0.8" }
 windows-rdl = { version = "0.100", default-features = false }
 ```
 
@@ -44,6 +44,11 @@ windows_rdl::reader()
     .write()
     .expect("compile WinMD");
 ```
+
+For package generation, `write_by_header()` emits flat RDL partitions and
+`remap_by_header()` converts the compiled WinMD into canonical
+defining-header namespaces. The remapper round-trips through RDL to restore
+external TypeRef scopes.
 
 See [`VENDORED.md`](VENDORED.md) for the upstream revision, licensing, and
 the maintained fork changes.

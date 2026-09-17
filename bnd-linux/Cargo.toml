@@ -1,6 +1,6 @@
 [package]
 name = "bnd-linux"
-version = "0.0.7"
+version = "0.0.8"
 edition.workspace = true
 description = "Rust FFI bindings for POSIX and Linux system APIs generated through bnd-clang"
 authors.workspace = true
@@ -13,7 +13,7 @@ categories = ["external-ffi-bindings", "os::linux-apis"]
 
 [package.metadata.docs.rs]
 default-target = "x86_64-unknown-linux-gnu"
-targets = ["x86_64-unknown-linux-gnu"]
+targets = ["x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu"]
 
 [dependencies]
 bnd-macros.workspace = true
@@ -43,7 +43,7 @@ default = [
     "fcntl",
     "fcntl_linux",
     "file",
-    "in",
+    "in_",
     "inet",
     "inotify",
     "int_ll64",
@@ -118,8 +118,8 @@ eventfd = []
 fcntl = ["types"]
 fcntl_linux = []
 file = ["struct_file", "types"]
-in = ["sockaddr", "socket"]
-inet = ["in", "types", "unistd"]
+in_ = ["sockaddr", "socket"]
+inet = ["in_", "types", "unistd"]
 inotify = []
 int_ll64 = []
 locale_t = ["__locale_t"]

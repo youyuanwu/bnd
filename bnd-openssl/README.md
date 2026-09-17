@@ -4,12 +4,13 @@ Rust FFI bindings for OpenSSL 3.x (`libssl` + `libcrypto`), generated
 through the production direct-Clang pipeline:
 
 ```text
-OpenSSL headers -> bnd-clang -> defining-header RDL -> flat openssl WinMD
-                -> temporary package remap -> bnd-bindgen -> Rust
+OpenSSL headers -> bnd-clang -> defining-header RDL -> flat temporary WinMD
+                -> defining-header remap -> canonical namespaced WinMD
+                -> bnd-bindgen -> Rust
 ```
 
-The checked-in canonical metadata is `winmd/bnd-openssl.winmd`, with one
-flat `openssl` namespace. Defining headers become Rust modules and
+The checked-in canonical metadata is `winmd/bnd-openssl.winmd`, whose
+`openssl.<header-module>` namespaces map directly to Rust modules and
 same-named Cargo features such as `bio`, `crypto`, `ssl`, and `types`.
 The default feature set remains `bio`, `bn`, `crypto`, `evp`, `rand`,
 `sha`, `ssl`, and `types`; generated dependency features enable additional
@@ -20,7 +21,14 @@ OpenSSL metadata references the canonical
 External POSIX types are owned by `bnd-linux` and generate as exact paths
 such as `bnd_linux::libc::file::FILE`,
 `bnd_linux::libc::struct_tm::tm`, and
-`bnd_linux::libc::types::off_t`. They are not duplicated in this crate.
+`bnd_linux::libc::types::off_t`. One namespace-preserving `libc` reference
+routes all of them; they are not duplicated in this crate.
+
+The checked-in bindings are generated and validated for
+`x86_64-unknown-linux-gnu`. They are also exposed on
+`aarch64-unknown-linux-gnu`, but that target has not been generated or
+ABI-validated and is used at the consumer's risk. On other targets, the crate
+compiles without exporting binding modules.
 
 ## Regenerating
 

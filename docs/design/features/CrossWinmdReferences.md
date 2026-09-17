@@ -1,7 +1,8 @@
 # Design: OpenSSL References to bnd-linux Types
 
 > **Status: Production.** `bnd-openssl` references external POSIX types from
-> the canonical `bnd-linux` WinMD and projects them to exact
+> the canonical `bnd-linux` WinMD and projects them through one
+> namespace-preserving reference to
 > `bnd_linux::libc::<defining-header-module>` Rust paths.
 
 ## Problem
@@ -13,8 +14,8 @@ would prevent values from moving directly between Linux and OpenSSL APIs.
 
 The production design keeps both metadata and Rust ownership external:
 
-- `bnd-linux/winmd/bnd-linux.winmd` defines the canonical flat `libc`
-  metadata.
+- `bnd-linux/winmd/bnd-linux.winmd` defines canonical
+  `libc.<defining-header-module>` metadata.
 - `bnd-openssl/winmd/bnd-openssl.winmd` contains external `libc` TypeRefs,
   not local libc TypeDefs.
 - Generated OpenSSL Rust uses types from the `bnd-linux` crate.
@@ -27,8 +28,9 @@ bnd-linux/winmd/bnd-linux.winmd
              | reference at RDL stage
              v
 OpenSSL headers -> bnd-clang -> defining-header RDL
-                               -> flat openssl WinMD
-                               -> temporary package remap
+                               -> flat temporary openssl WinMD
+                               -> canonical defining-header remap
+                               -> external-scope RDL repair
              + canonical Linux WinMD
                                -> bnd-bindgen
                                -> bnd-openssl/src/openssl/**
@@ -43,33 +45,26 @@ The Linux WinMD is supplied to both metadata stages:
 Passing the Linux WinMD only to bindgen would be too late: the canonical
 OpenSSL metadata itself must already contain valid external references.
 
-## Exact Rust Ownership Routes
+## Namespace-wide Rust Ownership
 
 WinMD identifies metadata namespace and type names, but it does not encode
 the Cargo crate or Rust module that owns an external type. The local
 `bnd-bindgen` fork therefore accepts caller-supplied external ownership
-routes.
+routes. Canonical metadata now carries defining-header ownership, so one
+route covers the complete namespace:
 
-`bnd-openssl-gen` owns the concrete route table:
+```rust
+bindgen.reference(
+    "bnd_linux",
+    windows_bindgen::ReferenceStyle::Full,
+    "libc",
+);
+```
 
-| Metadata type | Generated Rust owner |
-|---|---|
-| `libc.FILE` | `bnd_linux::libc::file` |
-| `libc.hostent` | `bnd_linux::libc::netdb` |
-| `libc.pthread_key_t`, `pthread_once_t`, `pthread_t` | `bnd_linux::libc::pthreadtypes` |
-| `libc.timeval` | `bnd_linux::libc::struct_timeval` |
-| `libc.tm` | `bnd_linux::libc::struct_tm` |
-| `libc.time_t` | `bnd_linux::libc::time_t` |
-| `libc.off_t`, `ssize_t` | `bnd_linux::libc::types` |
-
-Routes are exact because the flat canonical `libc` namespace does not carry
-Rust defining-header ownership. The generator derives the set of external
-types actually used by OpenSSL, rejects missing routes, and marks transitive
-Linux metadata dependencies as external so bindgen does not generate a
-local `libc` tree.
-
-The routing API is generic. Linux- and OpenSSL-specific names remain in
-`bnd-openssl-gen`, not in the vendored bindgen implementation.
+For example, `libc.file.FILE` becomes
+`bnd_linux::libc::file::FILE`, while `libc.types.off_t` becomes
+`bnd_linux::libc::types::off_t`. The namespace route also covers transitive
+Linux metadata dependencies, so no per-type route table is required.
 
 ## Cargo Features
 
@@ -85,14 +80,14 @@ the defining-header features required by routed types:
 - `types`
 
 Generated OpenSSL feature dependencies remain separate and are derived from
-the temporary package metadata.
+the canonical package metadata.
 
 ## Validation
 
 The OpenSSL freshness test verifies that:
 
 - No local `src/libc` tree is generated.
-- Generated Rust contains every expected exact external route.
+- Generated Rust contains the expected namespace-preserving external paths.
 - Rust sources, the canonical OpenSSL WinMD, and generated Cargo features
   match checked-in artifacts.
 - A second generation is identical.
@@ -113,10 +108,9 @@ This runs `bnd-linux-gen` followed by `bnd-openssl-gen`.
 
 ## History
 
-The earlier `bnd-winmd` production path used nested
-`libc.posix.*` metadata and a namespace-wide `--reference` mapping. The
-direct-Clang cutover changed canonical Linux metadata to flat `libc` and
-made defining-header Rust ownership explicit through exact bindgen routes.
-
-The old design remains relevant only as history for the retired standalone
-implementation and its removed fixtures.
+The earlier `bnd-winmd` production path used nested `libc.posix.*` metadata
+and a namespace-wide `--reference` mapping. The initial direct-Clang cutover
+temporarily changed canonical Linux metadata to flat `libc` and required
+exact bindgen routes. The current design retains the direct-Clang flat scrape
+but structurally remaps the canonical metadata to the current defining-header
+module layout before applying one namespace-wide reference.

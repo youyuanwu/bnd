@@ -13,15 +13,16 @@ Use `bnd-linux-gen`/`bnd-linux` and
 bnd-zstd-gen/                         bnd-zstd/
   Rust header/library policy            checked-in canonical WinMD
   bnd-clang -> per-header RDL            checked-in generated Rust
-  windows-rdl -> canonical WinMD         generated Cargo features
-  metadata remap -> package WinMD        native ABI/runtime tests
+  windows-rdl -> flat temporary WinMD    generated Cargo features
+  metadata remap -> canonical WinMD      native ABI/runtime tests
   bnd-bindgen package mode
                  |
                  +---------------------> regenerated artifacts
 ```
 
-The canonical metadata uses one flat namespace. Generated Rust modules and
-features are organized by the header that defines each item.
+The scrape metadata uses one flat namespace. The checked-in canonical
+metadata, generated Rust modules, and features are organized by the header
+that defines each item.
 
 ## 1. Create the product crate
 
@@ -136,15 +137,15 @@ Add only policy required by the target API:
 These choices belong in the generator so they are reviewed, tested, and
 versioned with the generated product.
 
-## 4. Compile the canonical WinMD
+## 4. Compile the flat intermediate WinMD
 
-Compile the RDL directory into one flat canonical namespace:
+Compile the RDL directory into one flat temporary namespace:
 
 ```rust
 windows_rdl::reader()
     .input(&rdl_dir)
     .reference_default()
-    .output(&canonical_winmd)
+    .output(&flat_winmd)
     .write()
     .expect("windows-rdl failed to compile zstd metadata");
 ```
@@ -153,33 +154,29 @@ If another product owns referenced types, pass its canonical WinMD to both
 `windows_clang::clang().reference(...)` and
 `windows_rdl::reader().reference(...)`.
 
-Copy the canonical result into `bnd-zstd/winmd/bnd-zstd.winmd`. This checked-in
-file is the external metadata contract. Do not check in temporary remapped
-metadata.
-
-## 5. Remap defining-header ownership
+## 5. Create canonical defining-header metadata
 
 `write_by_header()` emits one RDL file per defining header. Use
-`windows_rdl::item_names()` to collect each file's item names and construct
-routes from the flat canonical namespace to sanitized header-module names.
-Then use `windows_metadata::remap()` to create a temporary package-oriented
-WinMD:
+`windows_clang::remap_by_header()` to derive item ownership from those files,
+structurally remap the flat metadata, and repair external TypeRef scopes:
 
 ```rust
-windows_metadata::remap()
+windows_clang::remap_by_header()
+    .rdl_dir(&rdl_dir)
+    .scratch_dir(&temporary_remap_dir)
     .source("zstd")
-    .fallback("zstd")
-    .routes(routes)
-    .input(&canonical_winmd)
-    .output(&remapped_winmd)
-    .remap()
+    .input(&flat_winmd)
+    .output(&canonical_winmd)
+    .import("Windows::Win32")
+    .reference_default()
+    .write()
     .expect("failed to remap zstd metadata");
 ```
 
-Follow `module_stem()` in
-[`bnd-linux-gen/src/clang.rs`](../../bnd-linux-gen/src/clang.rs) when
-sanitizing header stems. The remap determines Rust module and feature
-ownership without changing the canonical WinMD namespace.
+Check the canonical result into `bnd-zstd/winmd/bnd-zstd.winmd`. Header stems
+are sanitized consistently, including a trailing underscore for Rust
+keywords. The RDL round trip is required because the metadata remapper does
+not preserve external assembly scopes itself.
 
 ## 6. Generate the package
 
@@ -188,7 +185,7 @@ Run the maintained bindgen fork in sys/package mode:
 ```rust
 let mut bindgen = windows_bindgen::Bindgen::new();
 bindgen
-    .input(&remapped_winmd)
+    .input(&canonical_winmd)
     .output(output_dir)
     .filter("zstd")
     .sys()
@@ -206,14 +203,16 @@ production generators protect the product manifest this way.
 When the generated API uses types owned by another bindings crate:
 
 1. Reference that crate's canonical WinMD during Clang and RDL generation.
-2. Include both the remapped local WinMD and external WinMD in bindgen inputs.
-3. Exclude external metadata namespaces from local output.
-4. Add exact `Bindgen::external_reference()` routes to the owning Rust module.
-5. Add the corresponding product dependency and defining-header features.
+2. Import its namespaces while repairing the remapped local WinMD.
+3. Include both canonical WinMD files in bindgen inputs.
+4. Exclude external metadata namespaces from local output.
+5. Add one namespace-wide `Bindgen::reference()` using
+   `ReferenceStyle::Full`.
+6. Add the corresponding product dependency and defining-header features.
 
-For example, OpenSSL routes `libc.tm` to
-`bnd_linux::libc::struct_tm`. The concrete route table remains in
-`bnd-openssl-gen`; the generic routing mechanism remains in `bnd-bindgen`.
+For example, OpenSSL routes the `libc` namespace to `bnd_linux`; metadata
+type `libc.struct_tm.tm` therefore becomes
+`bnd_linux::libc::struct_tm::tm`.
 
 See
 [`bnd-openssl-gen/src/clang.rs`](../../bnd-openssl-gen/src/clang.rs) and
@@ -255,9 +254,9 @@ Generator tests should verify the contract that matters for the API:
 
 - representative types, constants, callbacks, and method signatures;
 - native library ownership;
-- one flat canonical namespace;
-- defining-header remapping;
-- external TypeRefs and exact Rust ownership routes.
+- canonical defining-header namespaces;
+- deterministic structural remapping and reference-scope repair;
+- external TypeRefs and namespace-preserving Rust ownership.
 
 Product or integration tests should call the real shared library and verify
 ABI-sensitive sizes, alignments, offsets, values, and round trips.
@@ -280,10 +279,10 @@ change, not as output to edit manually.
 ## Active references
 
 - [`bnd-linux-gen`](../../bnd-linux-gen/) / [`bnd-linux`](../../bnd-linux/) —
-  flat canonical `libc`, defining-header modules, package feature generation.
+  canonical `libc.<header-module>` metadata and package feature generation.
 - [`bnd-openssl-gen`](../../bnd-openssl-gen/) /
-  [`bnd-openssl`](../../bnd-openssl/) — external Linux metadata and exact
-  cross-crate Rust routes.
+  [`bnd-openssl`](../../bnd-openssl/) — external Linux metadata and one
+  namespace-preserving cross-crate Rust reference.
 - [`tests/e2e-clang-simple`](../../tests/e2e-clang-simple/) — minimal direct
   header-to-Rust example.
 - [`tests/e2e-clang-multi`](../../tests/e2e-clang-multi/) — multiple Clang/RDL

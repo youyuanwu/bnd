@@ -141,7 +141,7 @@ fn generated_artifacts_are_up_to_date() {
     ] {
         assert!(
             generated_text.contains(path),
-            "generated OpenSSL bindings are missing external route `{path}`"
+            "generated OpenSSL bindings are missing external reference path `{path}`"
         );
     }
 

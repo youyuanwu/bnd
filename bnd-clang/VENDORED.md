@@ -66,5 +66,9 @@ fork remains easy to compare with upstream.
   requiring an unrelated directory scope.
 - Flat per-header output preserves namespaces from referenced WinMD types and
   accepts generic defining-header library overrides.
+- `remap_by_header` structurally maps flat per-header metadata into canonical
+  header namespaces and repairs external TypeRef scopes through an RDL
+  round trip. Header stems that are Rust keywords receive a trailing
+  underscore.
 - Function declarations enumerate their direct Clang arguments so parameter
   declarations nested under function-pointer return types are not duplicated.

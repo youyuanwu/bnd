@@ -45,6 +45,25 @@ fn generated_artifacts_are_up_to_date() {
     let actual =
         std::fs::read(temp.path().join("winmd/bnd-linux.winmd")).expect("read generated WinMD");
     assert_eq!(expected, actual, "bnd-linux.winmd is out of date");
+    let metadata =
+        windows_metadata::reader::File::new(actual.clone()).expect("parse generated Linux WinMD");
+    let namespaces: std::collections::BTreeSet<_> =
+        windows_metadata::reader::Index::new(vec![metadata])
+            .types()
+            .map(|ty| ty.namespace().to_string())
+            .collect();
+    assert!(
+        namespaces
+            .iter()
+            .all(|namespace| namespace.starts_with("libc.")),
+        "canonical Linux WinMD contains unexpected namespaces: {namespaces:?}"
+    );
+    assert!(
+        namespaces.contains("libc.file")
+            && namespaces.contains("libc.in_")
+            && namespaces.contains("libc.types"),
+        "canonical Linux WinMD is missing representative defining-header namespaces: {namespaces:?}"
+    );
 
     let expected =
         std::fs::read_to_string(checked_in.join("Cargo.toml")).expect("read checked-in Cargo.toml");

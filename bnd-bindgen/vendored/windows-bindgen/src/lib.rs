@@ -102,6 +102,31 @@ enum Input {
     Bytes(Vec<u8>),
 }
 
+/// Controls how an external metadata namespace is appended to its Rust path.
+#[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
+pub enum ReferenceStyle {
+    /// Append the complete metadata namespace.
+    Full,
+    /// Append the metadata namespace without its first segment.
+    SkipRoot,
+    /// Append only the referenced type name.
+    #[default]
+    Flat,
+}
+
+impl std::str::FromStr for ReferenceStyle {
+    type Err = &'static str;
+
+    fn from_str(value: &str) -> Result<Self, Self::Err> {
+        match value {
+            "full" => Ok(Self::Full),
+            "skip-root" => Ok(Self::SkipRoot),
+            "flat" => Ok(Self::Flat),
+            _ => Err("reference style must be `full`, `skip-root`, or `flat`"),
+        }
+    }
+}
+
 /// Output layout for the generated bindings.
 #[derive(Default, Debug, Clone, Copy, PartialEq, Eq)]
 enum Layout {
@@ -353,19 +378,51 @@ impl Bindgen {
     ///
     /// The filter uses the same namespace and type syntax as [`Bindgen::filter`]. Routed types
     /// remain available as dependencies of generated APIs, but are not generated in this output
-    /// package or represented by local Cargo feature gates.
+    /// package or represented by local Cargo feature gates. `style` controls whether the full
+    /// metadata namespace, its root-stripped form, or no namespace is appended to the Rust path.
     ///
     /// ```
     /// # let mut builder = windows_bindgen::Bindgen::new();
-    /// builder.external_reference("Vendor.Types", "vendor_bindings::types");
+    /// builder.external_reference(
+    ///     "Vendor.Types",
+    ///     "vendor_bindings",
+    ///     windows_bindgen::ReferenceStyle::Full,
+    /// );
     /// ```
     #[track_caller]
-    pub fn external_reference(&mut self, filter: &str, rust_path_prefix: &str) -> &mut Self {
+    pub fn external_reference(
+        &mut self,
+        filter: &str,
+        rust_path_prefix: &str,
+        style: ReferenceStyle,
+    ) -> &mut Self {
         validate_external_reference_filter(filter);
         validate_rust_path_prefix(rust_path_prefix);
         self.external_references.push(ReferenceStage::external(
             rust_path_prefix.trim(),
             filter.trim(),
+            style,
+        ));
+        self
+    }
+
+    /// Maps referenced metadata to a Rust crate or module prefix.
+    ///
+    /// Unlike [`Bindgen::external_reference`], an explicitly selected local type takes
+    /// precedence over this reference. This matches the historical `--reference` behavior.
+    #[track_caller]
+    pub fn reference(
+        &mut self,
+        rust_path_prefix: &str,
+        style: ReferenceStyle,
+        filter: &str,
+    ) -> &mut Self {
+        validate_external_reference_filter(filter);
+        validate_rust_path_prefix(rust_path_prefix);
+        self.external_references.push(ReferenceStage::implicit(
+            rust_path_prefix.trim(),
+            filter.trim(),
+            style,
         ));
         self
     }
@@ -962,7 +1019,7 @@ fn prepend_default_refs(refs: &mut Vec<ReferenceStage>, crate_name: &str, paths:
         paths
             .iter()
             .rev()
-            .map(|path| ReferenceStage::implicit(crate_name, path)),
+            .map(|path| ReferenceStage::implicit(crate_name, path, ReferenceStyle::Flat)),
     );
 }
 
@@ -1053,8 +1110,26 @@ mod tests {
     fn external_reference_builder_is_repeatable() {
         let mut builder = Bindgen::new();
         builder
-            .external_reference("Vendor.Types", "vendor_bindings::types")
-            .external_reference("Vendor.Values", "vendor_bindings::values");
+            .external_reference(
+                "Vendor.Types",
+                "vendor_bindings::types",
+                ReferenceStyle::Flat,
+            )
+            .external_reference(
+                "Vendor.Values",
+                "vendor_bindings::values",
+                ReferenceStyle::Flat,
+            );
+
+        assert_eq!(builder.external_references.len(), 2);
+    }
+
+    #[test]
+    fn reference_builder_is_repeatable() {
+        let mut builder = Bindgen::new();
+        builder
+            .reference("first", ReferenceStyle::Full, "Vendor.Types")
+            .reference("second", ReferenceStyle::SkipRoot, "Vendor.Values");
 
         assert_eq!(builder.external_references.len(), 2);
     }
@@ -1062,13 +1137,17 @@ mod tests {
     #[test]
     #[should_panic(expected = "external reference filter must not be empty")]
     fn empty_external_reference_filter_panics() {
-        Bindgen::new().external_reference("", "vendor_bindings");
+        Bindgen::new().external_reference("", "vendor_bindings", ReferenceStyle::Flat);
     }
 
     #[test]
     #[should_panic(expected = "invalid external reference Rust path prefix")]
     fn malformed_external_reference_path_panics() {
-        Bindgen::new().external_reference("Vendor.Types", "vendor-bindings::types");
+        Bindgen::new().external_reference(
+            "Vendor.Types",
+            "vendor-bindings::types",
+            ReferenceStyle::Flat,
+        );
     }
 
     #[test]

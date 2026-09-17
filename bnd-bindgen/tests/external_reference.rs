@@ -40,7 +40,11 @@ fn exact_route_does_not_own_independently_required_named_dependencies() {
         .sys()
         .package()
         .package_feature_root("Synthetic")
-        .external_reference("Synthetic.External.Shared", "synthetic_dep::provided")
+        .external_reference(
+            "Synthetic.External.Shared",
+            "synthetic_dep::provided",
+            windows_bindgen::ReferenceStyle::Flat,
+        )
         .write();
 
     let local = read(&output.join("src/Synthetic/Local/mod.rs"));
@@ -69,7 +73,11 @@ fn namespace_route_owns_matching_named_dependencies() {
         .sys()
         .package()
         .package_feature_root("Synthetic")
-        .external_reference("Synthetic.External", "synthetic_dep::provided")
+        .external_reference(
+            "Synthetic.External",
+            "synthetic_dep::provided",
+            windows_bindgen::ReferenceStyle::Flat,
+        )
         .write();
 
     let local = read(&output.join("src/Synthetic/Local/mod.rs"));
@@ -85,6 +93,43 @@ fn namespace_route_owns_matching_named_dependencies() {
 }
 
 #[test]
+fn namespace_reference_styles_control_generated_paths() {
+    for (name, style, expected) in [
+        (
+            "full",
+            windows_bindgen::ReferenceStyle::Full,
+            "synthetic_dep::Synthetic::External::Shared",
+        ),
+        (
+            "skip-root",
+            windows_bindgen::ReferenceStyle::SkipRoot,
+            "synthetic_dep::External::Shared",
+        ),
+    ] {
+        let output = package_directory(name);
+        let (local, external) = synthetic_winmds("Synthetic.External");
+
+        windows_bindgen::Bindgen::new()
+            .input_byte_sets([local, external])
+            .output(&output)
+            .filter("Synthetic.Local")
+            .sys()
+            .package()
+            .package_feature_root("Synthetic")
+            .external_reference("Synthetic.External", "synthetic_dep", style)
+            .write();
+
+        let local = read(&output.join("src/Synthetic/Local/mod.rs"));
+        assert!(
+            local.contains(expected),
+            "missing `{expected}` in:\n{local}"
+        );
+
+        std::fs::remove_dir_all(output).expect("remove reference-style package output");
+    }
+}
+
+#[test]
 fn overlapping_external_routes_are_rejected() {
     let output = package_directory("ambiguous");
     let (local, external) = synthetic_winmds("SyntheticExternal");
@@ -96,8 +141,16 @@ fn overlapping_external_routes_are_rejected() {
             .sys()
             .package()
             .package_feature_root("Synthetic")
-            .external_reference("SyntheticExternal", "first_dep")
-            .external_reference("SyntheticExternal.Shared", "second_dep")
+            .external_reference(
+                "SyntheticExternal",
+                "first_dep",
+                windows_bindgen::ReferenceStyle::Flat,
+            )
+            .external_reference(
+                "SyntheticExternal.Shared",
+                "second_dep",
+                windows_bindgen::ReferenceStyle::Flat,
+            )
             .write();
     });
 
@@ -106,6 +159,28 @@ fn overlapping_external_routes_are_rejected() {
     assert!(message.contains("ambiguous external reference routes for `SyntheticExternal.Shared`"));
 
     std::fs::remove_dir_all(output).expect("remove ambiguous package output");
+}
+
+#[test]
+fn broad_windows_reference_coexists_with_automatic_references() {
+    let directory = test_directory("windows-reference");
+    reset_directory(&directory);
+    let output = directory.join("bindings.rs");
+    let output_arg = output.to_string_lossy().into_owned();
+
+    windows_bindgen::bindgen([
+        "--in",
+        "default",
+        "--out",
+        &output_arg,
+        "--filter",
+        "Windows.Foundation.Uri",
+        "--reference",
+        "windows,skip-root,Windows",
+    ]);
+
+    assert!(output.exists());
+    std::fs::remove_dir_all(directory).expect("remove Windows reference output");
 }
 
 fn synthetic_winmds(external_namespace: &str) -> (Vec<u8>, Vec<u8>) {

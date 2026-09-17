@@ -318,15 +318,16 @@ After fixture, zlib, Linux, and OpenSSL parity testing, the direct path was
 promoted into production:
 
 - `bnd-linux-gen` parses one GNU C11 translation unit, emits RDL by defining
-  header under a flat `libc` namespace, writes the canonical
-  `bnd-linux/winmd/bnd-linux.winmd`, temporarily remaps header ownership, and
-  generates `bnd-linux::libc` modules and features with `bnd-bindgen`.
-- `bnd-openssl-gen` follows the same model under a flat `openssl` namespace,
-  writes `bnd-openssl/winmd/bnd-openssl.winmd`, and references the canonical
-  Linux WinMD at both the Clang and RDL stages.
-- Exact external-reference routes project OpenSSL POSIX TypeRefs to
-  `bnd_linux::libc::<defining-header-module>` without a local libc module or
-  source rewriting.
+  header under a flat `libc` scrape namespace, remaps the result into
+  canonical defining-header namespaces in
+  `bnd-linux/winmd/bnd-linux.winmd`, and generates matching
+  `bnd-linux::libc` modules and features with `bnd-bindgen`.
+- `bnd-openssl-gen` follows the same remapped-canonical model under
+  `openssl.<defining-header-module>` and references the canonical Linux WinMD
+  at both the Clang and RDL stages.
+- One namespace-preserving external reference projects all OpenSSL POSIX
+  TypeRefs to `bnd_linux::libc::<defining-header-module>` without a local
+  libc module or source rewriting.
 - Linux functions link to libc by default, with explicit libcrypt/libresolv
   exceptions. OpenSSL functions link to crypto by default, with `ssl.h` and
   `tls1.h` definitions routed to ssl.

@@ -11,9 +11,16 @@
     clippy::all
 )]
 
-#[cfg(not(all(target_os = "linux", target_arch = "x86_64", target_env = "gnu")))]
-compile_error!("bnd-linux supports only x86_64-unknown-linux-gnu");
-
+#[cfg(all(
+    target_os = "linux",
+    any(target_arch = "x86_64", target_arch = "aarch64"),
+    target_env = "gnu"
+))]
 pub mod libc;
 
+#[cfg(all(
+    target_os = "linux",
+    any(target_arch = "x86_64", target_arch = "aarch64"),
+    target_env = "gnu"
+))]
 extern crate bnd_macros as windows_link;

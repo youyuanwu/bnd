@@ -1,31 +1,32 @@
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 /// Generate the bnd-linux crate through bnd-clang.
 ///
-/// The canonical metadata uses one flat `libc` namespace partitioned into RDL
-/// files by defining header. A temporary remapped WinMD supplies the
-/// namespace-based Rust package layout.
+/// Clang emits flat `libc` RDL partitions, then the canonical WinMD is
+/// structurally remapped into defining-header namespaces.
 pub fn generate(output_dir: &Path) {
     let temp = tempfile::tempdir().expect("failed to create temporary metadata directory");
-    let generated_winmd = generate_metadata(temp.path());
+    let flat_winmd = generate_metadata(temp.path());
     let winmd_dir = output_dir.join("winmd");
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-linux WinMD directory");
     let winmd = winmd_dir.join("bnd-linux.winmd");
-    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-linux WinMD");
-    let remapped_winmd = temp.path().join("bnd-linux.remapped.winmd");
-    remap_metadata(
-        &temp.path().join("metadata"),
-        &generated_winmd,
-        &remapped_winmd,
-    );
+    windows_clang::remap_by_header()
+        .rdl_dir(temp.path().join("metadata"))
+        .input(&flat_winmd)
+        .output(&winmd)
+        .scratch_dir(temp.path().join("remap"))
+        .source("libc")
+        .import("Windows::Win32")
+        .reference_default()
+        .write()
+        .expect("failed to remap canonical bnd-linux metadata");
     let manifest_path = output_dir.join("Cargo.toml");
     let manifest = std::fs::read(&manifest_path).expect("failed to preserve bnd-linux Cargo.toml");
 
     let generation = std::panic::catch_unwind(|| {
         windows_bindgen::bindgen([
             "--in",
-            remapped_winmd.to_str().unwrap(),
+            winmd.to_str().unwrap(),
             "--out",
             output_dir.to_str().unwrap(),
             "--filter",
@@ -195,58 +196,6 @@ fn generate_metadata(output_dir: &Path) -> PathBuf {
         .write()
         .expect("windows-rdl failed to compile Linux metadata");
     linux_winmd
-}
-
-fn remap_metadata(rdl_dir: &Path, input: &Path, output: &Path) {
-    let mut rdl_files: Vec<_> = std::fs::read_dir(rdl_dir)
-        .expect("failed to read bnd-clang RDL directory")
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .filter(|path| path.extension().is_some_and(|extension| extension == "rdl"))
-        .collect();
-    rdl_files.sort();
-
-    let mut routes = HashMap::new();
-    for path in rdl_files {
-        let stem = path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .expect("RDL file has no UTF-8 stem");
-        let stem = module_stem(stem);
-        for name in windows_rdl::item_names(&path, "libc").expect("failed to read RDL item names") {
-            routes.insert(name, format!("libc.{stem}"));
-        }
-    }
-
-    windows_metadata::remap()
-        .source("libc")
-        .fallback("libc")
-        .routes(routes)
-        .input(input)
-        .output(output)
-        .remap()
-        .expect("failed to remap Linux metadata");
-}
-
-fn module_stem(header_stem: &str) -> String {
-    let mut stem: String = header_stem
-        .chars()
-        .map(|ch| {
-            if ch.is_ascii_alphanumeric() || ch == '_' {
-                ch
-            } else {
-                '_'
-            }
-        })
-        .collect();
-    if stem
-        .as_bytes()
-        .first()
-        .is_some_and(|byte| byte.is_ascii_digit())
-    {
-        stem.insert(0, '_');
-    }
-    stem
 }
 
 fn clear_rdl_dir(rdl_dir: &Path) {

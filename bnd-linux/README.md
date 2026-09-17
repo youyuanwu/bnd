@@ -4,21 +4,22 @@ Rust FFI bindings for POSIX and Linux system APIs, generated from C
 headers through the production direct-Clang pipeline:
 
 ```text
-system headers -> bnd-clang -> defining-header RDL -> flat libc WinMD
-               -> temporary package remap -> bnd-bindgen -> Rust
+system headers -> bnd-clang -> defining-header RDL -> flat temporary WinMD
+               -> defining-header remap -> canonical namespaced WinMD
+               -> bnd-bindgen -> Rust
 ```
 
 The checked-in canonical metadata is
-`winmd/bnd-linux.winmd`. It contains one flat `libc` namespace. The
-temporary remap is used only while generating Rust modules and is not
-checked in.
+`winmd/bnd-linux.winmd`. Its `libc.<header-module>` namespaces match the
+generated Rust module and Cargo feature layout.
 
 ## Supported target
 
 The checked-in bindings are generated and validated for
 `x86_64-unknown-linux-gnu` from Ubuntu 26.04 system headers (glibc 2.43).
-Other operating systems, architectures, and C library environments are
-rejected because their native ABI layouts may differ.
+They are also exposed on `aarch64-unknown-linux-gnu`, but that target has not
+been generated or ABI-validated and is used at the consumer's risk. On other
+targets, the crate compiles without exporting binding modules.
 
 ## Features
 
@@ -32,6 +33,7 @@ dependencies. For example:
 | `bits/types/struct_tm.h` | `struct_tm` | `bnd_linux::libc::struct_tm` |
 | `bits/pthreadtypes.h` | `pthreadtypes` | `bnd_linux::libc::pthreadtypes` |
 | `sys/types.h` | `types` | `bnd_linux::libc::types` |
+| `netinet/in.h` | `in_` | `bnd_linux::libc::in_` |
 
 All generated features are enabled by default. Disable default features to
 select a smaller surface; dependent defining-header features are added
@@ -43,7 +45,7 @@ Add to `Cargo.toml` with the features you need:
 
 ```toml
 [dependencies]
-bnd-linux = { version = "0.0.7", default-features = false, features = ["epoll", "signal"] }
+bnd-linux = { version = "0.0.8", default-features = false, features = ["epoll", "signal"] }
 ```
 
 Then use the bindings:

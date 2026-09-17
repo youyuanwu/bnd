@@ -12,7 +12,7 @@ name.
 
 ```toml
 [build-dependencies]
-windows-bindgen = { package = "bnd-bindgen", version = "0.0.7" }
+windows-bindgen = { package = "bnd-bindgen", version = "0.0.8" }
 ```
 
 ```rust,no_run
@@ -39,9 +39,11 @@ windows_bindgen::Bindgen::new()
     .write();
 ```
 
-Use `external_reference` to route types owned by referenced WinMD metadata
-to an existing Rust crate or module instead of generating duplicate local
-definitions.
+Use `reference` to route types owned by referenced WinMD metadata to an
+existing Rust crate or module instead of generating duplicate local
+definitions. `ReferenceStyle::Full` preserves the metadata namespace below
+the configured Rust crate path. The equivalent command-line form is
+`--reference rust-path,full,metadata-filter`.
 
 Generated sys bindings require a compatible implementation of the
 `windows_link` macros. Bnd product crates use

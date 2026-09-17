@@ -36,8 +36,8 @@ pub mod fcntl;
 pub mod fcntl_linux;
 #[cfg(feature = "file")]
 pub mod file;
-#[cfg(feature = "in")]
-pub mod r#in;
+#[cfg(feature = "in_")]
+pub mod in_;
 #[cfg(feature = "inet")]
 pub mod inet;
 #[cfg(feature = "inotify")]
