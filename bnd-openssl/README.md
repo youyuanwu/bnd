@@ -24,8 +24,11 @@ such as `bnd_linux::libc::file::FILE`,
 `bnd_linux::libc::types::off_t`. One namespace-preserving `libc` reference
 routes all of them; they are not duplicated in this crate.
 
-The checked-in bindings target `x86_64-unknown-linux-gnu`. On other targets,
-the crate compiles without exporting binding modules.
+The checked-in bindings are generated and validated for
+`x86_64-unknown-linux-gnu`. They are also exposed on
+`aarch64-unknown-linux-gnu`, but that target has not been generated or
+ABI-validated and is used at the consumer's risk. On other targets, the crate
+compiles without exporting binding modules.
 
 ## Regenerating
 
