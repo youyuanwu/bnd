@@ -102,8 +102,9 @@ The production products add a package-generation layer:
 ```text
 one translation unit
     -> RDL by defining header
-    -> one flat canonical WinMD namespace
-    -> temporary defining-header metadata remap
+    -> one flat temporary WinMD namespace
+    -> canonical defining-header metadata remap
+    -> external reference-scope repair
     -> bnd-bindgen package mode
     -> checked-in Rust modules and Cargo features
 ```
@@ -117,8 +118,8 @@ one translation unit
 - second-generation determinism.
 
 OpenSSL additionally verifies that POSIX metadata remains externally owned
-and that generated Rust uses exact
-`bnd_linux::libc::<defining-header-module>` routes.
+and that generated Rust uses the namespace-preserving
+`bnd_linux::libc::<defining-header-module>` paths.
 
 Run the production checks with:
 

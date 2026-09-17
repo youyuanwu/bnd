@@ -288,8 +288,9 @@ merged reader resolves types by `(namespace, name)` across all loaded
 winmds.
 
 The first production consumer was the former `bnd-openssl` generator. The
-current direct-Clang production design instead references the flat canonical
-Linux WinMD at the Clang and RDL stages and uses exact Rust ownership routes.
+current direct-Clang production design instead references the canonical
+defining-header Linux WinMD at the Clang and RDL stages and uses one
+namespace-preserving Rust ownership route.
 See [CrossWinmdReferences.md](features/CrossWinmdReferences.md).
 
 ### `windows-bindgen` Compatibility Conventions

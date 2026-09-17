@@ -1,6 +1,6 @@
 //! End-to-end tests for Socket bindings against real libc.
 
-use bnd_linux::libc::{r#in, socket, socket_type, struct_iovec, unistd};
+use bnd_linux::libc::{in_, socket, socket_type, struct_iovec, unistd};
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -131,22 +131,22 @@ fn getsockname_after_bind() {
     let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0);
 
-    let mut addr = r#in::sockaddr_in::default();
+    let mut addr = in_::sockaddr_in::default();
     addr.sin_family = socket::PF_INET as u16;
     addr.sin_port = 0;
-    addr.sin_addr.s_addr = unsafe { r#in::htonl(0x7f000001) }; // 127.0.0.1
+    addr.sin_addr.s_addr = unsafe { in_::htonl(0x7f000001) }; // 127.0.0.1
 
     let rc = unsafe {
         socket::bind(
             fd,
             &addr as *const _ as *const socket::sockaddr,
-            core::mem::size_of::<r#in::sockaddr_in>() as u32,
+            core::mem::size_of::<in_::sockaddr_in>() as u32,
         )
     };
     assert_eq!(rc, 0, "bind to loopback:0 failed");
 
-    let mut out = r#in::sockaddr_in::default();
-    let mut len = core::mem::size_of::<r#in::sockaddr_in>() as u32;
+    let mut out = in_::sockaddr_in::default();
+    let mut len = core::mem::size_of::<in_::sockaddr_in>() as u32;
     let rc = unsafe {
         socket::getsockname(
             fd,
@@ -167,16 +167,16 @@ fn listen_on_tcp_socket() {
     let fd = unsafe { socket::socket(socket::PF_INET, socket_type::SOCK_STREAM as i32, 0) };
     assert!(fd >= 0);
 
-    let mut addr = r#in::sockaddr_in::default();
+    let mut addr = in_::sockaddr_in::default();
     addr.sin_family = socket::PF_INET as u16;
     addr.sin_port = 0;
-    addr.sin_addr.s_addr = unsafe { r#in::htonl(0x7f000001) };
+    addr.sin_addr.s_addr = unsafe { in_::htonl(0x7f000001) };
 
     let rc = unsafe {
         socket::bind(
             fd,
             &addr as *const _ as *const socket::sockaddr,
-            core::mem::size_of::<r#in::sockaddr_in>() as u32,
+            core::mem::size_of::<in_::sockaddr_in>() as u32,
         )
     };
     assert_eq!(rc, 0, "bind failed");

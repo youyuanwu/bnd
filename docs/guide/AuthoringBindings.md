@@ -36,9 +36,9 @@ A crates.io-based setup can use:
 bnd-macros = "0.0.6"
 
 [build-dependencies]
-windows-clang = { package = "bnd-clang", version = "0.0.7" }
+windows-clang = { package = "bnd-clang", version = "0.0.8" }
 windows-rdl = { version = "0.100", default-features = false }
-windows-bindgen = { package = "bnd-bindgen", version = "0.0.7" }
+windows-bindgen = { package = "bnd-bindgen", version = "0.0.8" }
 ```
 
 ## Minimal flat binding
@@ -169,18 +169,20 @@ For a checked-in bindings product, follow the production convention:
 
 1. Parse one coherent translation unit.
 2. Emit RDL by defining header with `write_by_header()`.
-3. Compile all RDL into one canonical WinMD whose types share one flat root
+3. Compile all RDL into one temporary WinMD whose types share one flat root
    namespace.
 4. Derive defining-header ownership from the RDL files.
-5. Remap a temporary copy of the metadata to header-owned namespaces.
-6. Run `bnd-bindgen` in package mode against the remapped copy.
+5. Structurally remap the metadata to header-owned namespaces and round-trip
+   it through RDL to restore external TypeRef scopes.
+6. Check in that remapped WinMD as the canonical metadata contract.
+7. Run `bnd-bindgen` in package mode against the canonical WinMD.
 
 Package generation uses the builder APIs:
 
 ```rust
 let mut bindgen = windows_bindgen::Bindgen::new();
 bindgen
-    .input("example.remapped.winmd")
+    .input("example.winmd")
     .output("path/to/product-crate")
     .filter("example")
     .sys()
@@ -189,9 +191,9 @@ bindgen
     .write();
 ```
 
-The temporary remapped WinMD is only a code-generation input. The canonical
-flat WinMD is the metadata contract to check in and use as an external
-reference.
+`windows_clang::remap_by_header()` implements the structural remap and
+reference-scope repair used by the production generators. Its namespace
+layout is both the checked-in metadata contract and the Rust package layout.
 
 See
 [`bnd-linux-gen/src/clang.rs`](../../bnd-linux-gen/src/clang.rs) for
@@ -199,22 +201,24 @@ defining-header package generation and
 [`bnd-openssl-gen/src/clang.rs`](../../bnd-openssl-gen/src/clang.rs) for
 external metadata and Rust-route handling.
 
-## External Rust ownership routes
+## External Rust ownership
 
 WinMD identifies a referenced type by metadata namespace and name, not by
-Cargo crate. When generated Rust must use a type owned by another crate, add
-an exact route before `write()`:
+Cargo crate. When generated Rust must use types owned by another crate, add
+one namespace-preserving route before `write()`:
 
 ```rust
-bindgen.external_reference(
-    "libc.tm",
-    "bnd_linux::libc::struct_tm",
+bindgen.reference(
+    "bnd_linux",
+    windows_bindgen::ReferenceStyle::Full,
+    "libc",
 );
 ```
 
-Route all external types used by the generated surface and include the
-referenced WinMD as a bindgen input. Exact routes are preferable when one
-flat metadata namespace maps to several defining-header Rust modules.
+Include the referenced WinMD as a bindgen input. `ReferenceStyle::Full`
+appends its complete metadata namespace, so `libc.struct_tm.tm` becomes
+`bnd_linux::libc::struct_tm::tm`. The compatible CLI form is
+`--reference bnd_linux,full,libc`.
 
 ## Builder policy
 
@@ -227,8 +231,8 @@ flat metadata namespace maps to several defining-header Rust modules.
   preserve native library ownership.
 - Use `.reference(...)` for metadata ownership; do not re-emit externally
   owned declarations locally.
-- Keep the canonical WinMD namespace flat. Rust module ownership is a
-  code-generation concern handled by remapping and package mode.
+- Keep the Clang/RDL scrape namespace flat, then make the remapped
+  defining-header namespaces canonical so metadata and Rust ownership agree.
 
 ## Prerequisites and validation
 

@@ -39,6 +39,8 @@ mod interface;
 use interface::*;
 mod provision;
 pub use provision::*;
+mod remap;
+pub use remap::*;
 mod scrape;
 pub use scrape::*;
 mod guid;

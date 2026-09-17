@@ -5,20 +5,26 @@ Generate Rust FFI bindings from C headers using
 (ECMA-335) as an intermediate representation.
 
 ```
-C headers -> bnd-clang -> RDL -> windows-rdl -> canonical WinMD
-                                                     |
-                           defining-header remap + bnd-bindgen package mode
-                                                     |
-                                                     v
-                                             Rust FFI modules
+C headers -> bnd-clang -> flat RDL -> windows-rdl -> flat temporary WinMD
+                                                          |
+                              defining-header remap + reference-scope repair
+                                                          |
+                                                          v
+                                              canonical namespaced WinMD
+                                                          |
+                                              bnd-bindgen package mode
+                                                          |
+                                                          v
+                                                  Rust FFI modules
 ```
 
 Production generators parse one coherent translation unit, emit RDL by
-defining header under one flat canonical WinMD namespace, then remap a
-temporary metadata copy so `bnd-bindgen` package mode can generate
-header-owned Rust modules and Cargo features. External WinMD references are
-preserved through the Clang and RDL stages and routed to their owning Rust
-crate during bindgen.
+defining header under a flat scrape namespace, then structurally remap the
+compiled metadata into canonical header-owned namespaces. An RDL round trip
+restores external reference scopes after remapping. `bnd-bindgen` package
+mode maps the canonical namespaces directly to Rust modules and Cargo
+features; namespace-wide references route externally owned metadata to its
+Rust crate.
 
 ## Crates
 

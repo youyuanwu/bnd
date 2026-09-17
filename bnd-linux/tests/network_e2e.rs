@@ -1,4 +1,4 @@
-use bnd_linux::libc::{r#in, inet, netdb, socket, socket_type, unistd};
+use bnd_linux::libc::{in_, inet, netdb, socket, socket_type, unistd};
 
 #[test]
 fn socketpair_roundtrip() {
@@ -35,13 +35,13 @@ fn socketpair_roundtrip() {
 
 #[test]
 fn inet_and_getaddrinfo_roundtrip() {
-    let mut address = r#in::in_addr::default();
+    let mut address = in_::in_addr::default();
     assert_eq!(
         unsafe {
             inet::inet_pton(
                 socket::AF_INET,
                 c"127.0.0.1".as_ptr(),
-                (&mut address as *mut r#in::in_addr).cast(),
+                (&mut address as *mut in_::in_addr).cast(),
             )
         },
         1
@@ -52,7 +52,7 @@ fn inet_and_getaddrinfo_roundtrip() {
         !unsafe {
             inet::inet_ntop(
                 socket::AF_INET,
-                (&address as *const r#in::in_addr).cast(),
+                (&address as *const in_::in_addr).cast(),
                 text.as_mut_ptr(),
                 text.len() as u32,
             )

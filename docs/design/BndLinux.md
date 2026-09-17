@@ -13,16 +13,19 @@ one GNU C11 translation unit containing the supported system headers
                 bnd-clang / windows-clang fork
                               |
                  RDL partitioned by defining header
-                 under one flat `libc` namespace
+                  under a flat `libc` namespace
                               |
                               v
                          windows-rdl
                               |
+                     flat temporary WinMD
+                              |
+                 defining-header metadata remap
+                  + external-scope RDL repair
+                              |
                               v
              bnd-linux/winmd/bnd-linux.winmd
-                    (canonical flat metadata)
-                              |
-                 temporary defining-header remap
+                (canonical namespaced metadata)
                               |
                               v
                          bnd-bindgen
@@ -33,13 +36,11 @@ one GNU C11 translation unit containing the supported system headers
 
 `bnd-linux-gen` parses all root headers together so Clang sees one coherent
 glibc type graph. It emits RDL files by the header that defines each item,
-then compiles those files once into the canonical
-`bnd-linux/winmd/bnd-linux.winmd`. Every TypeDef in that checked-in file is
-in the flat `libc` namespace.
-
-The generator derives item ownership from the RDL filenames and creates a
-temporary remapped WinMD for package generation. The remapped file is not
-checked in and is not the external metadata contract.
+then compiles those files into a flat temporary WinMD. The generator derives
+item ownership from the RDL filenames, structurally remaps the metadata, and
+round-trips it through RDL to restore external TypeRef scopes. The resulting
+`bnd-linux/winmd/bnd-linux.winmd` is canonical and uses
+`libc.<defining-header-module>` namespaces.
 
 ## Rust Module and Feature Ownership
 
@@ -52,6 +53,7 @@ stems are sanitized into Rust/Cargo names:
 | `bits/types/struct_tm.h` | `bnd_linux::libc::struct_tm` | `struct_tm` |
 | `bits/pthreadtypes.h` | `bnd_linux::libc::pthreadtypes` | `pthreadtypes` |
 | `sys/types.h` | `bnd_linux::libc::types` | `types` |
+| `netinet/in.h` | `bnd_linux::libc::in_` | `in_` |
 
 This is a flat Rust module layout under `libc`; there are no
 `libc::posix` or `libc::linux` package layers. A type is imported from the
@@ -92,7 +94,7 @@ The product crate checks in:
 - `bnd-linux/src/libc/**` — generated Rust modules.
 - `bnd-linux/Cargo.toml` — hand-written package metadata plus generated
   features below `# generated features`.
-- `bnd-linux/winmd/bnd-linux.winmd` — canonical flat `libc` metadata.
+- `bnd-linux/winmd/bnd-linux.winmd` — canonical defining-header metadata.
 
 The freshness test regenerates all three artifacts, compares them byte for
 byte, and generates a second time to verify determinism.
@@ -121,9 +123,9 @@ OpenSSL because the OpenSSL generator references the canonical Linux WinMD.
 keeps POSIX declarations as external `libc` TypeRefs in the canonical
 OpenSSL metadata.
 
-During Rust generation, exact external ownership routes map those TypeRefs
-to `bnd_linux::libc::<defining-header-module>`. `bnd-openssl` therefore
-uses the same Rust `FILE`, `tm`, pthread, time, and offset types as
+During Rust generation, one namespace-preserving `libc` reference maps those
+TypeRefs to `bnd_linux::libc::<defining-header-module>`. `bnd-openssl`
+therefore uses the same Rust `FILE`, `tm`, pthread, time, and offset types as
 `bnd-linux`; it does not generate local copies.
 
 ```text

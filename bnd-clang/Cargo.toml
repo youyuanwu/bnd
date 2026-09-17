@@ -1,6 +1,6 @@
 [package]
 name = "bnd-clang"
-version = "0.0.7"
+version = "0.0.8"
 edition.workspace = true
 rust-version = "1.95"
 authors.workspace = true

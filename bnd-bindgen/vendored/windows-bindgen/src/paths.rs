@@ -78,6 +78,15 @@ impl Config<'_> {
         } {
             path.push_str(&reference.rust_path);
             path.push_str("::");
+            let namespaces: Box<dyn Iterator<Item = &str>> = match reference.style {
+                ReferenceStyle::Flat => Box::new(std::iter::empty()),
+                ReferenceStyle::Full => Box::new(type_name.namespace().split('.')),
+                ReferenceStyle::SkipRoot => Box::new(type_name.namespace().split('.').skip(1)),
+            };
+            for namespace in namespaces {
+                path.push_str(&to_ident(namespace).into_string());
+                path.push_str("::");
+            }
             path.parse().unwrap()
         } else {
             if self.bindgen.layout.is_flat() || type_name.namespace() == self.namespace {

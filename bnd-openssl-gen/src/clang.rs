@@ -1,4 +1,4 @@
-use std::collections::{BTreeMap, BTreeSet, HashMap};
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 
 const ROOT_HEADERS: &[&str] = &[
@@ -14,19 +14,6 @@ const ROOT_HEADERS: &[&str] = &[
     "openssl/tls1.h",
 ];
 
-const EXTERNAL_REFERENCE_ROUTES: &[(&str, &str)] = &[
-    ("FILE", "bnd_linux::libc::file"),
-    ("hostent", "bnd_linux::libc::netdb"),
-    ("off_t", "bnd_linux::libc::types"),
-    ("pthread_key_t", "bnd_linux::libc::pthreadtypes"),
-    ("pthread_once_t", "bnd_linux::libc::pthreadtypes"),
-    ("pthread_t", "bnd_linux::libc::pthreadtypes"),
-    ("ssize_t", "bnd_linux::libc::types"),
-    ("time_t", "bnd_linux::libc::time_t"),
-    ("timeval", "bnd_linux::libc::struct_timeval"),
-    ("tm", "bnd_linux::libc::struct_tm"),
-];
-
 /// Generate the bnd-openssl crate through one direct-Clang translation unit.
 pub fn generate(output_dir: &Path) {
     let linux_winmd = linux_winmd();
@@ -36,23 +23,20 @@ pub fn generate(output_dir: &Path) {
             .expect("bnd-openssl output must have a parent directory"),
     )
     .expect("failed to create temporary OpenSSL metadata directory");
-    let generated_winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
+    let flat_winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
     let winmd_dir = output_dir.join("winmd");
     std::fs::create_dir_all(&winmd_dir).expect("failed to create bnd-openssl WinMD directory");
     let winmd = winmd_dir.join("bnd-openssl.winmd");
-    std::fs::copy(&generated_winmd, &winmd).expect("failed to save bnd-openssl WinMD");
-
-    let remapped_winmd = temp.path().join("bnd-openssl.remapped.winmd");
     remap_metadata(
         &temp.path().join("metadata"),
-        &generated_winmd,
-        &remapped_winmd,
+        &flat_winmd,
+        &winmd,
+        &temp.path().join("remap"),
+        &linux_winmd,
     );
 
-    let external_types = external_libc_types(&generated_winmd, &linux_winmd);
-    let external_routes = checked_external_routes(&external_types);
-    let external_dependencies = external_libc_dependencies(&external_types, &linux_winmd);
-    assert_metadata_contract(&generated_winmd, &remapped_winmd, &external_types);
+    let external_types = external_libc_types(&winmd, &linux_winmd);
+    assert_metadata_contract(&winmd, &external_types);
 
     let manifest_path = output_dir.join("Cargo.toml");
     let manifest =
@@ -60,27 +44,45 @@ pub fn generate(output_dir: &Path) {
     let generation = std::panic::catch_unwind(|| {
         let mut bindgen = staged_bindgen::Bindgen::new();
         bindgen
-            .inputs([&remapped_winmd, &linux_winmd])
+            .inputs([&winmd, &linux_winmd])
             .output(output_dir)
             .filter("openssl")
             .filter("!libc")
             .sys()
             .package()
-            .package_feature_root("openssl");
-        for (type_name, rust_path) in &external_routes {
-            bindgen.external_reference(&format!("libc.{type_name}"), rust_path);
-        }
-        // Excluded libc definitions still participate in bindgen's dependency closure.
-        // Mark their transitive dependencies external; only the direct routes above are emitted.
-        for type_name in external_dependencies.difference(&external_types) {
-            bindgen.external_reference(&format!("libc.{type_name}"), "bnd_linux::libc");
-        }
+            .package_feature_root("openssl")
+            .reference("bnd_linux", staged_bindgen::ReferenceStyle::Full, "libc");
         bindgen.write();
     });
     if let Err(payload) = generation {
         std::fs::write(manifest_path, manifest).expect("failed to restore bnd-openssl Cargo.toml");
         std::panic::resume_unwind(payload);
     }
+}
+
+fn remap_metadata(
+    rdl_dir: &Path,
+    flat_winmd: &Path,
+    output: &Path,
+    scratch_dir: &Path,
+    linux_winmd: &Path,
+) {
+    let mut remap = windows_clang::remap_by_header();
+    remap
+        .rdl_dir(rdl_dir)
+        .input(flat_winmd)
+        .output(output)
+        .scratch_dir(scratch_dir)
+        .source("openssl")
+        .import("Windows::Win32")
+        .reference(linux_winmd)
+        .reference_default();
+    for namespace in metadata_namespaces(linux_winmd, "libc") {
+        remap.import(&namespace.replace('.', "::"));
+    }
+    remap
+        .write()
+        .expect("failed to remap canonical bnd-openssl metadata");
 }
 
 fn linux_winmd() -> PathBuf {
@@ -126,39 +128,6 @@ fn generate_metadata(output_dir: &Path, linux_winmd: &Path, headers: &[&str]) ->
     openssl_winmd
 }
 
-fn remap_metadata(rdl_dir: &Path, input: &Path, output: &Path) {
-    let mut rdl_files: Vec<_> = std::fs::read_dir(rdl_dir)
-        .expect("failed to read OpenSSL RDL directory")
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .filter(|path| path.extension().is_some_and(|extension| extension == "rdl"))
-        .collect();
-    rdl_files.sort();
-
-    let mut routes = HashMap::new();
-    for path in rdl_files {
-        let stem = path
-            .file_stem()
-            .and_then(|stem| stem.to_str())
-            .expect("OpenSSL RDL file has no UTF-8 stem");
-        let stem = module_stem(stem);
-        for name in windows_rdl::item_names(&path, "openssl")
-            .expect("failed to read OpenSSL RDL item names")
-        {
-            routes.insert(name, format!("openssl.{stem}"));
-        }
-    }
-
-    windows_metadata::remap()
-        .source("openssl")
-        .fallback("openssl")
-        .routes(routes)
-        .input(input)
-        .output(output)
-        .remap()
-        .expect("failed to remap OpenSSL metadata");
-}
-
 fn external_libc_types(input: &Path, linux_winmd: &Path) -> BTreeSet<String> {
     let openssl = windows_metadata::reader::File::new(
         std::fs::read(input).expect("failed to read generated OpenSSL WinMD"),
@@ -170,7 +139,10 @@ fn external_libc_types(input: &Path, linux_winmd: &Path) -> BTreeSet<String> {
     .expect("failed to parse bnd-linux WinMD");
     let index = windows_metadata::reader::Index::new(vec![openssl, linux]);
     let mut result = BTreeSet::new();
-    for ty in index.types().filter(|ty| ty.namespace() == "openssl") {
+    for ty in index
+        .types()
+        .filter(|ty| ty.namespace().starts_with("openssl."))
+    {
         for field in ty.fields() {
             collect_libc_types(&field.ty(), &mut result);
         }
@@ -185,11 +157,24 @@ fn external_libc_types(input: &Path, linux_winmd: &Path) -> BTreeSet<String> {
     result
 }
 
+fn metadata_namespaces(input: &Path, root: &str) -> BTreeSet<String> {
+    open_index(input)
+        .types()
+        .map(|ty| ty.namespace().to_string())
+        .filter(|namespace| {
+            namespace == root
+                || namespace
+                    .strip_prefix(root)
+                    .is_some_and(|suffix| suffix.starts_with('.'))
+        })
+        .collect()
+}
+
 fn collect_libc_types(ty: &windows_metadata::Type, result: &mut BTreeSet<String>) {
     match ty {
         windows_metadata::Type::ClassName(name) | windows_metadata::Type::ValueName(name) => {
-            if name.namespace == "libc" {
-                result.insert(name.name.clone());
+            if name.namespace.starts_with("libc.") {
+                result.insert(format!("{}.{}", name.namespace, name.name));
             }
             for generic in &name.generics {
                 collect_libc_types(generic, result);
@@ -205,98 +190,32 @@ fn collect_libc_types(ty: &windows_metadata::Type, result: &mut BTreeSet<String>
     }
 }
 
-fn checked_external_routes(types: &BTreeSet<String>) -> BTreeMap<String, String> {
-    let available: BTreeMap<_, _> = EXTERNAL_REFERENCE_ROUTES.iter().copied().collect();
-    let missing: Vec<_> = types
-        .iter()
-        .filter(|name| !available.contains_key(name.as_str()))
-        .cloned()
-        .collect();
-    assert!(
-        missing.is_empty(),
-        "missing bnd-linux Rust routes for external libc types: {missing:?}"
-    );
-    let unused: Vec<_> = available
-        .keys()
-        .filter(|name| !types.contains(**name))
-        .copied()
-        .collect();
-    assert!(
-        unused.is_empty(),
-        "unused bnd-linux Rust routes do not match OpenSSL metadata: {unused:?}"
-    );
-    types
-        .iter()
-        .map(|name| {
-            (
-                name.clone(),
-                available
-                    .get(name.as_str())
-                    .expect("external route checked above")
-                    .to_string(),
-            )
-        })
-        .collect()
-}
-
-fn external_libc_dependencies(types: &BTreeSet<String>, linux_winmd: &Path) -> BTreeSet<String> {
-    let linux = open_index(linux_winmd);
-    let mut dependencies = types.clone();
-    let mut pending: Vec<_> = types.iter().cloned().collect();
-
-    while let Some(name) = pending.pop() {
-        let ty = linux.expect("libc", &name);
-        let mut referenced = BTreeSet::new();
-        for field in ty.fields() {
-            collect_libc_types(&field.ty(), &mut referenced);
-        }
-        for method in ty.methods() {
-            let signature = method.signature(&[]);
-            collect_libc_types(&signature.return_type, &mut referenced);
-            for ty in signature.types {
-                collect_libc_types(&ty, &mut referenced);
-            }
-        }
-        for name in referenced {
-            if dependencies.insert(name.clone()) {
-                pending.push(name);
-            }
-        }
-    }
-
-    dependencies
-}
-
-fn assert_metadata_contract(canonical: &Path, remapped: &Path, external_types: &BTreeSet<String>) {
+fn assert_metadata_contract(canonical: &Path, external_types: &BTreeSet<String>) {
     let canonical = open_index(canonical);
     let namespaces: BTreeSet<_> = canonical
         .types()
         .map(|ty| ty.namespace().to_string())
         .collect();
-    assert_eq!(
-        namespaces,
-        ["openssl".to_string()].into_iter().collect(),
-        "canonical OpenSSL metadata must contain one flat namespace"
+    assert!(
+        namespaces
+            .iter()
+            .all(|namespace| namespace.starts_with("openssl.")),
+        "canonical OpenSSL metadata contains unexpected namespaces: {namespaces:?}"
     );
     assert!(
         !external_types.is_empty(),
         "OpenSSL metadata should retain external libc TypeRefs"
     );
     assert!(
-        canonical.types().all(|ty| ty.namespace() != "libc"),
+        canonical
+            .types()
+            .all(|ty| !ty.namespace().starts_with("libc.")),
         "OpenSSL metadata must not define libc types locally"
-    );
-    let expected_external_types: BTreeSet<_> = EXTERNAL_REFERENCE_ROUTES
-        .iter()
-        .map(|(name, _)| (*name).to_string())
-        .collect();
-    assert_eq!(
-        external_types, &expected_external_types,
-        "OpenSSL metadata has an unexpected external libc TypeRef surface"
     );
     let local_type_names: BTreeSet<_> = canonical.types().map(|ty| ty.name().to_string()).collect();
     let locally_defined_external_types: Vec<_> = external_types
         .iter()
+        .filter_map(|name| name.rsplit_once('.').map(|(_, name)| name))
         .filter(|name| local_type_names.contains(*name))
         .collect();
     assert!(
@@ -304,9 +223,8 @@ fn assert_metadata_contract(canonical: &Path, remapped: &Path, external_types: &
         "OpenSSL metadata defines external libc types locally: {locally_defined_external_types:?}"
     );
 
-    let remapped = open_index(remapped);
     let mut method_counts = BTreeMap::<String, usize>::new();
-    for ty in remapped.types().filter(|ty| ty.name() == "Apis") {
+    for ty in canonical.types().filter(|ty| ty.name() == "Apis") {
         let namespace = ty.namespace();
         let expected_library = if matches!(namespace, "openssl.ssl" | "openssl.tls1") {
             "ssl"
@@ -350,27 +268,6 @@ fn open_index(path: &Path) -> windows_metadata::reader::Index {
     )
     .unwrap_or_else(|| panic!("failed to parse `{}`", path.display()));
     windows_metadata::reader::Index::new(vec![file])
-}
-
-fn module_stem(header_stem: &str) -> String {
-    let mut stem: String = header_stem
-        .chars()
-        .map(|ch| {
-            if ch.is_ascii_alphanumeric() || ch == '_' {
-                ch
-            } else {
-                '_'
-            }
-        })
-        .collect();
-    if stem
-        .as_bytes()
-        .first()
-        .is_some_and(|byte| byte.is_ascii_digit())
-    {
-        stem.insert(0, '_');
-    }
-    stem
 }
 
 fn clear_rdl_dir(rdl_dir: &Path) {
@@ -452,31 +349,36 @@ mod tests {
         );
     }
 
-    fn assert_opaque(index: &windows_metadata::reader::Index, name: &str) {
+    fn assert_opaque(index: &windows_metadata::reader::Index, namespace: &str, name: &str) {
         let fields: Vec<_> = index
-            .expect("openssl", name)
+            .expect(namespace, name)
             .fields()
             .map(|field| (field.name().to_string(), field.ty()))
             .collect();
         assert_eq!(
             fields,
             [],
-            "openssl.{name} is no longer represented as an opaque type"
+            "{namespace}.{name} is no longer represented as an opaque type"
         );
     }
 
     #[test]
-    fn generates_active_flat_openssl_metadata() {
+    fn generates_active_partitioned_openssl_metadata() {
         let target = Path::new(env!("CARGO_MANIFEST_DIR")).join("../target");
         std::fs::create_dir_all(&target).expect("create target directory");
         let temp = tempfile::tempdir_in(target).expect("create OpenSSL test output");
         let linux_winmd = linux_winmd();
-        let winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
-        let remapped = temp.path().join("bnd-openssl.remapped.winmd");
-        remap_metadata(&temp.path().join("metadata"), &winmd, &remapped);
+        let flat_winmd = generate_metadata(temp.path(), &linux_winmd, ROOT_HEADERS);
+        let winmd = temp.path().join("bnd-openssl.winmd");
+        remap_metadata(
+            &temp.path().join("metadata"),
+            &flat_winmd,
+            &winmd,
+            &temp.path().join("remap"),
+            &linux_winmd,
+        );
         let external_types = external_libc_types(&winmd, &linux_winmd);
-        checked_external_routes(&external_types);
-        assert_metadata_contract(&winmd, &remapped, &external_types);
+        assert_metadata_contract(&winmd, &external_types);
 
         let index = open_index(&winmd);
         for name in [
@@ -487,10 +389,10 @@ mod tests {
             "ssl_st",
             "ssl_ctx_st",
         ] {
-            assert_opaque(&index, name);
+            assert_opaque(&index, "openssl.types", name);
         }
 
-        let callback = index.expect("openssl", "pem_password_cb");
+        let callback = index.expect("openssl.types", "pem_password_cb");
         assert!(
             format!("{:?}", callback.extends().expect("callback base type"))
                 .contains("MulticastDelegate"),
@@ -512,7 +414,7 @@ mod tests {
             ]
         );
 
-        let crypto_thread_id = index.expect("openssl", "CRYPTO_THREADID");
+        let crypto_thread_id = index.expect("openssl.crypto", "CRYPTO_THREADID");
         assert_eq!(
             crypto_thread_id
                 .fields()
@@ -520,7 +422,7 @@ mod tests {
                 .collect::<Vec<_>>(),
             [("dummy".to_string(), windows_metadata::Type::I32)]
         );
-        let bio_msg = index.expect("openssl", "BIO_MSG");
+        let bio_msg = index.expect("openssl.bio", "BIO_MSG");
         assert_eq!(
             bio_msg
                 .fields()
@@ -534,17 +436,23 @@ mod tests {
                 windows_metadata::Type::PtrMut(Box::new(windows_metadata::Type::Void), 1),
                 windows_metadata::Type::USize,
                 windows_metadata::Type::PtrMut(
-                    Box::new(windows_metadata::Type::value_named("openssl", "BIO_ADDR")),
+                    Box::new(windows_metadata::Type::value_named(
+                        "openssl.bio",
+                        "BIO_ADDR",
+                    )),
                     1,
                 ),
                 windows_metadata::Type::PtrMut(
-                    Box::new(windows_metadata::Type::value_named("openssl", "BIO_ADDR")),
+                    Box::new(windows_metadata::Type::value_named(
+                        "openssl.bio",
+                        "BIO_ADDR",
+                    )),
                     1,
                 ),
                 windows_metadata::Type::U64,
             ]
         );
-        let ssl_shutdown = index.expect("openssl", "SSL_SHUTDOWN_EX_ARGS");
+        let ssl_shutdown = index.expect("openssl.ssl", "SSL_SHUTDOWN_EX_ARGS");
         assert_eq!(
             ssl_shutdown
                 .fields()
@@ -558,7 +466,7 @@ mod tests {
                 ),
             ]
         );
-        let error_strings = index.expect("openssl", "lhash_st_ERR_STRING_DATA");
+        let error_strings = index.expect("openssl.err", "lhash_st_ERR_STRING_DATA");
         assert_eq!(
             error_strings
                 .fields()
@@ -566,10 +474,10 @@ mod tests {
                 .collect::<Vec<_>>(),
             [(
                 "dummy".to_string(),
-                windows_metadata::Type::value_named("openssl", "lhash_st_ERR_STRING_DATA_0"),
+                windows_metadata::Type::value_named("openssl.err", "lhash_st_ERR_STRING_DATA_0",),
             )]
         );
-        let error_strings_dummy = index.expect("openssl", "lhash_st_ERR_STRING_DATA_0");
+        let error_strings_dummy = index.expect("openssl.err", "lhash_st_ERR_STRING_DATA_0");
         assert!(
             error_strings_dummy
                 .flags()
@@ -590,9 +498,8 @@ mod tests {
             ]
         );
 
-        let remapped = open_index(&remapped);
         assert_surface(
-            &remapped,
+            &index,
             "openssl.types",
             &[
                 "BIO",
@@ -694,48 +601,49 @@ mod tests {
                 ][..],
             ),
         ] {
-            assert_surface(&remapped, namespace, types, constants, methods);
+            assert_surface(&index, namespace, types, constants, methods);
         }
         assert_surface(
-            &remapped,
+            &index,
             "openssl.tls1",
             &[],
             &["TLS1_2_VERSION_MAJOR", "TLS1_2_VERSION_MINOR"],
             &["SSL_get1_builtin_sigalgs"],
         );
 
-        assert_i32_constant(&remapped, "openssl.crypto", "OPENSSL_VERSION", 0);
-        assert_i32_constant(&remapped, "openssl.rand", "RAND_DRBG_STRENGTH", 256);
-        assert_i32_constant(&remapped, "openssl.bn", "BN_BYTES", 8);
-        assert_i32_constant(&remapped, "openssl.evp", "EVP_MAX_MD_SIZE", 64);
-        assert_i32_constant(&remapped, "openssl.sha", "SHA256_DIGEST_LENGTH", 32);
-        assert_i32_constant(&remapped, "openssl.bio", "BIO_CLOSE", 1);
-        assert_i32_constant(&remapped, "openssl.ssl", "SSL_ERROR_SSL", 1);
+        assert_i32_constant(&index, "openssl.crypto", "OPENSSL_VERSION", 0);
+        assert_i32_constant(&index, "openssl.rand", "RAND_DRBG_STRENGTH", 256);
+        assert_i32_constant(&index, "openssl.bn", "BN_BYTES", 8);
+        assert_i32_constant(&index, "openssl.evp", "EVP_MAX_MD_SIZE", 64);
+        assert_i32_constant(&index, "openssl.sha", "SHA256_DIGEST_LENGTH", 32);
+        assert_i32_constant(&index, "openssl.bio", "BIO_CLOSE", 1);
+        assert_i32_constant(&index, "openssl.ssl", "SSL_ERROR_SSL", 1);
 
-        let canonical_apis = index.expect("openssl", "Apis");
-        let gmtime = canonical_apis
+        let crypto_apis = index.expect("openssl.crypto", "Apis");
+        let gmtime = crypto_apis
             .methods()
             .find(|method| method.name() == "OPENSSL_gmtime")
             .expect("OPENSSL_gmtime method");
         assert_eq!(
             gmtime.signature(&[]).return_type,
             windows_metadata::Type::PtrMut(
-                Box::new(windows_metadata::Type::value_named("libc", "tm")),
+                Box::new(windows_metadata::Type::value_named("libc.struct_tm", "tm",)),
                 1,
             )
         );
-        let sendfile = canonical_apis
+        let sendfile = index
+            .expect("openssl.ssl", "Apis")
             .methods()
             .find(|method| method.name() == "SSL_sendfile")
             .expect("SSL_sendfile method");
         let signature = sendfile.signature(&[]);
         assert_eq!(
             signature.return_type,
-            windows_metadata::Type::value_named("libc", "ssize_t")
+            windows_metadata::Type::value_named("libc.types", "ssize_t")
         );
         assert_eq!(
             signature.types.get(2),
-            Some(&windows_metadata::Type::value_named("libc", "off_t"))
+            Some(&windows_metadata::Type::value_named("libc.types", "off_t"))
         );
     }
 }

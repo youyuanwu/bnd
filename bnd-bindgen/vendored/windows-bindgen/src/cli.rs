@@ -30,6 +30,8 @@ use super::*;
 /// - `--dead-code`: Emits `pub(crate)` items for dead-code analysis.
 /// - `--etc`: Reads arguments from command files.
 /// - `--filter-file`: Reads filters from text files.
+/// - `--reference`: Routes metadata to an external Rust path as
+///   `rust-path,full|skip-root|flat,filter`.
 ///
 /// # `--out`
 ///
@@ -99,6 +101,7 @@ where
                 "--out" => kind = ArgKind::Output,
                 "--filter" => kind = ArgKind::Filter,
                 "--filter-file" => kind = ArgKind::FilterFile,
+                "--reference" => kind = ArgKind::Reference,
                 "--rustfmt" => kind = ArgKind::Rustfmt,
                 "--derive" => kind = ArgKind::Derive,
                 "--flat" => {
@@ -148,6 +151,10 @@ where
             ArgKind::FilterFile => {
                 builder.filter_file(&arg);
             }
+            ArgKind::Reference => {
+                let (rust_path, style, filter) = parse_reference(&arg);
+                builder.reference(rust_path, style, filter);
+            }
             ArgKind::Derive => {
                 builder.derive(&arg);
             }
@@ -187,11 +194,39 @@ enum ArgKind {
     Output,
     Filter,
     FilterFile,
+    Reference,
     Rustfmt,
     PackageFeatureRoot,
     Derive,
     Implement,
     Compose,
+}
+
+#[track_caller]
+fn parse_reference(value: &str) -> (&str, ReferenceStyle, &str) {
+    if value == "windows" {
+        return ("windows", ReferenceStyle::SkipRoot, "Windows");
+    }
+
+    let mut parts = value.splitn(3, ',');
+    let rust_path = parts.next().unwrap_or_default();
+    let style = parts
+        .next()
+        .unwrap_or_else(|| panic!("invalid reference `{value}`"));
+    let filter = parts
+        .next()
+        .unwrap_or_else(|| panic!("invalid reference `{value}`"));
+    assert!(
+        !rust_path.is_empty() && !filter.is_empty(),
+        "invalid reference `{value}`"
+    );
+    (
+        rust_path,
+        style
+            .parse()
+            .unwrap_or_else(|error| panic!("invalid reference `{value}`: {error}")),
+        filter,
+    )
 }
 
 #[track_caller]
@@ -263,4 +298,29 @@ pub(super) fn read_tokens(input: impl AsRef<Path>) -> Vec<String> {
     }
 
     result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_reference_styles() {
+        assert_eq!(
+            parse_reference("provider,full,Root.Namespace"),
+            ("provider", ReferenceStyle::Full, "Root.Namespace")
+        );
+        assert_eq!(
+            parse_reference("provider,skip-root,Root.Namespace"),
+            ("provider", ReferenceStyle::SkipRoot, "Root.Namespace")
+        );
+        assert_eq!(
+            parse_reference("provider::module,flat,Root.Type"),
+            ("provider::module", ReferenceStyle::Flat, "Root.Type")
+        );
+        assert_eq!(
+            parse_reference("windows"),
+            ("windows", ReferenceStyle::SkipRoot, "Windows")
+        );
+    }
 }
