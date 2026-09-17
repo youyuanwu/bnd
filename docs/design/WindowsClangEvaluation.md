@@ -302,10 +302,10 @@ Rust APIs and the ABI assertions already covered by bnd's end-to-end tests.
 
 ## Fork Experiment and Production Cutover
 
-The repository maintains two non-published generator components:
+The repository maintains two generator components:
 
-- `bnd-clang`, containing the vendored `windows-clang` fork.
-- `bnd-bindgen`, containing the vendored `windows-bindgen` fork.
+- Published `bnd-clang`, containing the vendored `windows-clang` fork.
+- Published `bnd-bindgen`, containing the vendored `windows-bindgen` fork.
 
 Each records its upstream revision and license in `VENDORED.md`. The fork
 work made scalar widths target-aware for the active host ABI, preserved C

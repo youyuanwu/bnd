@@ -1,12 +1,19 @@
 [package]
 name = "bnd-linux"
-version = "0.0.6"
+version = "0.0.7"
 edition.workspace = true
 description = "Rust FFI bindings for POSIX and Linux system APIs generated through bnd-clang"
 authors.workspace = true
 repository.workspace = true
 license.workspace = true
+documentation = "https://docs.rs/bnd-linux"
 readme = "README.md"
+keywords = ["linux", "posix", "ffi", "bindings"]
+categories = ["external-ffi-bindings", "os::linux-apis"]
+
+[package.metadata.docs.rs]
+default-target = "x86_64-unknown-linux-gnu"
+targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
 bnd-macros.workspace = true

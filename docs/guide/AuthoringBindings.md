@@ -24,27 +24,22 @@ C headers -> bnd-clang -> RDL -> windows-rdl -> canonical WinMD
 
 ## Dependency sources
 
-`bnd-clang` and `bnd-bindgen` are currently non-published fork packages.
-External projects must use them from a local checkout/vendor directory or a
-Git dependency pinned to a specific bnd commit. Do not substitute upstream
-`windows-clang` or `windows-bindgen` without validating the Linux ABI,
-bitfield, alignment, package-generation, and external-reference behavior
-described in the fork `VENDORED.md` files.
+`bnd-clang` and `bnd-bindgen` are published on crates.io. Do not substitute
+the upstream packages without validating the Linux ABI, bitfield, alignment,
+package-generation, and external-reference behavior described in the fork
+`VENDORED.md` files.
 
-A local-checkout setup can use:
+A crates.io-based setup can use:
 
 ```toml
 [dependencies]
-bnd-macros = { path = "../bnd/bnd-macros" }
+bnd-macros = "0.0.6"
 
 [build-dependencies]
-windows-clang = { package = "bnd-clang", path = "../bnd/bnd-clang" }
+windows-clang = { package = "bnd-clang", version = "0.0.7" }
 windows-rdl = { version = "0.100", default-features = false }
-windows-bindgen = { package = "bnd-bindgen", path = "../bnd/bnd-bindgen" }
+windows-bindgen = { package = "bnd-bindgen", version = "0.0.7" }
 ```
-
-The path values are examples; adjust them for your checkout. If you use Git
-dependencies instead, pin all bnd packages to the same commit.
 
 ## Minimal flat binding
 

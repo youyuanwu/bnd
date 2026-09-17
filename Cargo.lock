@@ -19,7 +19,7 @@ checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
 name = "bnd-bindgen"
-version = "0.0.0"
+version = "0.0.7"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "bnd-clang"
-version = "0.0.0"
+version = "0.0.7"
 dependencies = [
  "clang-sys",
  "proc-macro2",
@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "bnd-linux"
-version = "0.0.6"
+version = "0.0.7"
 dependencies = [
  "bnd-macros",
  "libc",
