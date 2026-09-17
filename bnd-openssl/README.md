@@ -24,6 +24,9 @@ such as `bnd_linux::libc::file::FILE`,
 `bnd_linux::libc::types::off_t`. One namespace-preserving `libc` reference
 routes all of them; they are not duplicated in this crate.
 
+The checked-in bindings target `x86_64-unknown-linux-gnu`. On other targets,
+the crate compiles without exporting binding modules.
+
 ## Regenerating
 
 Regenerate Linux first because OpenSSL consumes its canonical WinMD:

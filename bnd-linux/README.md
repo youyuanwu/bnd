@@ -17,8 +17,8 @@ generated Rust module and Cargo feature layout.
 
 The checked-in bindings are generated and validated for
 `x86_64-unknown-linux-gnu` from Ubuntu 26.04 system headers (glibc 2.43).
-Other operating systems, architectures, and C library environments are
-rejected because their native ABI layouts may differ.
+On other targets, the crate compiles without exporting binding modules
+because their native ABI layouts may differ.
 
 ## Features
 

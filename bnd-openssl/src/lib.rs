@@ -11,6 +11,8 @@
     clippy::all
 )]
 
+#[cfg(all(target_os = "linux", target_arch = "x86_64", target_env = "gnu"))]
 pub mod openssl;
 
+#[cfg(all(target_os = "linux", target_arch = "x86_64", target_env = "gnu"))]
 extern crate bnd_macros as windows_link;
