@@ -8,7 +8,7 @@ fn main() {
             "--edition=2024",
             "--crate-name=simple",
             "--crate-type=cdylib",
-            "src/lib.rs",
+            "src/native.rs",
         ])
         .arg("--target")
         .arg(env::var_os("TARGET").unwrap())
@@ -17,5 +17,5 @@ fn main() {
         .status()
         .expect("run rustc for libsimple");
     assert!(status.success(), "failed to build libsimple: {status}");
-    println!("cargo::rerun-if-changed=src/lib.rs");
+    println!("cargo::rerun-if-changed=src/native.rs");
 }

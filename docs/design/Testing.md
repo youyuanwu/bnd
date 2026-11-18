@@ -51,8 +51,10 @@ bitfield fixtures as C11, emits one `SimpleTest` RDL file, compiles it with
 `windows-rdl`, and generates flat sys bindings with `bnd-bindgen`.
 
 The simple and multi packages link `tests/simple-impl` as `libsimple`. The
-fixture build script compiles the shared library into its own `OUT_DIR`, and
-the test build scripts obtain that directory from `simple::lib_dir()`.
+fixture build script compiles `src/native.rs` once into its own `OUT_DIR`. The
+Rust build-dependency library contains only `simple::lib_dir()`, which lets
+the test build scripts locate the shared library without recompiling the
+native implementation.
 Together their runtime tests cover:
 
 - constants and enum values;
