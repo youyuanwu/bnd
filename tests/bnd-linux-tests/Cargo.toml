@@ -4,6 +4,6 @@ version = "0.0.1"
 edition.workspace = true
 publish = false
 
-[dependencies]
+[dev-dependencies]
 bnd-linux = { path = "../../bnd-linux" }
 libc = "0.2"

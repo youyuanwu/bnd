@@ -35,9 +35,10 @@ fn main() {
         "--sys",
     ]);
 
+    // Cargo 1.100: <target>/<profile>/build/<package>/<hash>/out.
     let target_dir = out_dir
         .ancestors()
-        .nth(3)
+        .nth(4)
         .expect("cannot derive target directory from OUT_DIR");
     println!("cargo:rustc-link-search=native={}", target_dir.display());
     println!("cargo:rustc-link-lib=dylib=simple");
