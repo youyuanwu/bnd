@@ -5,6 +5,11 @@
 
 use std::sync::atomic::{AtomicI32, Ordering};
 
+/// Directory containing the native fixture built by `build.rs`.
+pub fn lib_dir() -> &'static str {
+    env!("OUT_DIR")
+}
+
 // Mirror the C types from simple.h
 #[repr(C)]
 pub struct Rect {

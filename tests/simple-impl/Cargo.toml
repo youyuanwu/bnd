@@ -6,4 +6,3 @@ publish = false
 
 [lib]
 name = "simple"              # must match ImplMap library field
-crate-type = ["cdylib"]

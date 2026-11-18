@@ -50,7 +50,9 @@ uses the maintained `windows_clang` library to parse the simple and partial
 bitfield fixtures as C11, emits one `SimpleTest` RDL file, compiles it with
 `windows-rdl`, and generates flat sys bindings with `bnd-bindgen`.
 
-The simple and multi packages link `tests/simple-impl` as `libsimple`.
+The simple and multi packages link `tests/simple-impl` as `libsimple`. The
+fixture build script compiles the shared library into its own `OUT_DIR`, and
+the test build scripts obtain that directory from `simple::lib_dir()`.
 Together their runtime tests cover:
 
 - constants and enum values;

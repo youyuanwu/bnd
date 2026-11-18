@@ -4,7 +4,6 @@ members = ["bnd-bindgen", "bnd-clang", "bnd-macros", "bnd-openssl", "bnd-openssl
 
 package.edition = "2024"
 package.authors = [ "youyuanwu@outlook.com" ]
-package.documentation = "https://github.com/youyuanwu/bnd"
 package.repository = "https://github.com/youyuanwu/bnd"
 package.license = "MIT"
 
