@@ -26,10 +26,14 @@ fn main() {
         "--sys",
     ]);
 
-    let lib_dir = simple::lib_dir();
-    println!("cargo:rustc-link-search=native={lib_dir}");
+    // Cargo 1.100: <target>/<profile>/build/<package>/<hash>/out.
+    let target_dir = out_dir
+        .ancestors()
+        .nth(4)
+        .expect("cannot derive target directory from OUT_DIR");
+    println!("cargo:rustc-link-search=native={}", target_dir.display());
     println!("cargo:rustc-link-lib=dylib=simple");
-    println!("cargo:rustc-link-arg=-Wl,-rpath,{lib_dir}");
+    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", target_dir.display());
     println!("cargo:rerun-if-changed={}", fixtures.display());
     println!("cargo:rerun-if-changed=../../bnd-clang/vendored/windows-clang/src");
     println!("cargo:rerun-if-changed=../../bnd-bindgen/vendored/windows-bindgen/src");
